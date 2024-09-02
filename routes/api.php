@@ -94,6 +94,7 @@ Route::group(['middleware' => ['auth.jwt','admin' ]], function () {
     Route::get('/update/imagepath/', [ArticleController::class, 'updateImagePaths']);
     Route::put('/article/update/{slug}', [ArticleController::class, 'update']);
     Route::put('/article/status/update/{slug}', [ArticleController::class, 'updateStatus']);
+    Route::post('/add-post/', [ArticleController::class, 'storeArticle']);
 });
 
 Route::group(['middleware' => ['auth.jwt','payment' ]], function () {
