@@ -1,0 +1,5 @@
+@include('header.dash_header')
+@include('inc.admin_navbar')
+@include('inc.message')
+@yield('content')
+@include('footer.dash_footer')

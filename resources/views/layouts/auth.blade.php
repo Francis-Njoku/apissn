@@ -1,0 +1,5 @@
+@include('header.auth')
+@include('inc.navbar')
+@include('inc.message')
+@yield('content')
+@include('footer.footer')
