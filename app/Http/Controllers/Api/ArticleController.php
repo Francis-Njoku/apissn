@@ -2,23 +2,24 @@
 
 namespace App\Http\Controllers\Api;
 
-use App\Http\Controllers\Controller;
-use Illuminate\Http\Request;
-use App\Http\Requests\ArticleRequest;
-use App\Http\Resources\ArticleResource;
-use App\Http\Resources\ArticleAllResource;
-use App\Models\Newsletter;
-use Illuminate\Support\Facades\Validator;
 use Illuminate\Support\Str;
+use Illuminate\Support\Facades\Validator;
 use Illuminate\Support\Facades\Storage;
 use Illuminate\Pagination\LengthAwarePaginator;
+use Illuminate\Http\Request;
+use App\Models\Newsletter;
+use App\Http\Resources\ArticleResource;
+use App\Http\Resources\ArticleAllResource;
+use App\Http\Requests\ArticleRequest;
+use App\Http\Controllers\Controller;
 
 class ArticleController extends Controller
 {
     /**
      * Generate Slug.
      */
-    private function generateSlug($name) {
+    private function generateSlug($name)
+    {
         return Str::slug($name);
     }
 
@@ -44,29 +45,25 @@ class ArticleController extends Controller
     {
         $media = $request->get('m');
 
-        if($media == "bytes")
-        {
+        if ($media == "bytes") {
             $latestRow = Newsletter::where('mediaType', 'bytes')->orderBy('created_at', 'desc')->first();
-        
+
             return new ArticleAllResource($latestRow);
-        } elseif($media == "audio")
-        {
+        } elseif ($media == "audio") {
             $latestRow = Newsletter::where('mediaType', 'audio')->orderBy('created_at', 'desc')->first();
-        
+
             return new ArticleAllResource($latestRow);
-        } elseif($media == "video")
-        {
+        } elseif ($media == "video") {
             $latestRow = Newsletter::where('mediaType', 'video')->orderBy('created_at', 'desc')->first();
-        
+
             return new ArticleAllResource($latestRow);
-        } else
-        {
+        } else {
             $latestRow = Newsletter::where('mediaType', 'text')->orderBy('created_at', 'desc')->first();
-        
+
             return new ArticleAllResource($latestRow);
         }
 
-        
+
     }
 
     /**
@@ -74,69 +71,63 @@ class ArticleController extends Controller
      */
     public function index(Request $request)
     {
-        $filter = $request->get('s');
-        $media = $request->get('m');
+        $filter   = $request->get('s');
+        $media    = $request->get('m');
         $newsType = $request->get('n');
 
-        if($newsType && $media )
-        {
+        if ($newsType && $media) {
             //echo $filter;
             return ArticleResource::collection(
                 Newsletter::where('news_type_id', $newsType)
-                ->where('mediaType', $media)
-                ->orderBy('created_at','desc')
-                ->paginate(10));
-        }
-        elseif($newsType)
-        {
+                    ->where('mediaType', $media)
+                    ->orderBy('created_at', 'desc')
+                    ->paginate(10)
+            );
+        } elseif ($newsType) {
             //echo $filter;
             return ArticleResource::collection(
                 Newsletter::where('news_type_id', $newsType)
-                ->orderBy('created_at','desc')
-                ->paginate(10));
-        }
-        elseif($media)
-        {
+                    ->orderBy('created_at', 'desc')
+                    ->paginate(10)
+            );
+        } elseif ($media) {
             //echo $filter;
             return ArticleResource::collection(
                 Newsletter::where('mediaType', $media)
-                ->orderBy('created_at','desc')
-                ->paginate(10));
-        }
-        elseif($filter)
-        {
+                    ->orderBy('created_at', 'desc')
+                    ->paginate(10)
+            );
+        } elseif ($filter) {
             //echo $filter;
             return ArticleResource::collection(
-                Newsletter::where('name', 'like', '%'.$filter.'%')
-                ->orWhere('title', 'like', '%'.$filter.'%')
-                ->orderBy('created_at','desc')
+                Newsletter::where('name', 'like', '%' . $filter . '%')
+                    ->orWhere('title', 'like', '%' . $filter . '%')
+                    ->orderBy('created_at', 'desc')
+                    ->paginate(10)
+            );
+        } else {
+            return ArticleResource::collection(Newsletter::orderBy('created_at', 'desc')
                 ->paginate(10));
-        }
-        else{
-            return ArticleResource::collection(Newsletter::orderBy('created_at','desc')
-            ->paginate(10));
         }
     }
 
     public function indexByMediaType(Request $request)
     {
         $media = $request->get('m');
-        if($media)
-        {
+        if ($media) {
             // Query the latest 10 posts by created_at date
-            $posts = Newsletter::where('mediaType',$media)->orderBy('created_at', 'desc')->take(10)->get();
+            $posts = Newsletter::where('mediaType', $media)->orderBy('created_at', 'desc')->take(10)->get();
 
             // Wrap the result with the API resource
             return ArticleAllResource::collection($posts);
-        }
-        else{
+        } else {
             // Query the latest 10 posts by created_at date
             $posts = Newsletter::orderBy('created_at', 'desc')->take(10)->get();
 
             // Wrap the result with the API resource
             return ArticleAllResource::collection($posts);
         }
-        
+
     }
 
     /**
@@ -144,47 +135,43 @@ class ArticleController extends Controller
      */
     public function indexNoAuth(Request $request)
     {
-        $filter = $request->get('s');
-        $media = $request->get('m');
+        $filter   = $request->get('s');
+        $media    = $request->get('m');
         $newsType = $request->get('n');
 
-        if($newsType && $media )
-        {
+        if ($newsType && $media) {
             //echo $filter;
             return ArticleAllResource::collection(
                 Newsletter::where('news_type_id', $newsType)
-                ->where('mediaType', $media)
-                ->orderBy('created_at','desc')
-                ->paginate(10));
-        }
-        elseif($newsType)
-        {
+                    ->where('mediaType', $media)
+                    ->orderBy('created_at', 'desc')
+                    ->paginate(10)
+            );
+        } elseif ($newsType) {
             //echo $filter;
             return ArticleAllResource::collection(
                 Newsletter::where('news_type_id', $newsType)
-                ->orderBy('created_at','desc')
-                ->paginate(10));
-        }
-        elseif($media)
-        {
+                    ->orderBy('created_at', 'desc')
+                    ->paginate(10)
+            );
+        } elseif ($media) {
             //echo $filter;
             return ArticleAllResource::collection(
                 Newsletter::where('mediaType', $media)
-                ->orderBy('created_at','desc')
-                ->paginate(10));
-        }
-        elseif($filter)
-        {
+                    ->orderBy('created_at', 'desc')
+                    ->paginate(10)
+            );
+        } elseif ($filter) {
             //echo $filter;
             return ArticleAllResource::collection(
-                Newsletter::where('name', 'like', '%'.$filter.'%')
-                ->orWhere('title', 'like', '%'.$filter.'%')
-                ->orderBy('created_at','desc')
+                Newsletter::where('name', 'like', '%' . $filter . '%')
+                    ->orWhere('title', 'like', '%' . $filter . '%')
+                    ->orderBy('created_at', 'desc')
+                    ->paginate(10)
+            );
+        } else {
+            return ArticleAllResource::collection(Newsletter::orderBy('created_at', 'desc')
                 ->paginate(10));
-        }
-        else{
-            return ArticleAllResource::collection(Newsletter::orderBy('created_at','desc')
-            ->paginate(10));
         }
     }
 
@@ -193,6 +180,8 @@ class ArticleController extends Controller
      */
     public function uploadFile(Request $request)
     {
+        echo ($request->get(('file')));
+
         // Validate the request
         $validator = Validator::make($request->all(), [
             'file' => 'nullable|file|mimetypes:image/jpeg,image/png,image/jpg,audio/mpeg,audio/x-wav,audio/mp3,video/avi,video/mpeg,video/quicktime,video/mp4',
@@ -213,9 +202,7 @@ class ArticleController extends Controller
                 'status' => 'success',
                 'message' => 'Data processed successfully',
             ], 200);
-        }
-        else
-        {
+        } else {
             return response()->json([
                 'status' => 'failed',
                 'message' => 'Data not processed successfully',
@@ -228,8 +215,8 @@ class ArticleController extends Controller
      */
     public function store(Request $request)
     {
-         // Validate the request
-         $validator = Validator::make($request->all(), [
+        // Validate the request
+        $validator = Validator::make($request->all(), [
             'text' => 'nullable|string',
             'news_type_id' => 'required|string',
             'video' => 'nullable|file|mimetypes:video/avi,video/mpeg,video/quicktime,video/mp4',
@@ -265,10 +252,10 @@ class ArticleController extends Controller
 
         // Check for and handle each file type
         if ($request->hasFile('video')) {
-            $data['media'] = $this->storeFile($request->file('video'), 'videos');
+            $data['media']     = $this->storeFile($request->file('video'), 'videos');
             $data['mediaType'] = 'video';
         } elseif ($request->hasFile('audio')) {
-            $data['media'] = $this->storeFile($request->file('audio'), 'audios');
+            $data['media']     = $this->storeFile($request->file('audio'), 'audios');
             $data['mediaType'] = 'audio';
         } elseif ($request->input('text')) {
             $data['mediaType'] = 'text';
@@ -282,7 +269,7 @@ class ArticleController extends Controller
         //$imagePath = $this->storeFile($request->file('image'), 'images');
 
         // Store validated data in the database
-        
+
         // Store validated data in the database
         $media = Newsletter::create($data);
 
@@ -298,8 +285,8 @@ class ArticleController extends Controller
      */
     public function storeArticle(Request $request)
     {
-         // Validate the request
-         $validator = Validator::make($request->all(), [
+        // Validate the request
+        $validator = Validator::make($request->all(), [
             'mediaType' => 'nullable|string',
             'news_type_id' => 'required|string',
             'name' => 'required|string',
@@ -348,7 +335,7 @@ class ArticleController extends Controller
             return null;
         }
 
-            // Get the original file name without the extension
+        // Get the original file name without the extension
         $originalName = pathinfo($file->getClientOriginalName(), PATHINFO_FILENAME);
 
         // Remove spaces from the original file name
@@ -366,14 +353,14 @@ class ArticleController extends Controller
             return null;
         }
 
-            // Get the original file name without the extension
-            $originalName = pathinfo($file->getClientOriginalName(), PATHINFO_FILENAME);
+        // Get the original file name without the extension
+        $originalName = pathinfo($file->getClientOriginalName(), PATHINFO_FILENAME);
 
-            // Remove spaces from the original file name
-            $fileNameWithoutSpaces = str_replace(' ', '_', $originalName);
-    
-            $dateStamp = date('Ymd_His');
-    
+        // Remove spaces from the original file name
+        $fileNameWithoutSpaces = str_replace(' ', '_', $originalName);
+
+        $dateStamp = date('Ymd_His');
+
 
         // Generate a unique name for the image
         $fileName = $fileNameWithoutSpaces . '_' . $dateStamp . '.' . $file->getClientOriginalExtension();
@@ -451,7 +438,8 @@ class ArticleController extends Controller
         ]);
 
         // Find the item by ID
-        $item = Newsletter::where('slug', $slug)->firstOrFail();;
+        $item = Newsletter::where('slug', $slug)->firstOrFail();
+        ;
 
         // Update the specific column
         $item->update(['status' => $request->status]);
@@ -471,10 +459,10 @@ class ArticleController extends Controller
     public function listFiles(Request $request)
     {
         // Define the folders you want to list files from
-        $folders = ['public/all','public/audios', 'public/featured_image', 'public/videos'];
+        $folders = ['public/all', 'public/audios', 'public/featured_image', 'public/videos'];
 
         $allFiles = [];
-        $baseUrl = config('app.url'); // Base URL of your application
+        $baseUrl  = config('app.url'); // Base URL of your application
 
         // Loop through each folder and get the files
         foreach ($folders as $folder) {
@@ -490,7 +478,7 @@ class ArticleController extends Controller
         }
 
         // Set the current page for pagination
-        $page = $request->input('page', 1);
+        $page    = $request->input('page', 1);
         $perPage = 10; // Number of files per page
 
         // Slice the files array based on the pagination
@@ -523,4 +511,3 @@ class ArticleController extends Controller
         return "Image paths updated successfully!";
     }
 }
-

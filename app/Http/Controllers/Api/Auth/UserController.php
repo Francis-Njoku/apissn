@@ -2,27 +2,28 @@
 
 namespace App\Http\Controllers\Api\Auth;
 
-use App\Http\Controllers\Controller;
-use App\Http\Requests\ForgotPasswordRequest;
-use App\Http\Resources\UserResource;
-use Illuminate\Http\Request;
-use App\Models\User;
-use App\Models\UserGroup;
-use Illuminate\Auth\Events\PasswordReset;
-use Illuminate\Auth\Events\Registered;
-use Illuminate\Support\Facades\Auth;
-use Illuminate\Support\Facades\Hash;
-use Illuminate\Support\Facades\Validator;
-use Illuminate\Auth\Events\Verified;
-use Illuminate\Http\JsonResponse;
-use Illuminate\Http\Resources\Json\JsonResource;
-use App\Mail\ResetPassword;
-use Carbon\Carbon;
-use Illuminate\Support\Facades\DB;
-use Illuminate\Support\Facades\Mail;
-//use App\Enum\UserAuth;
 use Tymon\JWTAuth\Facades\JWTAuth;
+use Tymon\JWTAuth\Exceptions\JWTException;
+use Illuminate\Support\Facades\Validator;
+use Illuminate\Support\Facades\Mail;
 use Illuminate\Support\Facades\Log;
+use Illuminate\Support\Facades\Hash;
+use Illuminate\Support\Facades\DB;
+use Illuminate\Support\Facades\Auth;
+use Illuminate\Http\Resources\Json\JsonResource;
+use Illuminate\Http\Request;
+use Illuminate\Http\JsonResponse;
+use Illuminate\Auth\Events\Verified;
+use Illuminate\Auth\Events\Registered;
+use Illuminate\Auth\Events\PasswordReset;
+use Carbon\Carbon;
+use App\Models\UserGroup;
+use App\Models\User;
+use App\Mail\ResetPassword;
+//use App\Enum\UserAuth;
+use App\Http\Resources\UserResource;
+use App\Http\Requests\ForgotPasswordRequest;
+use App\Http\Controllers\Controller;
 
 class UserController extends Controller
 {
@@ -46,8 +47,8 @@ class UserController extends Controller
             return response()->json(['message' => 'User not exist'], 404);
         }
     }
-    
-    
+
+
     /***
      * Generate Identity
      * @param No params
@@ -58,13 +59,12 @@ class UserController extends Controller
         $randomNumber = random_int(10000000000000, 99999999999999);
         if (User::where('identity', '=', $randomNumber)->exists()) {
             return $this->generateIdentity();
-         }
-         else{
+        } else {
             return $randomNumber;
-         }
+        }
     }
 
-      /***
+    /***
      * Generate Identity
      * @param No params
      * @return unique Identity
@@ -74,16 +74,16 @@ class UserController extends Controller
         $randomNumber = random_int(100000, 999999);
         if (User::where('name', '=', $randomNumber)->exists()) {
             return $this->generateIdentity();
-         }
-         else{
+        } else {
             return $randomNumber;
-         }
+        }
     }
-    private function isValidTimezoneId($usertimezone) {
-        try{
+    private function isValidTimezoneId($usertimezone)
+    {
+        try {
             new \DateTimeZone($usertimezone);
             return true;
-        }catch(Exception $e){
+        } catch (Exception $e) {
             return response()->json([
                 'status' => false,
                 'message' => 'Wrong Timezone, please try again'
@@ -93,17 +93,17 @@ class UserController extends Controller
     }
     private function getTimeZone($getZome)
     {
-        $usertimezone="Africa/Lagos"; 
+        $usertimezone = "Africa/Lagos";
 
-        date_default_timezone_set($usertimezone); 
+        date_default_timezone_set($usertimezone);
 
         //new date and time
-        $ndate= new datetime();
+        $ndate = new datetime();
         //split into date and time seperate
-        $nndate =$ndate->format("Y-m-d");
-        $nntime= $ndate->format("H:i:S");
+        $nndate = $ndate->format("Y-m-d");
+        $nntime = $ndate->format("H:i:S");
         //here you can test it
-        echo $nndate.'<br/>';
+        echo $nndate . '<br/>';
         echo $nntime;
 
     }
@@ -137,26 +137,24 @@ class UserController extends Controller
 
             //$this->isValidTimezoneId($request->gmt);
 
-            if($request->manager_id)
-            {
+            if ($request->manager_id) {
                 $user = User::create([
                     'name' => $this->generateUser(),
                     'email' => $request->email,
-                    'first_name' => $request->firstname,
-                    'last_name' => $request->lastname,
+                    'firstname' => $request->firstname,
+                    'lastname' => $request->lastname,
                     'phone' => $request->phone,
                     'role_id' => 1,
                     'identity' => $this->generateIdentity(),
                     'status' => 'approved',
                     'password' => Hash::make($request->password)
                 ]);
-            }
-            else{
+            } else {
                 $user = User::create([
                     'name' => $this->generateUser(),
                     'email' => $request->email,
-                    'first_name' => $request->firstname,
-                    'last_name' => $request->lastname,
+                    'firstname' => $request->firstname,
+                    'lastname' => $request->lastname,
                     'phone' => $request->phone,
                     'role_id' => 1,
                     'identity' => $this->generateIdentity(),
@@ -230,9 +228,9 @@ class UserController extends Controller
         $credentials = $request->only('email', 'password');
 
         try {
-            if (! $token = JWTAuth::attempt($credentials)) {
+            if (!$token = JWTAuth::attempt($credentials)) {
                 return response()->json(['error' => 'Unauthorized'], 401);
-                
+
             }
         } catch (JWTException $e) {
             return response()->json(['error' => 'Could not create token'], 500);
@@ -296,7 +294,7 @@ class UserController extends Controller
             return response()->json(['error' => 'Failed to logout, please try again.'], 500);
         }
     }
- 
+
     /**
      * @param ForgotPasswordRequest $request
      * @return JsonResponse
@@ -323,7 +321,7 @@ class UserController extends Controller
                 $verify2->delete();
             }
 
-            $token =  random_int(100000, 999999);
+            $token          = random_int(100000, 999999);
             $password_reset = DB::table('password_resets')->insert([
                 'email' => $request->all()['email'],
                 'token' => $token,
@@ -450,13 +448,13 @@ class UserController extends Controller
      * @return \Illuminate\Http\Response
      */
 
-     public function profile()
-     {
+    public function profile()
+    {
         //$query = User::where('id', Auth::id())->get();
         return new UserResource(User::where('id', Auth::user()->id)->first());
-     }
+    }
 
-     /**
+    /**
      * Create User
      * @param Request $request
      * @return User
@@ -486,26 +484,24 @@ class UserController extends Controller
 
             $this->isValidTimezoneId($request->gmt);
 
-            if($request->manager_id)
-            {
+            if ($request->manager_id) {
                 $user = User::create([
                     'name' => $this->generateUser(),
                     'email' => $request->email,
-                    'first_name' => $request->firstName,
-                    'last_name' => $request->lastName,
+                    'firstname' => $request->firstName,
+                    'lastname' => $request->lastName,
                     'phone' => $request->phone,
                     'identity' => $this->generateIdentity(),
                     'role_id' => 1,
                     'status' => 'approved',
                     'password' => Hash::make($request->password)
                 ]);
-            }
-            else{
+            } else {
                 $user = User::create([
                     'name' => $this->generateUser(),
                     'email' => $request->email,
-                    'first_name' => $request->firstName,
-                    'last_name' => $request->lastName,
+                    'firstname' => $request->firstName,
+                    'lastname' => $request->lastName,
                     'phone' => $request->phone,
                     'identity' => $this->generateIdentity(),
                     'role_id' => 1,
@@ -551,5 +547,5 @@ class UserController extends Controller
             ], 200);
         }
     }
-    
+
 }
