@@ -180,10 +180,9 @@ class ArticleController extends Controller
      */
     public function uploadFile(Request $request)
     {
-        echo ($request->get(('file')));
-
         // Validate the request
         $validator = Validator::make($request->all(), [
+            'folder' => 'nullable|string',
             'file' => 'nullable|file|mimetypes:image/jpeg,image/png,image/jpg,audio/mpeg,audio/x-wav,audio/mp3,video/avi,video/mpeg,video/quicktime,video/mp4',
         ]);
 
@@ -195,13 +194,20 @@ class ArticleController extends Controller
             ], 422);
         }
 
-        if ($request->hasFile('file')) {
-            $media = $this->storeFile($request->file('file'), 'all');
+        if ($request->hasFile(key: 'file')) {
+
+            $directory = $request->folder
+                ? $request->folder
+                : 'all';
+
+            $media = $this->storeFile($request->file('file'), $directory);
 
             return response()->json([
                 'status' => 'success',
                 'message' => 'Data processed successfully',
+                'data' => $media
             ], 200);
+
         } else {
             return response()->json([
                 'status' => 'failed',
@@ -284,50 +290,54 @@ class ArticleController extends Controller
      * Store a newly created resource in storage.
      */
     public function storeArticle(Request $request)
-    {
-        // Validate the request
-        $validator = Validator::make($request->all(), [
-            'mediaType' => 'nullable|string',
-            'news_type_id' => 'required|string',
-            'name' => 'required|string',
-            'title' => 'required|string',
-            'news_date' => 'required|date',
-            'body' => 'nullable|string|min:10|max:10000',
-            'featuredImage' => 'required|string',
-            'media' => 'nullable|string',
-            'status' => 'required|string',
+        {
 
-        ]);
+            // Validate the request
+            $validator = Validator::make($request->all(), [
+                'mediaType' => 'nullable|string',
+                'news_type_id' => 'required|string',
+                'name' => 'required|string',
+                'title' => 'required|string',
+                'news_date' => 'required|date',
+                'body' => 'nullable|string|min:10|max:10000',
+                'featuredImage' => 'required|string',
+                'media' => 'nullable|string',
+                'mediaSrc' => 'nullable|string',
+                'status' => 'required|string',
 
-        if ($validator->fails()) {
+            ]);
+
+            if ($validator->fails()) {
+                return response()->json([
+                    'status' => 'error',
+                    'message' => 'Validation failed',
+                    'errors' => $validator->errors()
+                ], 422);
+            }
+
+            // Initialize an empty data array
+            $data = [
+                'news_type_id' => $request->input('news_type_id'),
+                'name' => $request->input('name'),
+                'title' => $request->input('title'),
+                'news_date' => $request->input('news_date'),
+                'body' => $request->input('body'),
+                'status' => $request->input('status'),
+                'mediaType' => $request->input('mediaType'),
+                'media' => $request->input('media'),
+                'mediaSrc' => $request->input('mediaSrc'),
+                'featuredImage' => $request->input('featuredImage'),
+            ];
+
+
+            $media = Newsletter::create($data);
+
             return response()->json([
-                'status' => 'error',
-                'message' => 'Validation failed',
-                'errors' => $validator->errors()
-            ], 422);
+                'status' => 'success',
+                'message' => 'Data processed successfully',
+                'data' => $media
+            ], 200);
         }
-
-        // Initialize an empty data array
-        $data = [
-            'news_type_id' => $request->input('news_type_id'),
-            'name' => $request->input('name'),
-            'title' => $request->input('title'),
-            'news_date' => $request->input('news_date'),
-            'body' => $request->input('body'),
-            'status' => $request->input('status'),
-            'mediaType' => $request->input('mediaType'),
-            'media' => $request->input('media'),
-            'featuredImage' => $request->input('featuredImage'),
-        ];
-
-        $media = Newsletter::create($data);
-
-        return response()->json([
-            'status' => 'success',
-            'message' => 'Data processed successfully',
-            'data' => $media
-        ], 200);
-    }
 
     private function storeFile($file, $directory)
     {
@@ -344,7 +354,11 @@ class ArticleController extends Controller
         $dateStamp = date('Ymd_His');
 
         $filename = $fileNameWithoutSpaces . '_' . $dateStamp . '.' . $file->getClientOriginalExtension();
-        return $file->storeAs($directory, $filename, 'public');
+        // dd($file);
+        // dd($filename);
+        $file->storeAs($directory, $filename, 'public');
+
+        return ['directory' => $directory, 'filename' => $filename];
     }
 
     private function storeFileNoDirectory($file)

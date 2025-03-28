@@ -144,7 +144,7 @@ class UserController extends Controller
                     'firstname' => $request->firstname,
                     'lastname' => $request->lastname,
                     'phone' => $request->phone,
-                    'role_id' => 1,
+                    'role_id' => 2,
                     'identity' => $this->generateIdentity(),
                     'status' => 'approved',
                     'password' => Hash::make($request->password)
@@ -156,7 +156,7 @@ class UserController extends Controller
                     'firstname' => $request->firstname,
                     'lastname' => $request->lastname,
                     'phone' => $request->phone,
-                    'role_id' => 1,
+                    'role_id' => 2,
                     'identity' => $this->generateIdentity(),
                     'status' => 'approved',
                     'password' => Hash::make($request->password)
@@ -310,45 +310,33 @@ class UserController extends Controller
             return new JsonResponse(['success' => false, 'message' => $validator->errors()], 422);
         }
 
-        $verify = User::where('email', $request->all()['email'])->exists();
+        $user = User::where('email', $request->email)->first();
 
-        if ($verify) {
-            $verify2 = DB::table('password_resets')->where([
-                ['email', $request->all()['email']]
-            ]);
-
-            if ($verify2->exists()) {
-                $verify2->delete();
-            }
-
-            $token          = random_int(100000, 999999);
-            $password_reset = DB::table('password_resets')->insert([
-                'email' => $request->all()['email'],
-                'token' => $token,
-                'created_at' => Carbon::now()
-            ]);
-
-            if ($password_reset) {
-                Mail::to($request->all()['email'])->send(new ResetPassword($token));
-
-                return new JsonResponse(
-                    [
-                        'success' => true,
-                        'message' => "Please check your email for a 6 digit pin"
-                    ],
-                    200
-                );
-            } else {
-                return new JsonResponse(
-                    [
-                        'success' => false,
-                        'message' => "This email does not exist"
-                    ],
-                    400
-                );
-            }
+        if (!$user) {
+            return new JsonResponse([
+                'success' => false,
+                'message' => "This email does not exist"
+            ], 400);
         }
+
+        DB::table('password_resets')->where('email', $request->email)->delete();
+
+        $token = random_int(100000, 999999);
+
+        DB::table('password_resets')->insert([
+            'email' => $request->email,
+            'token' => $token,
+            'created_at' => Carbon::now()
+        ]);
+
+        Mail::to($request->email)->send(new ResetPassword($token));
+
+        return new JsonResponse([
+            'success' => true,
+            'message' => "Please check your email for a 6 digit pin"
+        ], 200);
     }
+
 
     /**
      * @param VerifyPin
@@ -459,7 +447,7 @@ class UserController extends Controller
      * @param Request $request
      * @return User
      */
-    public function adminCreateUser()
+    public function adminCreateUser(Request $request)
     {
         try {
             //Validated
@@ -492,7 +480,7 @@ class UserController extends Controller
                     'lastname' => $request->lastName,
                     'phone' => $request->phone,
                     'identity' => $this->generateIdentity(),
-                    'role_id' => 1,
+                    'role_id' => 2,
                     'status' => 'approved',
                     'password' => Hash::make($request->password)
                 ]);
@@ -504,7 +492,7 @@ class UserController extends Controller
                     'lastname' => $request->lastName,
                     'phone' => $request->phone,
                     'identity' => $this->generateIdentity(),
-                    'role_id' => 1,
+                    'role_id' => 2,
                     'password' => Hash::make($request->password)
                 ]);
             }

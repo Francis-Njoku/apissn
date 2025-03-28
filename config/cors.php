@@ -15,20 +15,13 @@ return [
     |
     */
 
-    'paths' => ['api/*', 'sanctum/csrf-cookie'],
-
+    'paths' => ['api/*'],
     'allowed_methods' => ['*'],
-
-    'allowed_origins' => ['*'],
-
+    'allowed_origins' => ['http://localhost:3000', 'https://ftm.ng', 'http://localhost:3001', 'https://test.ftm.ng', 'http://localhost:3002',],
     'allowed_origins_patterns' => [],
-
     'allowed_headers' => ['*'],
-
     'exposed_headers' => [],
-
     'max_age' => 0,
-
-    'supports_credentials' => false,
+    'supports_credentials' => true,
 
 ];

@@ -7,6 +7,7 @@ use App\Http\Controllers\Api\PlanController;
 use App\Http\Controllers\Api\PayController;
 use App\Http\Controllers\Api\Auth\UserController;
 use App\Http\Controllers\Api\ArticleController;
+
 /*
 |--------------------------------------------------------------------------
 | API Routes
