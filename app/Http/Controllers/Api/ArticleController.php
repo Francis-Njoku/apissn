@@ -391,8 +391,6 @@ class ArticleController extends Controller
         $dateStamp = date('Ymd_His');
 
         $filename = $fileNameWithoutSpaces . '_' . $dateStamp . '.' . $file->getClientOriginalExtension();
-        // dd($file);
-        // dd($filename);
         $file->storeAs($directory, $filename, 'public');
 
         return ['directory' => $directory, 'filename' => $filename];
