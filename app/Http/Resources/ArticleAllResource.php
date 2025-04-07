@@ -34,11 +34,13 @@ class ArticleAllResource extends JsonResource
         
         if ($this->mediaType == "video") {
             $data['media'] =  $this->media 
-            ? ( $this->mediaSrc === 'local' ?  URL::to('storage/'.$this->media ) : $this->media ) 
+            ? ( $this->mediaSrc !== 'youtube' ?  URL::to('storage/'.$this->media ) : $this->media ) 
+            // ? ( $this->mediaSrc === 'local' ?  URL::to('storage/'.$this->media ) : $this->media ) 
             : null  ;
         } elseif ($this->mediaType == "audio") {
             $data['media'] =  $this->media 
-            ? ( $this->mediaSrc === 'local' ?  URL::to('storage/'.$this->media ) : $this->media ) 
+            ? ( $this->mediaSrc !== 'spotify' ?  URL::to('storage/'.$this->media ) : $this->media ) 
+            // ? ( $this->mediaSrc === 'local' ?  URL::to('storage/'.$this->media ) : $this->media ) 
             : null  ;
         }
 

@@ -2,22 +2,21 @@
 
 namespace App\Http\Controllers\Api;
 
-use Illuminate\Http\Request;
-use Illuminate\Support\Facades\Session;
-use Illuminate\Support\Facades\DB;
-use App\Http\Controllers\Controller;
-use Illuminate\Support\Facades\Auth;
-use App\Http\Resources\PaymentResource;
-use Illuminate\Support\Facades\URL;
-use App\Models\User;
-use App\Models\Entries;
-use App\Models\Payment;
-use App\Models\Plan;
-use App\Models\Coupons;
 use Paystack;
 use Mail;
+use Illuminate\Support\Facades\URL;
+use Illuminate\Support\Facades\Session;
+use Illuminate\Support\Facades\DB;
+use Illuminate\Support\Facades\Auth;
+use Illuminate\Http\Request;
 use App\Services\MailchimpService;
-
+use App\Models\User;
+use App\Models\Plan;
+use App\Models\Payment;
+use App\Models\Entries;
+use App\Models\Coupons;
+use App\Http\Resources\PaymentResource;
+use App\Http\Controllers\Controller;
 
 class PayController extends Controller
 {
@@ -48,11 +47,11 @@ class PayController extends Controller
                 'callBackUrl' => 'required',
                 // Add other validation rules as needed
             ]);
-             // Get the base URL
+            // Get the base URL
             $baseUrl = URL::to('/');
             // Append the desired string to the base URL
             $fullUrl = $baseUrl . '/api/pay/callback/';
-            
+
             $callbackUrl = $validatedData['callBackUrl'];
             $email = Auth::user()->email; // Email passed from the React app
             $amount = $request->input('amount') * 100; // Convert amount to kobo
@@ -61,15 +60,13 @@ class PayController extends Controller
 
             $getPlan = Plan::where('track', $validatedData['planType'])->first();
 
-            if (!$getPlan)
-            {
+            if (!$getPlan) {
                 // Plan does not exist
                 return response()->json([
                     'exists' => false,
                     'message' => 'Plan not found'
                 ], 400);
             }
-
 
             // Merge data to send to Paystack
             $request->merge([
@@ -89,13 +86,13 @@ class PayController extends Controller
                     'first_name' => $first_name,
                     'last_name' => $last_name,
                     ]
-                );
+            );
             $customer = json_encode(
                 $array = [
                     'first_name' => $first_name,
                     'last_name' => $last_name,
                     ]
-                );    
+            );
 
             $paystackData = [
                 'email' => $email,
@@ -106,15 +103,15 @@ class PayController extends Controller
                 'planType' => $validatedData['planType'],
                 'metadata' => $metadata,
             ];
-            
 
-           // Get Paystack authorization URL
-           $authorizationUrl = Paystack::getAuthorizationUrl($paystackData)->url;
 
-           // Return authorization URL to the React app
-           return response()->json(['authorization_url' => $authorizationUrl], 200);
+            // Get Paystack authorization URL
+            $authorizationUrl = Paystack::getAuthorizationUrl($paystackData)->url;
+
             // Return authorization URL to the React app
-             //return response()->json(['authorization_url' => $authorizationUrl], 200);
+            return response()->json(['authorization_url' => $authorizationUrl], 200);
+            // Return authorization URL to the React app
+            //return response()->json(['authorization_url' => $authorizationUrl], 200);
         } catch (\Exception $e) {
             return response()->json(['message' => 'Failed to initiate payment. Please try again.', 'error' => $e->getMessage()], 500);
         }
@@ -155,7 +152,7 @@ class PayController extends Controller
         $post->save();
 
         // Check if user is registered
-        
+
 
         // Get plan type
         $plan_name = $this->getPlanType($plan_type);
@@ -188,27 +185,25 @@ class PayController extends Controller
         $post->status = 'active';
         $post->save();
 
-        if($callBackUrl)
-        {
+        if ($callBackUrl) {
             return redirect($callBackUrl.'/?trxref='.$reference);
 
-        }else{
+        } else {
 
         }
 
-        
 
-        
-        
-        
+
+
+
+
     }
 
     public function paymentReference($reference)
     {
         $getReference = Payment::where('reference', $reference)->first();
 
-        if($getReference)
-        {
+        if ($getReference) {
             $getPlanDetail = Plan::where('track', $getReference->plan_id)->first();
 
             return response()->json([
@@ -216,13 +211,12 @@ class PayController extends Controller
                 'amount' => $getReference->amount,
                 'reference' => $reference,
                 'planName' => $getPlanDetail->plan_name,
-                'planType' => $getPlanDetail->plan_type, 
+                'planType' => $getPlanDetail->plan_type,
                 'status' => 'Successful',
                 'message' => 'Completed',
                 'active' => $getReference->status,
             ], 200);
-        }
-        else{
+        } else {
             return response()->json([
                 'exists' => false,
                 'message' => 'An error occured, please contact admin',
@@ -235,8 +229,9 @@ class PayController extends Controller
     {
         return PaymentResource::collection(
             Payment::where('user_id', Auth::id())
-            ->orderBy('created_at','desc')
-            ->paginate(10));
+            ->orderBy('created_at', 'desc')
+            ->paginate(10)
+        );
     }
 
     public function paymentStatus()

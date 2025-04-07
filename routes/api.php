@@ -19,78 +19,84 @@ use App\Http\Controllers\Api\ArticleController;
 |
 */
 
-Route::middleware('auth:sanctum')->get('/user', function (Request $request) {
-    return $request->user();
-});
-Route::get('/auth/list-users/', [UserController::class, 'listUsers']);
-Route::post('/auth/refresh', [UserController::class, 'refresh']);
-Route::post('/auth/register', [UserController::class, 'createUser']);
-Route::post('/auth/logout', [UserController::class, 'logout']);
-Route::post('/auth/forgot', [UserController::class, 'forgot']);
-Route::post('/auth/reset', [UserController::class, 'reset']);
-Route::post('/auth/login', [UserController::class, 'loginUser']);
-Route::get('/email/verify', function () {
-    return view('auth.verify-email');
-})->middleware('auth')->name('verification.notice');
-Route::get('/email/verify/{id}/{hash}', function (EmailVerificationRequest $request) {
-    $request->fulfill();
-
-    #return redirect('/');
-    return redirect()->route('home');
-})->middleware(['auth', 'signed'])->name('verification.verify');
-
-Route::post('/email/verification-notification', function (Request $request) {
-    $request->user()->sendEmailVerificationNotification();
-
-    return back()->with('message', 'Verification link sent!');
-})->middleware(['auth', 'throttle:6,1'])->name('verification.send');
-
-Route::post(
-    '/forgot-password',
-    [UserController::class, 'forgotPassword']
-);
-Route::post(
-    '/reset-password',
-    [UserController::class, 'resetPassword']
-);
-
-Route::get('/all/article/', [ArticleController::class, 'indexNoAuth']);
-Route::get('/pay/callback/', [PayController::class, 'handleGatewayCallback']);
-Route::get('/article-single/{slug}', [ArticleController::class, 'showSingleArticle']);
-Route::get('/media/', [ArticleController::class, 'listFiles']);
 
 // No auth
+Route::get('/articles/sample/', [ArticleController::class, 'sampleArticle']);
 Route::get('/plans/', [PlanController::class, 'index']);
-Route::get('/no-auth-articles/', [ArticleController::class, 'indexNoAuth']);
-Route::get('/latest-articles/', [ArticleController::class, 'getLatest']);
-Route::get('/articles-by-media/', [ArticleController::class, 'indexByMediaType']);
+Route::prefix('auth')->group(function () {
+    Route::post('/refresh', [UserController::class, 'refresh']);
+    Route::post('/register', [UserController::class, 'createUser']);
+    Route::post('/logout', [UserController::class, 'logout']);
+    Route::post('/forgot', [UserController::class, 'forgot']);
+    Route::post('/reset', [UserController::class, 'reset']);
+    Route::post('/login', [UserController::class, 'loginUser']);
+    Route::post(
+        '/forgot-password',
+        [UserController::class, 'forgotPassword']
+    );
+    Route::post(
+        '/reset-password',
+        [UserController::class, 'resetPassword']
+    );
+});
 
+// auth
+Route::prefix('email')->group(function () {
+    Route::get('/verify', function () {
+        return view('auth.verify-email');
+    })->middleware('auth')->name('verification.notice');
+    Route::get('/verify/{id}/{hash}', function (EmailVerificationRequest $request) {
+        $request->fulfill();
+        #return redirect('/');
+        return redirect()->route('home');
+    })->middleware(['auth', 'signed'])->name('verification.verify');
+    Route::post('/verification-notification', function (Request $request) {
+        $request->user()->sendEmailVerificationNotification();
+        return back()->with('message', 'Verification link sent!');
+    })->middleware(['auth', 'throttle:6,1'])->name('verification.send');
+});
 Route::group(['middleware' => ['auth.jwt']], function () {
-    Route::get('/auth/profile/', [UserController::class, 'profile']);
-    Route::post('/auth/signout/', [UserController::class, 'signout']);
-    Route::post('/pay/', [PayController::class, 'redirectToGateway']);
-    Route::get('/pay/reference/{reference}', [PayController::class, 'paymentReference']);
-    Route::get('/pay/history/', [PayController::class, 'paymentHistory']);
+    Route::prefix('auth')->group(function () {
+        Route::post('/signout/', [UserController::class, 'signout']);
+        Route::get('/profile/', [UserController::class, 'profile']);
+    });
+    Route::prefix('pay')->group(function () {
+        Route::post('/', [PayController::class, 'redirectToGateway']);
+        Route::get('/callback/', [PayController::class, 'handleGatewayCallback']);
+        Route::get('/reference/{reference}', [PayController::class, 'paymentReference']);
+        Route::get('/history/', [PayController::class, 'paymentHistory']);
+        // Route::get('/payment/status/', [PayController::class, 'paymentStatus']);
+        Route::get('/status/', [PayController::class, 'paymentStatus']);
+    });
     Route::post('/store/ftm/', [ArticleController::class, 'store']);
-    Route::get('/payment/status/', [PayController::class, 'paymentStatus']);
     Route::get('/generate/slug/', [ArticleController::class, 'newsletterGenerateSlug']);
     Route::get('/user/type/', [UserController::class, 'userStatus']);
 });
-
-Route::group(['middleware' => ['auth.jwt', 'admin']], function () {
-    Route::post('/admin/create/user/', [UserController::class, 'adminCreateUser']);
-    Route::post('/upload/file/', [ArticleController::class, 'uploadFile']);
-    Route::get('/update/imagepath/', [ArticleController::class, 'updateImagePaths']);
-    Route::put('/article/update/{slug}', [ArticleController::class, 'update']);
-    Route::put('/article/status/update/{slug}', [ArticleController::class, 'updateStatus']);
-    Route::post('/add-post/', [ArticleController::class, 'storeArticle']);
-});
-
-Route::group(['middleware' => ['auth.jwt', 'payment']], function () {
-    Route::post('/admin/create/user/', [UserController::class, 'adminCreateUser']);
-});
-
 Route::group(['middleware' => ['auth.jwt', 'subscribed']], function () {
-    Route::get('/articles/', [ArticleController::class, 'index']);
-    Route::get('/article/{id}', [ArticleController::class, 'show']);
+    Route::prefix('articles')->group(function () {
+        Route::get('/', [ArticleController::class, 'index']);
+        Route::get('/all/', [ArticleController::class, 'indexNoAuth']);
+        Route::get('/latest/', [ArticleController::class, 'getLatest']);
+        Route::get('/by-media/', [ArticleController::class, 'indexByMediaType']);
+        Route::get('/{id}', [ArticleController::class, 'show']);
+        Route::get('/{slug}/', [ArticleController::class, 'showSingleArticle']);
+    });
+
 });
+Route::group(['middleware' => ['auth.jwt', 'admin']], function () {
+    Route::get('/media/', [ArticleController::class, 'listFiles']);
+    Route::prefix('articles')->group(function () {
+        Route::post('/add/', [ArticleController::class, 'storeArticle']);
+        Route::put('/update/{slug}', [ArticleController::class, 'update']);
+        Route::put('/status/update/{slug}', [ArticleController::class, 'updateStatus']);
+        Route::get('/update-image-paths/', [ArticleController::class, 'updateImagePaths']);
+    });
+    Route::prefix('users')->group(function () {
+        Route::post('/create/', [UserController::class, 'adminCreateUser']);
+        Route::get('/list/', [UserController::class, 'listUsers']);
+
+    });
+    Route::prefix('media')->group(function () {
+        Route::post('/upload/', [ArticleController::class, 'uploadFile']);
+    });
+})->prefix('admin');

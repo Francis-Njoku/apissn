@@ -110,6 +110,43 @@ class ArticleController extends Controller
                 ->paginate(10));
         }
     }
+    /**
+     * Display a single sample article for unsubscribed users.
+     * This doesn't require database modifications and returns just one article.
+     */
+    public function sampleArticle(Request $request)
+    {
+        $media = $request->get('m');
+        $newsType = $request->get('n');
+
+        // Start with a base query for approved articles
+        $query = Newsletter::where('status', 'approved')
+                          ->orderBy('created_at', 'desc');
+
+        // Apply media type filter if provided
+        if ($media) {
+            $query->where('mediaType', $media);
+        }
+
+        // Apply news type filter if provided
+        if ($newsType) {
+            $query->where('news_type_id', $newsType);
+        }
+
+        // Get just the first article that matches our criteria
+        $sampleArticle = $query->first();
+
+        if (!$sampleArticle) {
+            return response()->json([
+                'status' => 'error',
+                'message' => 'No sample article available'
+            ], 404);
+        }
+
+        // Return the single article as a resource
+        return new ArticleAllResource($sampleArticle);
+    }
+
 
     public function indexByMediaType(Request $request)
     {
@@ -290,54 +327,54 @@ class ArticleController extends Controller
      * Store a newly created resource in storage.
      */
     public function storeArticle(Request $request)
-        {
+    {
 
-            // Validate the request
-            $validator = Validator::make($request->all(), [
-                'mediaType' => 'nullable|string',
-                'news_type_id' => 'required|string',
-                'name' => 'required|string',
-                'title' => 'required|string',
-                'news_date' => 'required|date',
-                'body' => 'nullable|string|min:10|max:10000',
-                'featuredImage' => 'required|string',
-                'media' => 'nullable|string',
-                'mediaSrc' => 'nullable|string',
-                'status' => 'required|string',
+        // Validate the request
+        $validator = Validator::make($request->all(), [
+            'mediaType' => 'nullable|string',
+            'news_type_id' => 'required|string',
+            'name' => 'required|string',
+            'title' => 'required|string',
+            'news_date' => 'required|date',
+            'body' => 'nullable|string|min:10|max:10000',
+            'featuredImage' => 'required|string',
+            'media' => 'nullable|string',
+            'mediaSrc' => 'nullable|string',
+            'status' => 'required|string',
 
-            ]);
+        ]);
 
-            if ($validator->fails()) {
-                return response()->json([
-                    'status' => 'error',
-                    'message' => 'Validation failed',
-                    'errors' => $validator->errors()
-                ], 422);
-            }
-
-            // Initialize an empty data array
-            $data = [
-                'news_type_id' => $request->input('news_type_id'),
-                'name' => $request->input('name'),
-                'title' => $request->input('title'),
-                'news_date' => $request->input('news_date'),
-                'body' => $request->input('body'),
-                'status' => $request->input('status'),
-                'mediaType' => $request->input('mediaType'),
-                'media' => $request->input('media'),
-                'mediaSrc' => $request->input('mediaSrc'),
-                'featuredImage' => $request->input('featuredImage'),
-            ];
-
-
-            $media = Newsletter::create($data);
-
+        if ($validator->fails()) {
             return response()->json([
-                'status' => 'success',
-                'message' => 'Data processed successfully',
-                'data' => $media
-            ], 200);
+                'status' => 'error',
+                'message' => 'Validation failed',
+                'errors' => $validator->errors()
+            ], 422);
         }
+
+        // Initialize an empty data array
+        $data = [
+            'news_type_id' => $request->input('news_type_id'),
+            'name' => $request->input('name'),
+            'title' => $request->input('title'),
+            'news_date' => $request->input('news_date'),
+            'body' => $request->input('body'),
+            'status' => $request->input('status'),
+            'mediaType' => $request->input('mediaType'),
+            'media' => $request->input('media'),
+            'mediaSrc' => $request->input('mediaSrc'),
+            'featuredImage' => $request->input('featuredImage'),
+        ];
+
+
+        $media = Newsletter::create($data);
+
+        return response()->json([
+            'status' => 'success',
+            'message' => 'Data processed successfully',
+            'data' => $media
+        ], 200);
+    }
 
     private function storeFile($file, $directory)
     {
