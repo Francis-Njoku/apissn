@@ -86,15 +86,15 @@ Route::get('/stock-select/pricing', [LandController::class, 'stock_pricing'])->n
 Route::get('/agrotech/pricing', [LandController::class, 'agrotech_pricing'])->name('agrotech-pricing');
 Route::get('/premium-article/pricing', [LandController::class, 'premium_article_pricing'])->name('premium_article_pricing');
 Route::get('/home', [LandController::class, 'index'])->name('homere');
-Route::get('/check', [PaymentController::class, 'index'])->name('home11');
-Route::get('/tenks', [LandController::class, 'thank'])->name('home11');
-Route::get('/disclaimer', [LandController::class, 'terms'])->name('home11');
+Route::get('/check', [PaymentController::class, 'index'])->name('check');
+Route::get('/tenks', [LandController::class, 'thank'])->name('tenks');
+Route::get('/disclaimer', [LandController::class, 'terms'])->name('disclaimer');
 Route::get('/thank-you', [LandController::class, 'thank_you'])->name('thank-you');
 
 // Admin
 
-Route::get('/admin-ui', [AdminController::class, 'index'])->name('admin');
-Route::get('/admin', [AdminController::class, 'add_newsletter'])->name('admin-add');
+Route::get('/admin-ui', [AdminController::class, 'index'])->name('admin-ui');
+Route::get('/admin', [AdminController::class, 'add_newsletter'])->name('admin');
 Route::post('/admin-stock-store', [AdminController::class, 'store_newsletter'])->name('admin-store');
 Route::get('/admin-stock-add', [AdminController::class, 'add_newsletter'])->name('admin-add');
 Route::get('/admin-newsletter-list', [AdminController::class, 'list_newsletter'])->name('admin-list');
@@ -104,7 +104,7 @@ Route::get('/admin-newsletter/{slug}', [AdminController::class, 'newsletter'])->
 
 //Route::get('/admin-newsletter/edit/{slug}', ['as' => 'admin.single', 'uses' => [AdminController::class, 'edit_newsletter']])
 //    ->where('slug', '[\w\d\-\_]+');
-Route::get('/admin-newsletter/edit/{slug}', [AdminController::class, 'edit_newsletter'])->name('admin.single');
+Route::get('/admin-newsletter/edit/{slug}', [AdminController::class, 'edit_newsletter'])->name('admin.edit');
 Route::post('/update-newsletter', [AdminController::class, 'update_newsletter'])->name('update_newsletter');
 Route::get('/admin/list-users', [AdminController::class, 'listUsers']);
 Route::get('/admin/list-users/pagination', [AdminController::class, 'fetch_data']);
