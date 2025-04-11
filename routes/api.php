@@ -83,20 +83,25 @@ Route::group(['middleware' => ['auth.jwt', 'subscribed']], function () {
     });
 
 });
-Route::group(['middleware' => ['auth.jwt', 'admin']], function () {
-    Route::get('/media/', [ArticleController::class, 'listFiles']);
+
+Route::prefix('admin')->middleware(['auth.jwt', 'admin'])->group(function () {
+    // Media routes
+    Route::prefix('media')->group(function () {
+        Route::get('/', [ArticleController::class, 'listFiles']);
+        Route::post('/upload', [ArticleController::class, 'uploadFile']);
+    });
+
+    // Article management routes
     Route::prefix('articles')->group(function () {
-        Route::post('/add/', [ArticleController::class, 'storeArticle']);
+        Route::post('/add', [ArticleController::class, 'storeArticle']);
         Route::put('/update/{slug}', [ArticleController::class, 'update']);
         Route::put('/status/update/{slug}', [ArticleController::class, 'updateStatus']);
-        Route::get('/update-image-paths/', [ArticleController::class, 'updateImagePaths']);
+        Route::get('/update-image-paths', [ArticleController::class, 'updateImagePaths']);
     });
-    Route::prefix('users')->group(function () {
-        Route::post('/create/', [UserController::class, 'adminCreateUser']);
-        Route::get('/list/', [UserController::class, 'listUsers']);
 
+    // User management routes
+    Route::prefix('users')->group(function () {
+        Route::post('/create', [UserController::class, 'adminCreateUser']);
+        Route::get('/list', [UserController::class, 'listUsers']);
     });
-    Route::prefix('media')->group(function () {
-        Route::post('/upload/', [ArticleController::class, 'uploadFile']);
-    });
-})->prefix('admin');
+});
