@@ -1,0 +1,20 @@
+[12-Apr-2025 11:58:54 UTC] PHP Warning:  require(/home/ftmnlywl/test-server.ftm.ng/vendor/autoload.php): Failed to open stream: No such file or directory in /home/ftmnlywl/test-server.ftm.ng/artisan on line 18
+[12-Apr-2025 11:58:54 UTC] PHP Fatal error:  Uncaught Error: Failed opening required '/home/ftmnlywl/test-server.ftm.ng/vendor/autoload.php' (include_path='.:/opt/cpanel/ea-php82/root/usr/share/pear') in /home/ftmnlywl/test-server.ftm.ng/artisan:18
+Stack trace:
+#0 {main}
+  thrown in /home/ftmnlywl/test-server.ftm.ng/artisan on line 18
+[12-Apr-2025 11:58:54 UTC] PHP Warning:  require(/home/ftmnlywl/test-server.ftm.ng/vendor/autoload.php): Failed to open stream: No such file or directory in /home/ftmnlywl/test-server.ftm.ng/artisan on line 18
+[12-Apr-2025 11:58:54 UTC] PHP Fatal error:  Uncaught Error: Failed opening required '/home/ftmnlywl/test-server.ftm.ng/vendor/autoload.php' (include_path='.:/opt/cpanel/ea-php82/root/usr/share/pear') in /home/ftmnlywl/test-server.ftm.ng/artisan:18
+Stack trace:
+#0 {main}
+  thrown in /home/ftmnlywl/test-server.ftm.ng/artisan on line 18
+[12-Apr-2025 11:58:54 UTC] PHP Warning:  require(/home/ftmnlywl/test-server.ftm.ng/vendor/autoload.php): Failed to open stream: No such file or directory in /home/ftmnlywl/test-server.ftm.ng/artisan on line 18
+[12-Apr-2025 11:58:54 UTC] PHP Fatal error:  Uncaught Error: Failed opening required '/home/ftmnlywl/test-server.ftm.ng/vendor/autoload.php' (include_path='.:/opt/cpanel/ea-php82/root/usr/share/pear') in /home/ftmnlywl/test-server.ftm.ng/artisan:18
+Stack trace:
+#0 {main}
+  thrown in /home/ftmnlywl/test-server.ftm.ng/artisan on line 18
+[12-Apr-2025 11:58:54 UTC] PHP Warning:  require(/home/ftmnlywl/test-server.ftm.ng/vendor/autoload.php): Failed to open stream: No such file or directory in /home/ftmnlywl/test-server.ftm.ng/artisan on line 18
+[12-Apr-2025 11:58:54 UTC] PHP Fatal error:  Uncaught Error: Failed opening required '/home/ftmnlywl/test-server.ftm.ng/vendor/autoload.php' (include_path='.:/opt/cpanel/ea-php82/root/usr/share/pear') in /home/ftmnlywl/test-server.ftm.ng/artisan:18
+Stack trace:
+#0 {main}
+  thrown in /home/ftmnlywl/test-server.ftm.ng/artisan on line 18
