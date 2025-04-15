@@ -20,23 +20,19 @@ class ArticleResource extends JsonResource
             'news_type_id' => $this->news_type_id,
             'name' => $this->name,
             'title' => $this->title,
-            'slug' => $this->slug,
             'body' => $this->body,
             'mediaType' => $this->mediaType,
             'news_date' => $this->news_date,
             'image_url' => $this->featuredImage ? URL::to('storage/'.$this->featuredImage) : null,
             'status' => $this->status,
-            'featured_image' => $this->featuredImage ? $this->featuredImage : null,
             'created_at' => (new \DateTime($this->created_at))->format('Y-m-d H:i:s'),
             'updated_at' => (new \DateTime($this->updated_at))->format('Y-m-d H:i:s'),
         ];
 
         if ($this->mediaType == "video") {
             $data['media'] = $this->media ? URL::to('storage/'.$this->media) : null;
-            $data['mediaName'] = $this->media ? $this->media : null;
         }elseif ($this->mediaType == "audio") {
             $data['media'] = $this->media ? URL::to('storage/'.$this->media) : null;
-            $data['mediaName'] = $this->media ? $this->media : null;
         }
 
         return $data;

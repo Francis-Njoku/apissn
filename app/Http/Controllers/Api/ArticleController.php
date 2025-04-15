@@ -110,6 +110,43 @@ class ArticleController extends Controller
                 ->paginate(10));
         }
     }
+    /**
+     * Display a single sample article for unsubscribed users.
+     * This doesn't require database modifications and returns just one article.
+     */
+    public function sampleArticle(Request $request)
+    {
+        $media = $request->get('m');
+        $newsType = $request->get('n');
+
+        // Start with a base query for approved articles
+        $query = Newsletter::where('status', 'approved')
+                          ->orderBy('created_at', 'desc');
+
+        // Apply media type filter if provided
+        if ($media) {
+            $query->where('mediaType', $media);
+        }
+
+        // Apply news type filter if provided
+        if ($newsType) {
+            $query->where('news_type_id', $newsType);
+        }
+
+        // Get just the first article that matches our criteria
+        $sampleArticle = $query->first();
+
+        if (!$sampleArticle) {
+            return response()->json([
+                'status' => 'error',
+                'message' => 'No sample article available'
+            ], 404);
+        }
+
+        // Return the single article as a resource
+        return new ArticleAllResource($sampleArticle);
+    }
+
 
     public function indexByMediaType(Request $request)
     {
@@ -290,7 +327,8 @@ class ArticleController extends Controller
      * Store a newly created resource in storage.
      */
     public function storeArticle(Request $request)
-        {
+    {
+
         // Validate the request
         $validator = Validator::make($request->all(), [
             'mediaType' => 'nullable|string',
@@ -328,6 +366,7 @@ class ArticleController extends Controller
             'featuredImage' => $request->input('featuredImage'),
         ];
 
+
         $media = Newsletter::create($data);
 
         return response()->json([
@@ -352,8 +391,6 @@ class ArticleController extends Controller
         $dateStamp = date('Ymd_His');
 
         $filename = $fileNameWithoutSpaces . '_' . $dateStamp . '.' . $file->getClientOriginalExtension();
-        // dd($file);
-        // dd($filename);
         $file->storeAs($directory, $filename, 'public');
 
         return ['directory' => $directory, 'filename' => $filename];

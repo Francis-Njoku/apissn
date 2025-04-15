@@ -119,8 +119,8 @@ class UserController extends Controller
             $validateUser = Validator::make(
                 $request->all(),
                 [
-                    'firstname' => '',
-                    'lastname' => '',
+                    'first_name' => '',
+                    'last_name' => '',
                     'phone' => '',
                     'email' => 'required|email|unique:users,email',
                     'password' => 'required'
@@ -141,8 +141,8 @@ class UserController extends Controller
                 $user = User::create([
                     'name' => $this->generateUser(),
                     'email' => $request->email,
-                    'firstname' => $request->firstname,
-                    'lastname' => $request->lastname,
+                    'first_name' => $request->first_name,
+                    'last_name' => $request->last_name,
                     'phone' => $request->phone,
                     'role_id' => 2,
                     'identity' => $this->generateIdentity(),
@@ -153,8 +153,8 @@ class UserController extends Controller
                 $user = User::create([
                     'name' => $this->generateUser(),
                     'email' => $request->email,
-                    'firstname' => $request->firstname,
-                    'lastname' => $request->lastname,
+                    'first_name' => $request->first_name,
+                    'last_name' => $request->last_name,
                     'phone' => $request->phone,
                     'role_id' => 2,
                     'identity' => $this->generateIdentity(),
@@ -454,8 +454,8 @@ class UserController extends Controller
             $validateUser = Validator::make(
                 $request->all(),
                 [
-                    'firstName' => '',
-                    'lastName' => '',
+                    'first_Name' => '',
+                    'last_Name' => '',
                     'phone' => '',
                     'email' => 'required|email|unique:users,email',
                     'password' => 'required'
@@ -476,8 +476,8 @@ class UserController extends Controller
                 $user = User::create([
                     'name' => $this->generateUser(),
                     'email' => $request->email,
-                    'firstname' => $request->firstName,
-                    'lastname' => $request->lastName,
+                    'first_name' => $request->firstName,
+                    'last_name' => $request->lastName,
                     'phone' => $request->phone,
                     'identity' => $this->generateIdentity(),
                     'role_id' => 2,
@@ -488,8 +488,8 @@ class UserController extends Controller
                 $user = User::create([
                     'name' => $this->generateUser(),
                     'email' => $request->email,
-                    'firstname' => $request->firstName,
-                    'lastname' => $request->lastName,
+                    'first_name' => $request->firstName,
+                    'last_name' => $request->lastName,
                     'phone' => $request->phone,
                     'identity' => $this->generateIdentity(),
                     'role_id' => 2,

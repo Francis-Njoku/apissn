@@ -1,10 +1,10 @@
 @component('mail::message')
-    # Reset Password
+# Reset Password
 
-    Your six-digit PIN is <h4>{{ $pin }}</h4>
-    <p>Please do not share your One Time Pin With Anyone. You made a request to reset your password. Please discard if this
-        wasn't you.</p>
+Your six-digit PIN is: **{{ $pin }}**
 
-    Thanks,<br>
-    {{ config('app.name') }}
+Please do not share your One Time Pin with anyone. You made a request to reset your password. Please discard if this wasn't you.
+
+Thanks,
+{{ config('app.name') }}
 @endcomponent

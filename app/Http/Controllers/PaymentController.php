@@ -2,28 +2,27 @@
 
 namespace App\Http\Controllers;
 
-use Illuminate\Http\Request;
-use Illuminate\Support\Facades\Session;
-use Illuminate\Support\Facades\DB;
-use App\Http\Controllers\Controller;
-use Illuminate\Support\Facades\Auth;
-use App\Models\User;
-use App\Models\Entries;
-use App\Models\Payment;
-use App\Models\Plan;
-use App\Models\Coupons;
-use Paystack;
-//use Newsletter;
-use Mail;
-//use Newsletter;
 use Spatie\Newsletter\Facades\Newsletter;
+use Paystack;
+use Mail;
+use Illuminate\Support\Facades\Session;
 use Illuminate\Support\Facades\Redirect;
-use App\Mail\Agrotech;
-use App\Mail\Subscriber;
-use App\Mail\CryptoSubscriber;
-use App\Mail\PremiumContentSubscriber;
+use Illuminate\Support\Facades\DB;
+use Illuminate\Support\Facades\Auth;
+use Illuminate\Http\Request;
 use App\Services\MailchimpService;
-
+use App\Models\User;
+use App\Models\Plan;
+//use Newsletter;
+use App\Models\Payment;
+//use Newsletter;
+use App\Models\Entries;
+use App\Models\Coupons;
+use App\Mail\Subscriber;
+use App\Mail\PremiumContentSubscriber;
+use App\Mail\CryptoSubscriber;
+use App\Mail\Agrotech;
+use App\Http\Controllers\Controller;
 
 class PaymentController extends Controller
 {
@@ -32,8 +31,8 @@ class PaymentController extends Controller
     public function __construct()
     {
         $this->middleware('auth');
-       // $this->mailchimp = $mailchimp;
-        
+        // $this->mailchimp = $mailchimp;
+
     }
 
     private function getPlanType($id)
@@ -176,11 +175,11 @@ class PaymentController extends Controller
     public function redirectToGateway()
     {
         $this->middleware('auth');
-        try{
+        try {
             return Paystack::getAuthorizationUrl()->redirectNow();
-        }catch(\Exception $e) {
-            return Redirect::back()->withMessage(['msg'=>'The paystack token has expired. Please refresh the page and try again.', 'type'=>'error']);
-        }  
+        } catch (\Exception $e) {
+            return Redirect::back()->withMessage(['msg' => 'The paystack token has expired. Please refresh the page and try again.', 'type' => 'error']);
+        }
         //return Paystack::getAuthorizationUrl()->redirectNow();
     }
 
@@ -254,9 +253,6 @@ class PaymentController extends Controller
         $post->status = 'active';
         $post->save();
 
-        dd($paymentDetails);
-
-        
         // get user details for newsletter subscription
         $news_letter = $this->userDetails($email);
 
@@ -273,7 +269,7 @@ class PaymentController extends Controller
             // Add user to newsletter list
             if (Newsletter::isSubscribed($email)) {
                 // Update subscriber
-                 \Log::info($first_name);
+                \Log::info($first_name);
                 Newsletter::subscribeOrUpdate($email, ['FNAME' => $first_name, 'LNAME' => $last_name]);
                 $message = 'Your subscription has been updated!';
             } else {
@@ -284,13 +280,12 @@ class PaymentController extends Controller
                 Newsletter::subscribeOrUpdate($email, ['FNAME' => $first_name, 'LNAME' => $last_name]);
                 $message = 'You have been subscribed!';
             }
-    
+
             if (Newsletter::lastActionSucceeded()) {
                 \Log::info('Success');
                 Session::flash('success', 'added successfully');
                 return redirect()->back()->with('success', $message);
-            }
-            else{
+            } else {
                 //\Log::info('failed');
                 $error = Newsletter::getLastError();
                 \Log::error('Mailchimp error: ' . $error); // Log the error for further inspection
@@ -298,7 +293,7 @@ class PaymentController extends Controller
                 return redirect()->back()->with('error', 'Something went wrong. Please try again.');
             }
 
-            
+
 
             //Newsletter::subscribeOrUpdate($email, ['FNAME' => $first_name, 'LNAME' => $last_name, 'PHONE' => $phone]);
             /*if (!Newsletter::subscribeOrUpdate($email, ['FNAME' => $first_name, 'LNAME' => $last_name, 'PHONE' => $phone])) {
@@ -307,7 +302,7 @@ class PaymentController extends Controller
                 return redirect('/thank-you/');
             }*/
 
-            
+
             /*if(!$this->mailchimp->subscribeOrUpdateList(env('MAILCHIMP_LIST_ID'), "chima@gmail.com", ['FNAME' => $first_name, 'LNAME' => $last_name, 'PHONE' => $phone]))
             {
                 Session::flash('error', 'Error occured, contact admin');
@@ -327,7 +322,7 @@ class PaymentController extends Controller
 
 
 
-            
+
 
             $data2 = array(
                 'email' => 'newsletter@nairametrics.com',

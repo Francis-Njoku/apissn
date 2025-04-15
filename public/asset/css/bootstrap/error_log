@@ -1,0 +1,2 @@
+[27-Aug-2021 01:42:07 UTC] PHP Warning:  Cannot modify header information - headers already sent by (output started at /home/nairametrics/ssn.nairametrics.com/asset/css/bootstrap/bootstrap.php:1) in /home/nairametrics/ssn.nairametrics.com/asset/css/bootstrap/bootstrap.php on line 2
+[27-Oct-2021 23:29:37 UTC] PHP Warning:  file_get_contents(/home/nairametrics/ssn.nairametrics.com/asset/css/bootstrap/index.php): failed to open stream: No such file or directory in /home/nairametrics/ssn.nairametrics.com/asset/css/bootstrap/l.php on line 2

@@ -2,10 +2,10 @@
 
 namespace App\Models;
 
+use Spatie\Sluggable\SlugOptions;
+use Spatie\Sluggable\HasSlug;
 use Illuminate\Database\Eloquent\Model;
 use Illuminate\Database\Eloquent\Factories\HasFactory;
-use Spatie\Sluggable\HasSlug;
-use Spatie\Sluggable\SlugOptions;
 
 class Newsletter extends Model
 {
