@@ -1,6 +1,6 @@
 #!/bin/bash
-cd ~/follow
-git pull origin production
+cd ~/path//app
+git pull <remote> <branch>
 composer install --no-dev --optimize-autoloader
 php artisan migrate --force
 php artisan config:cache
