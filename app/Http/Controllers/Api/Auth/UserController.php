@@ -375,13 +375,13 @@ class UserController extends Controller
                 'password' => Hash::make($request->password)
             ]);
 
-            $token = $user->first()->createToken('myapptoken')->plainTextToken;
+            // $token = $user->first()->createToken('myapptoken')->plainTextToken;
 
             return new JsonResponse(
                 [
                     'success' => true,
                     'message' => "Your password has been reset",
-                    'token' => $token
+                    // 'token' => $token
                 ],
                 200
             );
