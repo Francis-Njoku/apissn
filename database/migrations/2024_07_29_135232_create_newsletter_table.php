@@ -18,7 +18,7 @@ return new class extends Migration {
             $table->string('title')->nullable();
             $table->date('news_date')->nullable();
             $table->string('status')->nullable();
-            $table->string('body')->nullable();
+            $table->mediumText('body')->nullable();
             $table->string('featuredImage')->nullable();
             $table->string('mediaType')->nullable();
             $table->string('media')->nullable();
