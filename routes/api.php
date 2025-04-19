@@ -58,8 +58,13 @@ Route::prefix('email')->group(function () {
 Route::group(['middleware' => ['auth.jwt']], function () {
     Route::prefix('auth')->group(function () {
         Route::post('/signout/', [UserController::class, 'signout']);
-        Route::get('/profile/', [UserController::class, 'profile']);
     });
+
+    Route::prefix('user')->group(function () {
+        Route::get('/profile/', [UserController::class, 'profile']);
+        Route::get('/role/', [UserController::class, 'userStatus']);        
+    });  
+    
     Route::prefix('pay')->group(function () {
         Route::post('/', [PayController::class, 'redirectToGateway']);
         Route::get('/callback/', [PayController::class, 'handleGatewayCallback']);
@@ -68,10 +73,11 @@ Route::group(['middleware' => ['auth.jwt']], function () {
         // Route::get('/payment/status/', [PayController::class, 'paymentStatus']);
         Route::get('/status/', [PayController::class, 'paymentStatus']);
     });
+    
     Route::post('/store/ftm/', [ArticleController::class, 'store']);
     Route::get('/generate/slug/', [ArticleController::class, 'newsletterGenerateSlug']);
-    Route::get('/user/type/', [UserController::class, 'userStatus']);
 });
+
 Route::group(['middleware' => ['auth.jwt', 'subscribed']], function () {
     Route::prefix('articles')->group(function () {
         Route::get('/', [ArticleController::class, 'index']);
