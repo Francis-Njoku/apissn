@@ -17,7 +17,7 @@ return [
 
     'paths' => ['api/*'],
     'allowed_methods' => ['*'],
-    'allowed_origins' => ['http://localhost:3000', 'https://ftm.ng', 'http://localhost:3001', 'https://test.ftm.ng', 'http://localhost:3002',],
+    'allowed_origins' => explode(',', env('CORS_ALLOWED_ORIGINS', '')),
     'allowed_origins_patterns' => [],
     'allowed_headers' => ['*'],
     'exposed_headers' => [],
