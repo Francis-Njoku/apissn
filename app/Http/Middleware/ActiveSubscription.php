@@ -13,20 +13,55 @@ class ActiveSubscription
     /**
      * Handle an incoming request.
      *
-     * @param  \Closure(\Illuminate\Http\Request): (\Symfony\Component\HttpFoundation\Response)  $next
+     * @param  \Illuminate\Http\Request  $request
+     * @param  \Closure  $next
+     * @return \Symfony\Component\HttpFoundation\Response
      */
     public function handle(Request $request, Closure $next): Response
     {
-        if (Auth::check() && Auth::user()->role_id == 1) {
+        if ($this->isAdmin() || $this->hasActiveSubscription()) {
             return $next($request);
-        } 
-        if (Payment::where('user_id', Auth::id())->where('status', 'active')->exists()) {
-            return $next($request);
-        } else {
-            return response()->json([
-                'status' => false,
-                'message' => 'Unauthorised'
-            ], 401);
         }
+        
+        return $this->unauthorizedResponse();
+    }
+    
+    /**
+     * Check if the authenticated user is an admin.
+     *
+     * @return bool
+     */
+    private function isAdmin(): bool
+    {
+        return Auth::check() && Auth::user()->role_id == 1;
+    }
+    
+    /**
+     * Check if the authenticated user has an active subscription.
+     *
+     * @return bool
+     */
+    private function hasActiveSubscription(): bool
+    {
+        if (!Auth::check()) {
+            return false;
+        }
+        
+        return Payment::where('user_id', Auth::id())
+            ->where('status', 'active')
+            ->exists();
+    }
+    
+    /**
+     * Return unauthorized response.
+     *
+     * @return \Illuminate\Http\JsonResponse
+     */
+    private function unauthorizedResponse()
+    {
+        return response()->json([
+            'status' => false,
+            'message' => 'Unauthorized: Active subscription required'
+        ], 401);
     }
 }
