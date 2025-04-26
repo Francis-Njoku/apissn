@@ -16,7 +16,7 @@ class Newsletter extends Model
     public $primaryKey = 'id';
     // Timestamps
     // Fillable
-    protected $fillable = ['news_type_id', 'name', 'title', 'slug', 'body','news_date','featuredImage', 'media','mediaType', 'mediaSrc','status'];
+    protected $fillable = ['news_type_id', 'name', 'title', 'slug', 'body','news_date','featuredImage', 'media','mediaType', 'mediaSrc','status', 'tags'];
 
     public function getSlugOptions(): SlugOptions
     {

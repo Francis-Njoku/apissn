@@ -7,6 +7,7 @@ use Illuminate\Support\Facades\Validator;
 use Illuminate\Support\Facades\Storage;
 use Illuminate\Pagination\LengthAwarePaginator;
 use Illuminate\Http\Request;
+use Carbon\Carbon;
 use App\Models\Newsletter;
 use App\Http\Resources\ArticleResource;
 use App\Http\Resources\ArticleAllResource;
@@ -21,6 +22,51 @@ class ArticleController extends Controller
     private function generateSlug($name)
     {
         return Str::slug($name);
+    }
+
+    private function storeFile($file, $directory)
+    {
+        if (!$file) {
+            return null;
+        }
+
+        // Get the original file name without the extension
+        $originalName = pathinfo($file->getClientOriginalName(), PATHINFO_FILENAME);
+
+        // Remove spaces from the original file name
+        $fileNameWithoutSpaces = str_replace(' ', '_', $originalName);
+
+        $dateStamp = date('Ymd_His');
+
+        $filename = $fileNameWithoutSpaces . '_' . $dateStamp . '.' . $file->getClientOriginalExtension();
+        $file->storeAs($directory, $filename, 'public');
+
+        return ['directory' => $directory, 'filename' => $filename];
+    }
+
+    private function storeFileNoDirectory($file)
+    {
+        if (!$file) {
+            return null;
+        }
+
+        // Get the original file name without the extension
+        $originalName = pathinfo($file->getClientOriginalName(), PATHINFO_FILENAME);
+
+        // Remove spaces from the original file name
+        $fileNameWithoutSpaces = str_replace(' ', '_', $originalName);
+
+        $dateStamp = date('Ymd_His');
+
+
+        // Generate a unique name for the image
+        $fileName = $fileNameWithoutSpaces . '_' . $dateStamp . '.' . $file->getClientOriginalExtension();
+
+        // Save the image in the 'images' directory
+        $file->storeAs('featured_image', $fileName, 'public');
+
+        return $fileName;
+
     }
 
     public function newsletterGenerateSlug()
@@ -120,21 +166,21 @@ class ArticleController extends Controller
         $newsType = $request->get('n');
 
         // Start with a base query for approved articles
-        $query = Newsletter::where('status', 'approved')
-                          ->orderBy('created_at', 'desc');
+        $baseQuery = Newsletter::where('status', 'approved')
+                          ->orderBy('created_at', 'asc');
 
         // Apply media type filter if provided
         if ($media) {
-            $query->where('mediaType', $media);
+            $baseQuery->where('mediaType', $media);
         }
 
         // Apply news type filter if provided
         if ($newsType) {
-            $query->where('news_type_id', $newsType);
+            $baseQuery->where('news_type_id', $newsType);
         }
 
-        // Get just the first article that matches our criteria
-        $sampleArticle = $query->first();
+        // Get the oldest approved article
+        $sampleArticle = $baseQuery->first();
 
         if (!$sampleArticle) {
             return response()->json([
@@ -341,6 +387,7 @@ class ArticleController extends Controller
             'media' => 'nullable|string',
             'mediaSrc' => 'nullable|string',
             'status' => 'required|string',
+            'tags' => 'nullable|string',
 
         ]);
 
@@ -360,6 +407,7 @@ class ArticleController extends Controller
             'news_date' => $request->input('news_date'),
             'body' => $request->input('body'),
             'status' => $request->input('status'),
+            'tags' => $request->input('tags'),
             'mediaType' => $request->input('mediaType'),
             'media' => $request->input('media'),
             'mediaSrc' => $request->input('mediaSrc'),
@@ -374,51 +422,6 @@ class ArticleController extends Controller
             'message' => 'Data processed successfully',
             'data' => $media
         ], 200);
-    }
-
-    private function storeFile($file, $directory)
-    {
-        if (!$file) {
-            return null;
-        }
-
-        // Get the original file name without the extension
-        $originalName = pathinfo($file->getClientOriginalName(), PATHINFO_FILENAME);
-
-        // Remove spaces from the original file name
-        $fileNameWithoutSpaces = str_replace(' ', '_', $originalName);
-
-        $dateStamp = date('Ymd_His');
-
-        $filename = $fileNameWithoutSpaces . '_' . $dateStamp . '.' . $file->getClientOriginalExtension();
-        $file->storeAs($directory, $filename, 'public');
-
-        return ['directory' => $directory, 'filename' => $filename];
-    }
-
-    private function storeFileNoDirectory($file)
-    {
-        if (!$file) {
-            return null;
-        }
-
-        // Get the original file name without the extension
-        $originalName = pathinfo($file->getClientOriginalName(), PATHINFO_FILENAME);
-
-        // Remove spaces from the original file name
-        $fileNameWithoutSpaces = str_replace(' ', '_', $originalName);
-
-        $dateStamp = date('Ymd_His');
-
-
-        // Generate a unique name for the image
-        $fileName = $fileNameWithoutSpaces . '_' . $dateStamp . '.' . $file->getClientOriginalExtension();
-
-        // Save the image in the 'images' directory
-        $file->storeAs('featured_image', $fileName, 'public');
-
-        return $fileName;
-
     }
 
     /**
@@ -455,15 +458,13 @@ class ArticleController extends Controller
 
         // Validate the request data
         $validatedData = $request->validate([
-            'mediaType' => 'nullable|string',
-            'news_type_id' => 'required|string',
-            'name' => 'required|string',
-            'title' => 'required|string',
-            'news_date' => 'required|date',
+            'title' => 'nullable|string',
+            'news_date' => 'nullable|date',
             'body' => 'nullable|string|min:10|max:10000',
-            'featuredImage' => 'required|string',
+            'featuredImage' => 'nullable|string',
             'media' => 'nullable|string',
-            'status' => 'required|string',
+            'status' => 'nullable|string',
+            'tags' => 'nullable|string',
         ]);
 
         // Update the resource with validated data
@@ -479,7 +480,7 @@ class ArticleController extends Controller
     /**
      * Remove the specified resource from storage.
      */
-    public function updateStatus(Request $request, $id)
+    public function updateStatus(Request $request, $slug)
     {
         // Validate the request
         $request->validate([
