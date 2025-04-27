@@ -2,9 +2,9 @@
 
 namespace App\Http\Resources;
 
-use Illuminate\Http\Request;
 use Illuminate\Support\Facades\URL;
 use Illuminate\Http\Resources\Json\JsonResource;
+use Illuminate\Http\Request;
 
 class ArticleResource extends JsonResource
 {
@@ -25,16 +25,22 @@ class ArticleResource extends JsonResource
             'news_date' => $this->news_date,
             'image_url' => $this->featuredImage ? URL::to('storage/'.$this->featuredImage) : null,
             'status' => $this->status,
+            'tags' => $this->tags,
             'created_at' => (new \DateTime($this->created_at))->format('Y-m-d H:i:s'),
             'updated_at' => (new \DateTime($this->updated_at))->format('Y-m-d H:i:s'),
         ];
 
-        if ($this->mediaType == "video") {
-            $data['media'] = $this->media ? URL::to('storage/'.$this->media) : null;
-        }elseif ($this->mediaType == "audio") {
-            $data['media'] = $this->media ? URL::to('storage/'.$this->media) : null;
+        switch ($this->mediaType) {
+            case 'video':
+                $data['media'] = $this->media ? URL::to('storage/'.$this->media) : null;
+                break;
+            case 'audio':
+                $data['media'] = $this->media ? URL::to('storage/'.$this->media) : null;
+                break;
+            default:
+                $data['media'] = null;
+                break;
         }
-
         return $data;
     }
 }
