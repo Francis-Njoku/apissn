@@ -1,0 +1,175 @@
+[28-Apr-2025 11:41:43 UTC] PHP Warning:  require(/home/ftmnlywl/server.ftm.ng/public/../vendor/autoload.php): Failed to open stream: No such file or directory in /home/ftmnlywl/server.ftm.ng/public/index.php on line 34
+[28-Apr-2025 11:41:43 UTC] PHP Fatal error:  Uncaught Error: Failed opening required '/home/ftmnlywl/server.ftm.ng/public/../vendor/autoload.php' (include_path='.:/opt/cpanel/ea-php82/root/usr/share/pear') in /home/ftmnlywl/server.ftm.ng/public/index.php:34
+Stack trace:
+#0 {main}
+  thrown in /home/ftmnlywl/server.ftm.ng/public/index.php on line 34
+[28-Apr-2025 11:55:40 UTC] PHP Warning:  require(/home/ftmnlywl/server.ftm.ng/public/../vendor/autoload.php): Failed to open stream: No such file or directory in /home/ftmnlywl/server.ftm.ng/public/index.php on line 34
+[28-Apr-2025 11:55:40 UTC] PHP Fatal error:  Uncaught Error: Failed opening required '/home/ftmnlywl/server.ftm.ng/public/../vendor/autoload.php' (include_path='.:/opt/cpanel/ea-php82/root/usr/share/pear') in /home/ftmnlywl/server.ftm.ng/public/index.php:34
+Stack trace:
+#0 {main}
+  thrown in /home/ftmnlywl/server.ftm.ng/public/index.php on line 34
+[28-Apr-2025 11:55:41 UTC] PHP Warning:  require(/home/ftmnlywl/server.ftm.ng/public/../vendor/autoload.php): Failed to open stream: No such file or directory in /home/ftmnlywl/server.ftm.ng/public/index.php on line 34
+[28-Apr-2025 11:55:41 UTC] PHP Fatal error:  Uncaught Error: Failed opening required '/home/ftmnlywl/server.ftm.ng/public/../vendor/autoload.php' (include_path='.:/opt/cpanel/ea-php82/root/usr/share/pear') in /home/ftmnlywl/server.ftm.ng/public/index.php:34
+Stack trace:
+#0 {main}
+  thrown in /home/ftmnlywl/server.ftm.ng/public/index.php on line 34
+[28-Apr-2025 12:01:32 UTC] PHP Warning:  require(/home/ftmnlywl/server.ftm.ng/public/../vendor/autoload.php): Failed to open stream: No such file or directory in /home/ftmnlywl/server.ftm.ng/public/index.php on line 34
+[28-Apr-2025 12:01:32 UTC] PHP Fatal error:  Uncaught Error: Failed opening required '/home/ftmnlywl/server.ftm.ng/public/../vendor/autoload.php' (include_path='.:/opt/cpanel/ea-php82/root/usr/share/pear') in /home/ftmnlywl/server.ftm.ng/public/index.php:34
+Stack trace:
+#0 {main}
+  thrown in /home/ftmnlywl/server.ftm.ng/public/index.php on line 34
+[28-Apr-2025 12:03:38 UTC] PHP Warning:  require(/home/ftmnlywl/server.ftm.ng/public/../vendor/autoload.php): Failed to open stream: No such file or directory in /home/ftmnlywl/server.ftm.ng/public/index.php on line 34
+[28-Apr-2025 12:03:38 UTC] PHP Fatal error:  Uncaught Error: Failed opening required '/home/ftmnlywl/server.ftm.ng/public/../vendor/autoload.php' (include_path='.:/opt/cpanel/ea-php82/root/usr/share/pear') in /home/ftmnlywl/server.ftm.ng/public/index.php:34
+Stack trace:
+#0 {main}
+  thrown in /home/ftmnlywl/server.ftm.ng/public/index.php on line 34
+[28-Apr-2025 12:32:15 UTC] PHP Warning:  require(/home/ftmnlywl/server.ftm.ng/public/../vendor/autoload.php): Failed to open stream: No such file or directory in /home/ftmnlywl/server.ftm.ng/public/index.php on line 34
+[28-Apr-2025 12:32:15 UTC] PHP Fatal error:  Uncaught Error: Failed opening required '/home/ftmnlywl/server.ftm.ng/public/../vendor/autoload.php' (include_path='.:/opt/cpanel/ea-php82/root/usr/share/pear') in /home/ftmnlywl/server.ftm.ng/public/index.php:34
+Stack trace:
+#0 {main}
+  thrown in /home/ftmnlywl/server.ftm.ng/public/index.php on line 34
+[28-Apr-2025 12:32:17 UTC] PHP Warning:  require(/home/ftmnlywl/server.ftm.ng/public/../vendor/autoload.php): Failed to open stream: No such file or directory in /home/ftmnlywl/server.ftm.ng/public/index.php on line 34
+[28-Apr-2025 12:32:17 UTC] PHP Fatal error:  Uncaught Error: Failed opening required '/home/ftmnlywl/server.ftm.ng/public/../vendor/autoload.php' (include_path='.:/opt/cpanel/ea-php82/root/usr/share/pear') in /home/ftmnlywl/server.ftm.ng/public/index.php:34
+Stack trace:
+#0 {main}
+  thrown in /home/ftmnlywl/server.ftm.ng/public/index.php on line 34
+[28-Apr-2025 12:32:17 UTC] PHP Warning:  require(/home/ftmnlywl/server.ftm.ng/public/../vendor/autoload.php): Failed to open stream: No such file or directory in /home/ftmnlywl/server.ftm.ng/public/index.php on line 34
+[28-Apr-2025 12:32:17 UTC] PHP Fatal error:  Uncaught Error: Failed opening required '/home/ftmnlywl/server.ftm.ng/public/../vendor/autoload.php' (include_path='.:/opt/cpanel/ea-php82/root/usr/share/pear') in /home/ftmnlywl/server.ftm.ng/public/index.php:34
+Stack trace:
+#0 {main}
+  thrown in /home/ftmnlywl/server.ftm.ng/public/index.php on line 34
+[28-Apr-2025 12:32:18 UTC] PHP Warning:  require(/home/ftmnlywl/server.ftm.ng/public/../vendor/autoload.php): Failed to open stream: No such file or directory in /home/ftmnlywl/server.ftm.ng/public/index.php on line 34
+[28-Apr-2025 12:32:18 UTC] PHP Fatal error:  Uncaught Error: Failed opening required '/home/ftmnlywl/server.ftm.ng/public/../vendor/autoload.php' (include_path='.:/opt/cpanel/ea-php82/root/usr/share/pear') in /home/ftmnlywl/server.ftm.ng/public/index.php:34
+Stack trace:
+#0 {main}
+  thrown in /home/ftmnlywl/server.ftm.ng/public/index.php on line 34
+[28-Apr-2025 12:33:56 UTC] PHP Warning:  require(/home/ftmnlywl/server.ftm.ng/public/../vendor/autoload.php): Failed to open stream: No such file or directory in /home/ftmnlywl/server.ftm.ng/public/index.php on line 34
+[28-Apr-2025 12:33:56 UTC] PHP Fatal error:  Uncaught Error: Failed opening required '/home/ftmnlywl/server.ftm.ng/public/../vendor/autoload.php' (include_path='.:/opt/cpanel/ea-php82/root/usr/share/pear') in /home/ftmnlywl/server.ftm.ng/public/index.php:34
+Stack trace:
+#0 {main}
+  thrown in /home/ftmnlywl/server.ftm.ng/public/index.php on line 34
+[28-Apr-2025 12:34:36 UTC] PHP Warning:  require(/home/ftmnlywl/server.ftm.ng/public/../vendor/autoload.php): Failed to open stream: No such file or directory in /home/ftmnlywl/server.ftm.ng/public/index.php on line 34
+[28-Apr-2025 12:34:36 UTC] PHP Fatal error:  Uncaught Error: Failed opening required '/home/ftmnlywl/server.ftm.ng/public/../vendor/autoload.php' (include_path='.:/opt/cpanel/ea-php82/root/usr/share/pear') in /home/ftmnlywl/server.ftm.ng/public/index.php:34
+Stack trace:
+#0 {main}
+  thrown in /home/ftmnlywl/server.ftm.ng/public/index.php on line 34
+[28-Apr-2025 12:34:37 UTC] PHP Warning:  require(/home/ftmnlywl/server.ftm.ng/public/../vendor/autoload.php): Failed to open stream: No such file or directory in /home/ftmnlywl/server.ftm.ng/public/index.php on line 34
+[28-Apr-2025 12:34:37 UTC] PHP Fatal error:  Uncaught Error: Failed opening required '/home/ftmnlywl/server.ftm.ng/public/../vendor/autoload.php' (include_path='.:/opt/cpanel/ea-php82/root/usr/share/pear') in /home/ftmnlywl/server.ftm.ng/public/index.php:34
+Stack trace:
+#0 {main}
+  thrown in /home/ftmnlywl/server.ftm.ng/public/index.php on line 34
+[28-Apr-2025 12:34:46 UTC] PHP Warning:  require(/home/ftmnlywl/server.ftm.ng/public/../vendor/autoload.php): Failed to open stream: No such file or directory in /home/ftmnlywl/server.ftm.ng/public/index.php on line 34
+[28-Apr-2025 12:34:46 UTC] PHP Fatal error:  Uncaught Error: Failed opening required '/home/ftmnlywl/server.ftm.ng/public/../vendor/autoload.php' (include_path='.:/opt/cpanel/ea-php82/root/usr/share/pear') in /home/ftmnlywl/server.ftm.ng/public/index.php:34
+Stack trace:
+#0 {main}
+  thrown in /home/ftmnlywl/server.ftm.ng/public/index.php on line 34
+[28-Apr-2025 12:56:14 UTC] PHP Warning:  require(/home/ftmnlywl/server.ftm.ng/public/../vendor/autoload.php): Failed to open stream: No such file or directory in /home/ftmnlywl/server.ftm.ng/public/index.php on line 34
+[28-Apr-2025 12:56:14 UTC] PHP Fatal error:  Uncaught Error: Failed opening required '/home/ftmnlywl/server.ftm.ng/public/../vendor/autoload.php' (include_path='.:/opt/cpanel/ea-php82/root/usr/share/pear') in /home/ftmnlywl/server.ftm.ng/public/index.php:34
+Stack trace:
+#0 {main}
+  thrown in /home/ftmnlywl/server.ftm.ng/public/index.php on line 34
+[28-Apr-2025 12:56:43 UTC] PHP Warning:  require(/home/ftmnlywl/server.ftm.ng/public/../vendor/autoload.php): Failed to open stream: No such file or directory in /home/ftmnlywl/server.ftm.ng/public/index.php on line 34
+[28-Apr-2025 12:56:43 UTC] PHP Fatal error:  Uncaught Error: Failed opening required '/home/ftmnlywl/server.ftm.ng/public/../vendor/autoload.php' (include_path='.:/opt/cpanel/ea-php82/root/usr/share/pear') in /home/ftmnlywl/server.ftm.ng/public/index.php:34
+Stack trace:
+#0 {main}
+  thrown in /home/ftmnlywl/server.ftm.ng/public/index.php on line 34
+[28-Apr-2025 12:58:46 UTC] PHP Warning:  require(/home/ftmnlywl/server.ftm.ng/public/../vendor/autoload.php): Failed to open stream: No such file or directory in /home/ftmnlywl/server.ftm.ng/public/index.php on line 34
+[28-Apr-2025 12:58:46 UTC] PHP Fatal error:  Uncaught Error: Failed opening required '/home/ftmnlywl/server.ftm.ng/public/../vendor/autoload.php' (include_path='.:/opt/cpanel/ea-php82/root/usr/share/pear') in /home/ftmnlywl/server.ftm.ng/public/index.php:34
+Stack trace:
+#0 {main}
+  thrown in /home/ftmnlywl/server.ftm.ng/public/index.php on line 34
+[28-Apr-2025 12:58:46 UTC] PHP Warning:  require(/home/ftmnlywl/server.ftm.ng/public/../vendor/autoload.php): Failed to open stream: No such file or directory in /home/ftmnlywl/server.ftm.ng/public/index.php on line 34
+[28-Apr-2025 12:58:46 UTC] PHP Fatal error:  Uncaught Error: Failed opening required '/home/ftmnlywl/server.ftm.ng/public/../vendor/autoload.php' (include_path='.:/opt/cpanel/ea-php82/root/usr/share/pear') in /home/ftmnlywl/server.ftm.ng/public/index.php:34
+Stack trace:
+#0 {main}
+  thrown in /home/ftmnlywl/server.ftm.ng/public/index.php on line 34
+[28-Apr-2025 12:58:46 UTC] PHP Warning:  require(/home/ftmnlywl/server.ftm.ng/public/../vendor/autoload.php): Failed to open stream: No such file or directory in /home/ftmnlywl/server.ftm.ng/public/index.php on line 34
+[28-Apr-2025 12:58:46 UTC] PHP Fatal error:  Uncaught Error: Failed opening required '/home/ftmnlywl/server.ftm.ng/public/../vendor/autoload.php' (include_path='.:/opt/cpanel/ea-php82/root/usr/share/pear') in /home/ftmnlywl/server.ftm.ng/public/index.php:34
+Stack trace:
+#0 {main}
+  thrown in /home/ftmnlywl/server.ftm.ng/public/index.php on line 34
+[28-Apr-2025 12:58:52 UTC] PHP Warning:  require(/home/ftmnlywl/server.ftm.ng/public/../vendor/autoload.php): Failed to open stream: No such file or directory in /home/ftmnlywl/server.ftm.ng/public/index.php on line 34
+[28-Apr-2025 12:58:52 UTC] PHP Fatal error:  Uncaught Error: Failed opening required '/home/ftmnlywl/server.ftm.ng/public/../vendor/autoload.php' (include_path='.:/opt/cpanel/ea-php82/root/usr/share/pear') in /home/ftmnlywl/server.ftm.ng/public/index.php:34
+Stack trace:
+#0 {main}
+  thrown in /home/ftmnlywl/server.ftm.ng/public/index.php on line 34
+[28-Apr-2025 13:01:31 UTC] PHP Warning:  require(/home/ftmnlywl/server.ftm.ng/public/../vendor/autoload.php): Failed to open stream: No such file or directory in /home/ftmnlywl/server.ftm.ng/public/index.php on line 34
+[28-Apr-2025 13:01:31 UTC] PHP Fatal error:  Uncaught Error: Failed opening required '/home/ftmnlywl/server.ftm.ng/public/../vendor/autoload.php' (include_path='.:/opt/cpanel/ea-php82/root/usr/share/pear') in /home/ftmnlywl/server.ftm.ng/public/index.php:34
+Stack trace:
+#0 {main}
+  thrown in /home/ftmnlywl/server.ftm.ng/public/index.php on line 34
+[28-Apr-2025 13:01:52 UTC] PHP Warning:  require(/home/ftmnlywl/server.ftm.ng/public/../vendor/autoload.php): Failed to open stream: No such file or directory in /home/ftmnlywl/server.ftm.ng/public/index.php on line 34
+[28-Apr-2025 13:01:52 UTC] PHP Fatal error:  Uncaught Error: Failed opening required '/home/ftmnlywl/server.ftm.ng/public/../vendor/autoload.php' (include_path='.:/opt/cpanel/ea-php82/root/usr/share/pear') in /home/ftmnlywl/server.ftm.ng/public/index.php:34
+Stack trace:
+#0 {main}
+  thrown in /home/ftmnlywl/server.ftm.ng/public/index.php on line 34
+[28-Apr-2025 13:02:53 UTC] PHP Warning:  require(/home/ftmnlywl/server.ftm.ng/public/../vendor/autoload.php): Failed to open stream: No such file or directory in /home/ftmnlywl/server.ftm.ng/public/index.php on line 34
+[28-Apr-2025 13:02:53 UTC] PHP Fatal error:  Uncaught Error: Failed opening required '/home/ftmnlywl/server.ftm.ng/public/../vendor/autoload.php' (include_path='.:/opt/cpanel/ea-php82/root/usr/share/pear') in /home/ftmnlywl/server.ftm.ng/public/index.php:34
+Stack trace:
+#0 {main}
+  thrown in /home/ftmnlywl/server.ftm.ng/public/index.php on line 34
+[28-Apr-2025 13:03:02 UTC] PHP Warning:  require(/home/ftmnlywl/server.ftm.ng/public/../vendor/autoload.php): Failed to open stream: No such file or directory in /home/ftmnlywl/server.ftm.ng/public/index.php on line 34
+[28-Apr-2025 13:03:02 UTC] PHP Fatal error:  Uncaught Error: Failed opening required '/home/ftmnlywl/server.ftm.ng/public/../vendor/autoload.php' (include_path='.:/opt/cpanel/ea-php82/root/usr/share/pear') in /home/ftmnlywl/server.ftm.ng/public/index.php:34
+Stack trace:
+#0 {main}
+  thrown in /home/ftmnlywl/server.ftm.ng/public/index.php on line 34
+[28-Apr-2025 13:03:36 UTC] PHP Warning:  require(/home/ftmnlywl/server.ftm.ng/public/../vendor/autoload.php): Failed to open stream: No such file or directory in /home/ftmnlywl/server.ftm.ng/public/index.php on line 34
+[28-Apr-2025 13:03:36 UTC] PHP Fatal error:  Uncaught Error: Failed opening required '/home/ftmnlywl/server.ftm.ng/public/../vendor/autoload.php' (include_path='.:/opt/cpanel/ea-php82/root/usr/share/pear') in /home/ftmnlywl/server.ftm.ng/public/index.php:34
+Stack trace:
+#0 {main}
+  thrown in /home/ftmnlywl/server.ftm.ng/public/index.php on line 34
+[28-Apr-2025 13:09:11 UTC] PHP Warning:  require(/home/ftmnlywl/server.ftm.ng/public/../vendor/autoload.php): Failed to open stream: No such file or directory in /home/ftmnlywl/server.ftm.ng/public/index.php on line 34
+[28-Apr-2025 13:09:11 UTC] PHP Fatal error:  Uncaught Error: Failed opening required '/home/ftmnlywl/server.ftm.ng/public/../vendor/autoload.php' (include_path='.:/opt/cpanel/ea-php82/root/usr/share/pear') in /home/ftmnlywl/server.ftm.ng/public/index.php:34
+Stack trace:
+#0 {main}
+  thrown in /home/ftmnlywl/server.ftm.ng/public/index.php on line 34
+[28-Apr-2025 13:09:42 UTC] PHP Warning:  require(/home/ftmnlywl/server.ftm.ng/public/../vendor/autoload.php): Failed to open stream: No such file or directory in /home/ftmnlywl/server.ftm.ng/public/index.php on line 34
+[28-Apr-2025 13:09:42 UTC] PHP Fatal error:  Uncaught Error: Failed opening required '/home/ftmnlywl/server.ftm.ng/public/../vendor/autoload.php' (include_path='.:/opt/cpanel/ea-php82/root/usr/share/pear') in /home/ftmnlywl/server.ftm.ng/public/index.php:34
+Stack trace:
+#0 {main}
+  thrown in /home/ftmnlywl/server.ftm.ng/public/index.php on line 34
+[28-Apr-2025 13:09:45 UTC] PHP Warning:  require(/home/ftmnlywl/server.ftm.ng/public/../vendor/autoload.php): Failed to open stream: No such file or directory in /home/ftmnlywl/server.ftm.ng/public/index.php on line 34
+[28-Apr-2025 13:09:45 UTC] PHP Fatal error:  Uncaught Error: Failed opening required '/home/ftmnlywl/server.ftm.ng/public/../vendor/autoload.php' (include_path='.:/opt/cpanel/ea-php82/root/usr/share/pear') in /home/ftmnlywl/server.ftm.ng/public/index.php:34
+Stack trace:
+#0 {main}
+  thrown in /home/ftmnlywl/server.ftm.ng/public/index.php on line 34
+[28-Apr-2025 13:10:27 UTC] PHP Warning:  require(/home/ftmnlywl/server.ftm.ng/public/../vendor/autoload.php): Failed to open stream: No such file or directory in /home/ftmnlywl/server.ftm.ng/public/index.php on line 34
+[28-Apr-2025 13:10:27 UTC] PHP Fatal error:  Uncaught Error: Failed opening required '/home/ftmnlywl/server.ftm.ng/public/../vendor/autoload.php' (include_path='.:/opt/cpanel/ea-php82/root/usr/share/pear') in /home/ftmnlywl/server.ftm.ng/public/index.php:34
+Stack trace:
+#0 {main}
+  thrown in /home/ftmnlywl/server.ftm.ng/public/index.php on line 34
+[28-Apr-2025 13:17:10 UTC] PHP Warning:  require(/home/ftmnlywl/server.ftm.ng/public/../vendor/autoload.php): Failed to open stream: No such file or directory in /home/ftmnlywl/server.ftm.ng/public/index.php on line 34
+[28-Apr-2025 13:17:10 UTC] PHP Fatal error:  Uncaught Error: Failed opening required '/home/ftmnlywl/server.ftm.ng/public/../vendor/autoload.php' (include_path='.:/opt/cpanel/ea-php82/root/usr/share/pear') in /home/ftmnlywl/server.ftm.ng/public/index.php:34
+Stack trace:
+#0 {main}
+  thrown in /home/ftmnlywl/server.ftm.ng/public/index.php on line 34
+[28-Apr-2025 13:17:16 UTC] PHP Warning:  require(/home/ftmnlywl/server.ftm.ng/public/../vendor/autoload.php): Failed to open stream: No such file or directory in /home/ftmnlywl/server.ftm.ng/public/index.php on line 34
+[28-Apr-2025 13:17:16 UTC] PHP Fatal error:  Uncaught Error: Failed opening required '/home/ftmnlywl/server.ftm.ng/public/../vendor/autoload.php' (include_path='.:/opt/cpanel/ea-php82/root/usr/share/pear') in /home/ftmnlywl/server.ftm.ng/public/index.php:34
+Stack trace:
+#0 {main}
+  thrown in /home/ftmnlywl/server.ftm.ng/public/index.php on line 34
+[28-Apr-2025 13:17:28 UTC] PHP Warning:  require(/home/ftmnlywl/server.ftm.ng/public/../vendor/autoload.php): Failed to open stream: No such file or directory in /home/ftmnlywl/server.ftm.ng/public/index.php on line 34
+[28-Apr-2025 13:17:28 UTC] PHP Fatal error:  Uncaught Error: Failed opening required '/home/ftmnlywl/server.ftm.ng/public/../vendor/autoload.php' (include_path='.:/opt/cpanel/ea-php82/root/usr/share/pear') in /home/ftmnlywl/server.ftm.ng/public/index.php:34
+Stack trace:
+#0 {main}
+  thrown in /home/ftmnlywl/server.ftm.ng/public/index.php on line 34
+[28-Apr-2025 13:17:39 UTC] PHP Warning:  require(/home/ftmnlywl/server.ftm.ng/public/../vendor/autoload.php): Failed to open stream: No such file or directory in /home/ftmnlywl/server.ftm.ng/public/index.php on line 34
+[28-Apr-2025 13:17:39 UTC] PHP Fatal error:  Uncaught Error: Failed opening required '/home/ftmnlywl/server.ftm.ng/public/../vendor/autoload.php' (include_path='.:/opt/cpanel/ea-php82/root/usr/share/pear') in /home/ftmnlywl/server.ftm.ng/public/index.php:34
+Stack trace:
+#0 {main}
+  thrown in /home/ftmnlywl/server.ftm.ng/public/index.php on line 34
+[28-Apr-2025 13:21:55 UTC] PHP Warning:  require(/home/ftmnlywl/server.ftm.ng/public/../vendor/autoload.php): Failed to open stream: No such file or directory in /home/ftmnlywl/server.ftm.ng/public/index.php on line 34
+[28-Apr-2025 13:21:55 UTC] PHP Fatal error:  Uncaught Error: Failed opening required '/home/ftmnlywl/server.ftm.ng/public/../vendor/autoload.php' (include_path='.:/opt/cpanel/ea-php82/root/usr/share/pear') in /home/ftmnlywl/server.ftm.ng/public/index.php:34
+Stack trace:
+#0 {main}
+  thrown in /home/ftmnlywl/server.ftm.ng/public/index.php on line 34
+[28-Apr-2025 13:21:55 UTC] PHP Warning:  require(/home/ftmnlywl/server.ftm.ng/public/../vendor/autoload.php): Failed to open stream: No such file or directory in /home/ftmnlywl/server.ftm.ng/public/index.php on line 34
+[28-Apr-2025 13:21:55 UTC] PHP Fatal error:  Uncaught Error: Failed opening required '/home/ftmnlywl/server.ftm.ng/public/../vendor/autoload.php' (include_path='.:/opt/cpanel/ea-php82/root/usr/share/pear') in /home/ftmnlywl/server.ftm.ng/public/index.php:34
+Stack trace:
+#0 {main}
+  thrown in /home/ftmnlywl/server.ftm.ng/public/index.php on line 34
+[28-Apr-2025 13:24:12 UTC] PHP Warning:  require(/home/ftmnlywl/server.ftm.ng/public/../vendor/autoload.php): Failed to open stream: No such file or directory in /home/ftmnlywl/server.ftm.ng/public/index.php on line 34
+[28-Apr-2025 13:24:12 UTC] PHP Fatal error:  Uncaught Error: Failed opening required '/home/ftmnlywl/server.ftm.ng/public/../vendor/autoload.php' (include_path='.:/opt/cpanel/ea-php82/root/usr/share/pear') in /home/ftmnlywl/server.ftm.ng/public/index.php:34
+Stack trace:
+#0 {main}
+  thrown in /home/ftmnlywl/server.ftm.ng/public/index.php on line 34

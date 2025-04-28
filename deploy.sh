@@ -1,6 +1,6 @@
 #!/bin/bash
-cd ~/test-server.ftm.ng
-git pull origin staging
+cd ~/server.ftm.ng
+git pull origin production
 composer install --no-dev --optimize-autoloader
 php artisan migrate --force
 php artisan config:cache
