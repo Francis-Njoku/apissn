@@ -62,18 +62,17 @@ Route::group(['middleware' => ['auth.jwt']], function () {
 
     Route::prefix('user')->group(function () {
         Route::get('/profile/', [UserController::class, 'profile']);
-        Route::get('/role/', [UserController::class, 'userStatus']);        
-    });  
-    
+        Route::get('/role/', [UserController::class, 'userStatus']);
+    });
+
     Route::prefix('pay')->group(function () {
         Route::post('/', [PayController::class, 'redirectToGateway']);
-        Route::get('/callback/', [PayController::class, 'handleGatewayCallback']);
-        Route::get('/reference/{reference}', [PayController::class, 'paymentReference']);
+
         Route::get('/history/', [PayController::class, 'paymentHistory']);
         // Route::get('/payment/status/', [PayController::class, 'paymentStatus']);
         Route::get('/status/', [PayController::class, 'paymentStatus']);
     });
-    
+
     Route::post('/store/ftm/', [ArticleController::class, 'store']);
     Route::get('/generate/slug/', [ArticleController::class, 'newsletterGenerateSlug']);
 });
@@ -89,6 +88,9 @@ Route::group(['middleware' => ['auth.jwt', 'subscribed']], function () {
     });
 
 });
+
+Route::get('/pay/callback/', [PayController::class, 'handleGatewayCallback']);
+Route::get('/pay/reference/{reference}', [PayController::class, 'paymentReference']);
 
 Route::prefix('admin')->middleware(['auth.jwt', 'admin'])->group(function () {
     // Media routes
