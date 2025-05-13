@@ -315,7 +315,7 @@ class ArticleController extends Controller
             'title' => 'required|string',
             'news_date' => 'required|date',
             'bytes' => 'nullable|string',
-            'body' => 'nullable|string|min:10|max:10000',
+            'body' => 'nullable|string|min:10|max:100000',
             'featuredImage' => 'nullable|file|mimetypes:image/jpeg,image/png,image/jpg',
 
         ]);
@@ -382,7 +382,7 @@ class ArticleController extends Controller
             'name' => 'required|string',
             'title' => 'required|string',
             'news_date' => 'required|date',
-            'body' => 'nullable|string|min:10|max:10000',
+            'body' => 'nullable|string|min:10|max:100000',
             'featuredImage' => 'required|string',
             'media' => 'nullable|string',
             'mediaSrc' => 'nullable|string',
@@ -460,7 +460,7 @@ class ArticleController extends Controller
         $validatedData = $request->validate([
             'title' => 'nullable|string',
             'news_date' => 'nullable|date',
-            'body' => 'nullable|string|min:10|max:10000',
+            'body' => 'nullable|string|min:10|max:100000',
             'featuredImage' => 'nullable|string',
             'media' => 'nullable|string',
             'status' => 'nullable|string',
