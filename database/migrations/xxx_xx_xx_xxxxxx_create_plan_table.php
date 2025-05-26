@@ -4,7 +4,7 @@ use Illuminate\Support\Facades\Schema;
 use Illuminate\Database\Schema\Blueprint;
 use Illuminate\Database\Migrations\Migration;
 
-class CreatePlansTable extends Migration
+class CreatePlanTable extends Migration
 {
     /**
      * Run the migrations.
@@ -13,8 +13,8 @@ class CreatePlansTable extends Migration
      */
     public function up()
     {
-        if (!Schema::hasTable('plans')) {
-            Schema::create('plans', function (Blueprint $table) {
+        if (!Schema::hasTable('plan')) {
+            Schema::create('plan', function (Blueprint $table) {
                 $table->id();
                 $table->string('plan_name');
                 $table->string('track')->nullable();
@@ -23,17 +23,17 @@ class CreatePlansTable extends Migration
                 $table->timestamps();
             });
         } else {
-            Schema::table('plans', function (Blueprint $table) {
-                if (!Schema::hasColumn('plans', 'plan_name')) {
+            Schema::table('plan', function (Blueprint $table) {
+                if (!Schema::hasColumn('plan', 'plan_name')) {
                     $table->string('plan_name');
                 }
-                if (!Schema::hasColumn('plans', 'track')) {
+                if (!Schema::hasColumn('plan', 'track')) {
                     $table->string('track')->nullable();
                 }
-                if (!Schema::hasColumn('plans', 'plan_type')) {
+                if (!Schema::hasColumn('plan', 'plan_type')) {
                     $table->string('plan_type');
                 }
-                if (!Schema::hasColumn('plans', 'amount')) {
+                if (!Schema::hasColumn('plan', 'amount')) {
                     $table->decimal('amount', 10, 2);
                 }
             });

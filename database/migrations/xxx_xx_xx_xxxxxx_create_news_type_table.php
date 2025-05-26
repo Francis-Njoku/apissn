@@ -4,7 +4,7 @@ use Illuminate\Support\Facades\Schema;
 use Illuminate\Database\Schema\Blueprint;
 use Illuminate\Database\Migrations\Migration;
 
-class CreateNewsTypesTable extends Migration
+class CreateNewsTypeTable extends Migration
 {
     /**
      * Run the migrations.
@@ -13,19 +13,19 @@ class CreateNewsTypesTable extends Migration
      */
     public function up()
     {
-        if (!Schema::hasTable('news_types')) {
-            Schema::create('news_types', function (Blueprint $table) {
+        if (!Schema::hasTable('news_type')) {
+            Schema::create('news_type', function (Blueprint $table) {
                 $table->id();
                 $table->string('name')->unique();
                 $table->string('description')->nullable();
                 $table->timestamps();
             });
         } else {
-            Schema::table('news_types', function (Blueprint $table) {
-                if (!Schema::hasColumn('news_types', 'name')) {
+            Schema::table('news_type', function (Blueprint $table) {
+                if (!Schema::hasColumn('news_type', 'name')) {
                     $table->string('name')->unique();
                 }
-                if (!Schema::hasColumn('news_types', 'description')) {
+                if (!Schema::hasColumn('news_type', 'description')) {
                     $table->string('description')->nullable();
                 }
             });
