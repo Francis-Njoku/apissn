@@ -1,0 +1,56 @@
+<?php
+
+// app/Jobs/SendNewPostEmail.php
+
+namespace App\Jobs;
+
+use App\Mail\NewPostMail;
+use App\Models\User;
+use Illuminate\Bus\Queueable;
+use Illuminate\Contracts\Queue\ShouldQueue;
+use Illuminate\Foundation\Bus\Dispatchable;
+use Illuminate\Queue\InteractsWithQueue;
+use Illuminate\Queue\SerializesModels;
+use Illuminate\Support\Facades\Mail;
+use Illuminate\Support\Facades\DB;
+
+class SendNewPostEmail implements ShouldQueue
+{
+    use Dispatchable, InteractsWithQueue, Queueable, SerializesModels;
+
+    public $title;
+
+    /**
+     * Create a new job instance.
+     *
+     * @param  string  $title
+     * @return void
+     */
+    public function __construct($title)
+    {
+        $this->title = $title;
+    }
+
+    /**
+     * Execute the job.
+     *
+     * @return void
+     */
+    public function handle()
+    {
+         // Get unique user emails from the payment table by joining with the users table
+         $userEmails = DB::table('payments')
+         ->join('users', 'payments.user_id', '=', 'users.id')
+         ->select('users.email')
+         ->distinct()
+         ->get(); // Fetch emails
+
+        // Send emails in batches of 100
+        $userEmails->chunk(100)->each(function ($chunk) {
+            foreach ($chunk as $user) {
+                // Send email
+                Mail::to($user->email)->send(new NewPostMail($this->title));
+            }
+        });
+    }
+}

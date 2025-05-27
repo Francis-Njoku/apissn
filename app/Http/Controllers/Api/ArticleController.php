@@ -13,6 +13,10 @@ use App\Http\Resources\ArticleResource;
 use App\Http\Resources\ArticleAllResource;
 use App\Http\Requests\ArticleRequest;
 use App\Http\Controllers\Controller;
+use App\Jobs\SendNewPostEmail;
+use Illuminate\Support\Facades\DB;
+use App\Models\User;
+use Illuminate\Support\Facades\Mail;
 
 class ArticleController extends Controller
 {
@@ -361,6 +365,12 @@ class ArticleController extends Controller
 
         // Store validated data in the database
         $media = Newsletter::create($data);
+
+
+        // Get unique user emails from the payment table by joining with the users table
+        // Dispatch the email job to notify users
+        SendNewPostEmail::dispatch($media->title);
+
 
         return response()->json([
             'status' => 'success',
