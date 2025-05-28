@@ -1,12 +1,13 @@
 <?php
+
 // app/Mail/WelcomeEmail.php
 
 namespace App\Mail;
 
-use App\Models\User;
 use Illuminate\Mail\Mailable;
+use App\Models\User;
 
-class WelcomeEmail extends Mailable
+class WelcomeMail extends Mailable
 {
     public $user;
 
