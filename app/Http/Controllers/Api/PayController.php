@@ -97,14 +97,9 @@ class PayController extends Controller
 
     public function handleGatewayCallback()
     {
-<<<<<<< HEAD
         $paymentDetails = Paystack::getPaymentData();
-        
+
         //dd($paymentDetails);
-=======
-        // Check if user is registered
-        $user_id = Auth::id();
->>>>>>> 9589c674d27cc1cc3b7d90540c63ff341b524e31
 
         $paymentDetails = Paystack::getPaymentData();
 
@@ -136,11 +131,11 @@ class PayController extends Controller
         $post->reference = $reference;
         $post->ip_address = $ip_address;
         $post->save();
-        
+
 
         // Get plan type
         $plan_name = $this->getPlanType($plan_type);
-        
+
 
         // Get due date
         $date_now = date("Y-m-d");
@@ -155,7 +150,7 @@ class PayController extends Controller
         } else {
             $add_date = date("Y-m-d");
         }
-        
+
 
 
         // Store payment
@@ -171,22 +166,16 @@ class PayController extends Controller
         $post->due_date = $add_date;
         $post->status = 'active';
         $post->save();
-        
+
 
         if ($callBackUrl) {
-<<<<<<< HEAD
-            //return redirect($callBackUrl.'/?trxref='.$reference);
-            return redirect('https://ftm.ng/payment-reference/?trxref='.$reference);
+            return redirect($callBackUrl.'/?trxref='.$reference);
         } else {
             return response()->json([
         'status' => 'error',
         'message' => 'Callback URL not found',
         'reference' => $reference
             ], 400); // 400 Bad Request
-=======
-            return redirect($callBackUrl.'/?trxref='.$reference);
-        } else {
->>>>>>> 9589c674d27cc1cc3b7d90540c63ff341b524e31
         }
 
     }

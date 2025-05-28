@@ -68,7 +68,6 @@ Route::group(['middleware' => ['auth.jwt']], function () {
     Route::prefix('pay')->group(function () {
         Route::post('/', [PayController::class, 'redirectToGateway']);
         Route::get('/history/', [PayController::class, 'paymentHistory']);
-        // Route::get('/payment/status/', [PayController::class, 'paymentStatus']);
         Route::get('/status/', [PayController::class, 'paymentStatus']);
     });
 
