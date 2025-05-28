@@ -5,18 +5,18 @@ namespace App\Http\Controllers\Api;
 use Illuminate\Support\Str;
 use Illuminate\Support\Facades\Validator;
 use Illuminate\Support\Facades\Storage;
+use Illuminate\Support\Facades\Mail;
+use Illuminate\Support\Facades\DB;
 use Illuminate\Pagination\LengthAwarePaginator;
 use Illuminate\Http\Request;
 use Carbon\Carbon;
+use App\Models\User;
 use App\Models\Newsletter;
+use App\Jobs\SendNewPostEmail;
 use App\Http\Resources\ArticleResource;
 use App\Http\Resources\ArticleAllResource;
 use App\Http\Requests\ArticleRequest;
 use App\Http\Controllers\Controller;
-use App\Jobs\SendNewPostEmail;
-use Illuminate\Support\Facades\DB;
-use App\Models\User;
-use Illuminate\Support\Facades\Mail;
 
 class ArticleController extends Controller
 {
@@ -426,6 +426,9 @@ class ArticleController extends Controller
 
 
         $media = Newsletter::create($data);
+
+        // Dispatch the email job to notify users
+        SendNewPostEmail::dispatch($media->title);
 
         return response()->json([
             'status' => 'success',
