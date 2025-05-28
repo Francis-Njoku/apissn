@@ -4,19 +4,22 @@
 
 namespace App\Jobs;
 
-use App\Mail\NewPostMail;
-use App\Models\User;
-use Illuminate\Bus\Queueable;
-use Illuminate\Contracts\Queue\ShouldQueue;
-use Illuminate\Foundation\Bus\Dispatchable;
-use Illuminate\Queue\InteractsWithQueue;
-use Illuminate\Queue\SerializesModels;
 use Illuminate\Support\Facades\Mail;
 use Illuminate\Support\Facades\DB;
+use Illuminate\Queue\SerializesModels;
+use Illuminate\Queue\InteractsWithQueue;
+use Illuminate\Foundation\Bus\Dispatchable;
+use Illuminate\Contracts\Queue\ShouldQueue;
+use Illuminate\Bus\Queueable;
+use App\Models\User;
+use App\Mail\NewPostMail;
 
 class SendNewPostEmail implements ShouldQueue
 {
-    use Dispatchable, InteractsWithQueue, Queueable, SerializesModels;
+    use Dispatchable;
+    use InteractsWithQueue;
+    use Queueable;
+    use SerializesModels;
 
     public $title;
 
@@ -38,12 +41,12 @@ class SendNewPostEmail implements ShouldQueue
      */
     public function handle()
     {
-         // Get unique user emails from the payment table by joining with the users table
-         $userEmails = DB::table('payments')
-         ->join('users', 'payments.user_id', '=', 'users.id')
-         ->select('users.email')
-         ->distinct()
-         ->get(); // Fetch emails
+        // Get unique user emails from the payment table by joining with the users table
+        $userEmails = DB::table('payment')
+        ->join('users', 'payment.user_id', '=', 'users.id')
+        ->select('users.email')
+        ->distinct()
+        ->get(); // Fetch emails
 
         // Send emails in batches of 100
         $userEmails->chunk(100)->each(function ($chunk) {
