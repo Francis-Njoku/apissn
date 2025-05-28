@@ -382,7 +382,7 @@ class ArticleController extends Controller
             'name' => 'required|string',
             'title' => 'required|string',
             'news_date' => 'required|date',
-            'body' => 'nullable|string|min:10|max:10000',
+            'body' => 'nullable|string|min:10|max:100000',
             'featuredImage' => 'required|string',
             'media' => 'nullable|string',
             'mediaSrc' => 'nullable|string',

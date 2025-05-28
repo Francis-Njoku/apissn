@@ -218,6 +218,10 @@ class PaymentController extends Controller
         $post->reference = $reference;
         $post->ip_address = $ip_address;
         $post->save();
+        
+        if (!Auth::check()) {
+        return redirect()->back()->with('error', 'User not logged in.');
+         }
 
         // Check if user is registered
         $user_id = Auth::id();

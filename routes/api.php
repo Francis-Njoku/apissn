@@ -67,8 +67,7 @@ Route::group(['middleware' => ['auth.jwt']], function () {
     
     Route::prefix('pay')->group(function () {
         Route::post('/', [PayController::class, 'redirectToGateway']);
-        Route::get('/callback/', [PayController::class, 'handleGatewayCallback']);
-        Route::get('/reference/{reference}', [PayController::class, 'paymentReference']);
+        
         Route::get('/history/', [PayController::class, 'paymentHistory']);
         // Route::get('/payment/status/', [PayController::class, 'paymentStatus']);
         Route::get('/status/', [PayController::class, 'paymentStatus']);
@@ -77,6 +76,9 @@ Route::group(['middleware' => ['auth.jwt']], function () {
     Route::post('/store/ftm/', [ArticleController::class, 'store']);
     Route::get('/generate/slug/', [ArticleController::class, 'newsletterGenerateSlug']);
 });
+
+Route::get('/pay/callback/', [PayController::class, 'handleGatewayCallback']);
+Route::get('/pay/reference/{reference}', [PayController::class, 'paymentReference']);
 
 Route::group(['middleware' => ['auth.jwt', 'subscribed']], function () {
     Route::prefix('articles')->group(function () {
