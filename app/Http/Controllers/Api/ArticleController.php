@@ -92,19 +92,19 @@ class ArticleController extends Controller
         $media = $request->get('m');
 
         if ($media == "bytes") {
-            $latestRow = Newsletter::where('mediaType', 'bytes')->orderBy('created_at', 'desc')->first();
+            $latestRow = Newsletter::where('mediaType', 'bytes')->orderBy('news_date', 'desc')->first();
 
             return new ArticleAllResource($latestRow);
         } elseif ($media == "audio") {
-            $latestRow = Newsletter::where('mediaType', 'audio')->orderBy('created_at', 'desc')->first();
+            $latestRow = Newsletter::where('mediaType', 'audio')->orderBy('news_date', 'desc')->first();
 
             return new ArticleAllResource($latestRow);
         } elseif ($media == "video") {
-            $latestRow = Newsletter::where('mediaType', 'video')->orderBy('created_at', 'desc')->first();
+            $latestRow = Newsletter::where('mediaType', 'video')->orderBy('news_date', 'desc')->first();
 
             return new ArticleAllResource($latestRow);
         } else {
-            $latestRow = Newsletter::where('mediaType', 'text')->orderBy('created_at', 'desc')->first();
+            $latestRow = Newsletter::where('mediaType', 'text')->orderBy('news_date', 'desc')->first();
 
             return new ArticleAllResource($latestRow);
         }
@@ -126,21 +126,21 @@ class ArticleController extends Controller
             return ArticleResource::collection(
                 Newsletter::where('news_type_id', $newsType)
                     ->where('mediaType', $media)
-                    ->orderBy('created_at', 'desc')
+                    ->orderBy('news_date', 'desc')
                     ->paginate(10)
             );
         } elseif ($newsType) {
             //echo $filter;
             return ArticleResource::collection(
                 Newsletter::where('news_type_id', $newsType)
-                    ->orderBy('created_at', 'desc')
+                    ->orderBy('news_date', 'desc')
                     ->paginate(10)
             );
         } elseif ($media) {
             //echo $filter;
             return ArticleResource::collection(
                 Newsletter::where('mediaType', $media)
-                    ->orderBy('created_at', 'desc')
+                    ->orderBy('news_date', 'desc')
                     ->paginate(10)
             );
         } elseif ($filter) {
@@ -148,11 +148,11 @@ class ArticleController extends Controller
             return ArticleResource::collection(
                 Newsletter::where('name', 'like', '%' . $filter . '%')
                     ->orWhere('title', 'like', '%' . $filter . '%')
-                    ->orderBy('created_at', 'desc')
+                    ->orderBy('news_date', 'desc')
                     ->paginate(10)
             );
         } else {
-            return ArticleResource::collection(Newsletter::orderBy('created_at', 'desc')
+            return ArticleResource::collection(Newsletter::orderBy('news_date', 'desc')
                 ->paginate(10));
         }
     }
@@ -167,7 +167,7 @@ class ArticleController extends Controller
 
         // Start with a base query for approved articles
         $baseQuery = Newsletter::where('status', 'approved')
-                          ->orderBy('created_at', 'asc');
+                          ->orderBy('news_date', 'asc');
 
         // Apply media type filter if provided
         if ($media) {
@@ -198,14 +198,14 @@ class ArticleController extends Controller
     {
         $media = $request->get('m');
         if ($media) {
-            // Query the latest 10 posts by created_at date
-            $posts = Newsletter::where('mediaType', $media)->orderBy('created_at', 'desc')->take(10)->get();
+            // Query the latest 10 posts by news_date date
+            $posts = Newsletter::where('mediaType', $media)->orderBy('news_date', 'desc')->take(10)->get();
 
             // Wrap the result with the API resource
             return ArticleAllResource::collection($posts);
         } else {
-            // Query the latest 10 posts by created_at date
-            $posts = Newsletter::orderBy('created_at', 'desc')->take(10)->get();
+            // Query the latest 10 posts by news_date date
+            $posts = Newsletter::orderBy('news_date', 'desc')->take(10)->get();
 
             // Wrap the result with the API resource
             return ArticleAllResource::collection($posts);
@@ -227,21 +227,21 @@ class ArticleController extends Controller
             return ArticleAllResource::collection(
                 Newsletter::where('news_type_id', $newsType)
                     ->where('mediaType', $media)
-                    ->orderBy('created_at', 'desc')
+                    ->orderBy('news_date', 'desc')
                     ->paginate(10)
             );
         } elseif ($newsType) {
             //echo $filter;
             return ArticleAllResource::collection(
                 Newsletter::where('news_type_id', $newsType)
-                    ->orderBy('created_at', 'desc')
+                    ->orderBy('news_date', 'desc')
                     ->paginate(10)
             );
         } elseif ($media) {
             //echo $filter;
             return ArticleAllResource::collection(
                 Newsletter::where('mediaType', $media)
-                    ->orderBy('created_at', 'desc')
+                    ->orderBy('news_date', 'desc')
                     ->paginate(10)
             );
         } elseif ($filter) {
@@ -249,7 +249,7 @@ class ArticleController extends Controller
             return ArticleAllResource::collection(
                 Newsletter::where('name', 'like', '%' . $filter . '%')
                     ->orWhere('title', 'like', '%' . $filter . '%')
-                    ->orderBy('created_at', 'desc')
+                    ->orderBy('news_date', 'desc')
                     ->paginate(10)
             );
         } else {
