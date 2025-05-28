@@ -1,6 +1,6 @@
 <?php
 
-// app/Mail/WelcomeEmail.php
+// app/Mail/WelcomeMail.php
 
 namespace App\Mail;
 
