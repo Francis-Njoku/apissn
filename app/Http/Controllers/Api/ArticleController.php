@@ -253,7 +253,7 @@ class ArticleController extends Controller
                     ->paginate(10)
             );
         } else {
-            return ArticleAllResource::collection(Newsletter::orderBy('created_at', 'desc')
+            return ArticleAllResource::collection(Newsletter::orderBy('news_date', 'desc')
                 ->paginate(10));
         }
     }
