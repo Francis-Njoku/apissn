@@ -84,7 +84,7 @@ Route::group(['middleware' => ['auth.jwt', 'subscribed']], function () {
         Route::get('/all/', [ArticleController::class, 'indexNoAuth']);
         Route::get('/latest/', [ArticleController::class, 'getLatest']);
         Route::get('/by-media/', [ArticleController::class, 'indexByMediaType']);
-        Route::get('/{id}', [ArticleController::class, 'show']);
+        // Route::get('/{id}', [ArticleController::class, 'show']);
         Route::get('/{slug}/', [ArticleController::class, 'showSingleArticle']);
     });
 
