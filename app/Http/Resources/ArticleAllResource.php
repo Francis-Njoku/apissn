@@ -17,6 +17,7 @@ class ArticleAllResource extends JsonResource
     {
         $data = [
             'id' => $this->id,
+            'author_id' => $this->author_id,
             'news_type_id' => $this->news_type_id,
             'name' => $this->name,
             'title' => $this->title,

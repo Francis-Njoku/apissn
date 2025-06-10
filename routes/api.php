@@ -90,9 +90,6 @@ Route::group(['middleware' => ['auth.jwt', 'subscribed']], function () {
 
 });
 
-Route::get('/pay/callback/', [PayController::class, 'handleGatewayCallback']);
-Route::get('/pay/reference/{reference}', [PayController::class, 'paymentReference']);
-
 Route::prefix('admin')->middleware(['auth.jwt', 'admin'])->group(function () {
     // Media routes
     Route::prefix('media')->group(function () {
@@ -110,7 +107,7 @@ Route::prefix('admin')->middleware(['auth.jwt', 'admin'])->group(function () {
 
     // User management routes
     Route::prefix('users')->group(function () {
+        Route::get('/', [UserController::class, 'listUsers']);
         Route::post('/create', [UserController::class, 'adminCreateUser']);
-        Route::get('/list', [UserController::class, 'listUsers']);
     });
 });

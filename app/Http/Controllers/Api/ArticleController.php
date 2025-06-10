@@ -321,6 +321,7 @@ class ArticleController extends Controller
             'bytes' => 'nullable|string',
             'body' => 'nullable|string|min:10|max:100000',
             'featuredImage' => 'nullable|file|mimetypes:image/jpeg,image/png,image/jpg',
+            'author_id' => 'required|integer',
 
         ]);
 
@@ -341,6 +342,7 @@ class ArticleController extends Controller
             'body' => $request->input('body'),
             'status' => 'approved',
             'featuredImage' => $this->storeFileNoDirectory($request->file('featuredImage')),
+            'author_id' => $request->input('author_id'),
         ];
 
         // Check for and handle each file type
@@ -398,6 +400,7 @@ class ArticleController extends Controller
             'mediaSrc' => 'nullable|string',
             'status' => 'required|string',
             'tags' => 'nullable|string',
+            'author_id' => 'required|integer',
 
         ]);
 
@@ -422,6 +425,7 @@ class ArticleController extends Controller
             'media' => $request->input('media'),
             'mediaSrc' => $request->input('mediaSrc'),
             'featuredImage' => $request->input('featuredImage'),
+            'author_id' => $request->input('author_id'),
         ];
 
 

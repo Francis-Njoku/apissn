@@ -19,8 +19,8 @@ use Illuminate\Auth\Events\PasswordReset;
 use Carbon\Carbon;
 use App\Models\UserGroup;
 use App\Models\User;
-use App\Mail\ResetPassword;
 use App\Mail\WelcomeMail;
+use App\Mail\ResetPassword;
 //use App\Enum\UserAuth;
 use App\Http\Resources\UserResource;
 use App\Http\Requests\ForgotPasswordRequest;
@@ -425,12 +425,16 @@ class UserController extends Controller
      */
     public function listUsers(Request $request)
     {
-        /*
-        $user = $request->user();
-        if ($user->isAdmin == false) {
-            return abort(403, 'Unauthorized action.');
-        }*/
-        return UserResource::collection(User::paginate(10));
+        $role = $request->query('role');
+        $query = User::query();
+
+        if ($role === 'admin') {
+            $query->where('role_id', 1);
+        } elseif ($role === 'user') {
+            $query->where('role_id', 2);
+        }
+
+        return UserResource::collection($query->paginate(10));
     }
 
     /**
