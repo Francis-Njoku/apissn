@@ -88,7 +88,23 @@ Route::group(['middleware' => ['auth.jwt', 'subscribed']], function () {
         Route::get('/{slug}/', [ArticleController::class, 'showSingleArticle']);
     });
 
+    Route::prefix('comments')->group(function () {
+        // Store a new comment
+    Route::post('/', [CommentController::class, 'store']);
+    
+    // Update an existing comment
+    Route::put('/{comment}', [CommentController::class, 'update']);
+    Route::patch('/{comment}', [CommentController::class, 'update']);
+
+    
+    });
+
 });
+
+// Public routes (view comments)
+Route::get('/comments/', [CommentController::class, 'index']); // All or filtered comments
+Route::get('/comments/{comment}/', [CommentController::class, 'show']); // Single comment
+
 
 Route::prefix('admin')->middleware(['auth.jwt', 'admin'])->group(function () {
     // Media routes
@@ -110,4 +126,7 @@ Route::prefix('admin')->middleware(['auth.jwt', 'admin'])->group(function () {
         Route::post('/create', [UserController::class, 'adminCreateUser']);
         Route::get('/list', [UserController::class, 'listUsers']);
     });
+
+    // Delete a comment
+    Route::delete('/comments/{comment}', [CommentController::class, 'destroy']);
 });
