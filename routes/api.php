@@ -73,6 +73,24 @@ Route::group(['middleware' => ['auth.jwt']], function () {
 
     Route::post('/store/ftm/', [ArticleController::class, 'store']);
     Route::get('/generate/slug/', [ArticleController::class, 'newsletterGenerateSlug']);
+
+
+    // comments
+    Route::get('/public/comments', [App\Http\Controllers\Api\CommentController::class, 'index']);
+
+    // Comments routes
+    Route::prefix('comments')->group(function () {
+        Route::get('/', [App\Http\Controllers\Api\CommentController::class, 'index']);
+        Route::post('/', [App\Http\Controllers\Api\CommentController::class, 'store']);
+        Route::get('/{comment}', [App\Http\Controllers\Api\CommentController::class, 'show']);
+        Route::put('/{comment}', [App\Http\Controllers\Api\CommentController::class, 'update']);
+        Route::delete('/{comment}', [App\Http\Controllers\Api\CommentController::class, 'destroy']);
+
+        // Comment reporting
+        Route::post('/{comment}/report', [App\Http\Controllers\Api\CommentReportController::class, 'report']);
+        Route::delete('/{comment}/report', [App\Http\Controllers\Api\CommentReportController::class, 'unreport']);
+    });
+
 });
 
 Route::get('/pay/callback/', [PayController::class, 'handleGatewayCallback']);
@@ -110,4 +128,15 @@ Route::prefix('admin')->middleware(['auth.jwt', 'admin'])->group(function () {
         Route::get('/', [UserController::class, 'listUsers']);
         Route::post('/create', [UserController::class, 'adminCreateUser']);
     });
+
+
+    // Moderation routes (admin/moderator only)
+    Route::prefix('comments')->group(function () {
+        Route::get('/pending', [App\Http\Controllers\Api\CommentModerationController::class, 'pending']);
+        Route::get('/flagged', [App\Http\Controllers\Api\CommentModerationController::class, 'flagged']);
+        Route::get('/stats', [App\Http\Controllers\Api\CommentModerationController::class, 'stats']);
+        Route::patch('/{comment}/moderate', [App\Http\Controllers\Api\CommentModerationController::class, 'moderate']);
+        Route::patch('/bulk-moderate', [App\Http\Controllers\Api\CommentModerationController::class, 'bulkModerate']);
+    });
+
 });

@@ -6,11 +6,13 @@ use Spatie\Sluggable\SlugOptions;
 use Spatie\Sluggable\HasSlug;
 use Illuminate\Database\Eloquent\Model;
 use Illuminate\Database\Eloquent\Factories\HasFactory;
+use App\Traits\HasComments;
 
 class Newsletter extends Model
 {
     use HasFactory;
     use HasSlug;
+    use HasComments;
     // Table name
     protected $table = 'newsletter';
     // Primary Key

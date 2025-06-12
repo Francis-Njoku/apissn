@@ -34,7 +34,7 @@ class CreatePaymentTable extends Migration
                 $table->timestamp('paid_at')->nullable();
                 $table->timestamps();
 
-                $table->foreign('user_id')->references('id')->on('users')->onDelete('cascade');
+                // Foreign key will be added later after users table exists
             });
         } else {
             // Check and add columns if they don't exist
@@ -53,7 +53,7 @@ class CreatePaymentTable extends Migration
                 }
                 if (!Schema::hasColumn('payment', 'plan_id')) {
                     $table->unsignedBigInteger('plan_id')->nullable();
-                    $table->foreign('plan_id')->references('id')->on('plans')->onDelete('set null');
+                    // Foreign key will be added later after plans table exists
                 }
                 if (!Schema::hasColumn('payment', 'interval')) {
                     $table->string('interval')->nullable(); // monthly, quarterly, etc.
@@ -81,7 +81,24 @@ class CreatePaymentTable extends Migration
      */
     public function down()
     {
-        // We don't want to drop tables in the down method
-        // as this migration is meant to ensure tables exist
+        Schema::dropIfExists('payment');
+    }
+
+    /**
+     * Add foreign key constraints after all tables exist
+     */
+    public static function addForeignKeys()
+    {
+        if (Schema::hasTable('payment') && Schema::hasTable('users')) {
+            Schema::table('payment', function (Blueprint $table) {
+                $table->foreign('user_id')->references('id')->on('users')->onDelete('cascade');
+            });
+        }
+
+        if (Schema::hasTable('payment') && Schema::hasTable('plans')) {
+            Schema::table('payment', function (Blueprint $table) {
+                $table->foreign('plan_id')->references('id')->on('plans')->onDelete('set null');
+            });
+        }
     }
 }

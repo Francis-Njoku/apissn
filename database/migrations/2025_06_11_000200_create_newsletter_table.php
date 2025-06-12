@@ -16,6 +16,7 @@ class CreateNewsletterTable extends Migration
         if (!Schema::hasTable('newsletter')) {
             Schema::create('newsletter', function (Blueprint $table) {
                 $table->id();
+                $table->unsignedBigInteger('author_id');
                 $table->string('name');
                 $table->string('title');
                 $table->string('slug')->unique();
@@ -28,13 +29,17 @@ class CreateNewsletterTable extends Migration
                 $table->string('media')->nullable();
                 $table->string('mediaType')->nullable();
                 $table->string('mediaSrc')->nullable();
+                $table->string('featuredImage')->nullable();
                 $table->json('tags')->nullable();
                 $table->timestamps();
 
-                $table->foreign('news_type_id')->references('id')->on('news_types')->onDelete('cascade');
+                $table->foreign('news_type_id')->references('id')->on('news_type')->onDelete('cascade');
             });
         } else {
             Schema::table('newsletter', function (Blueprint $table) {
+                if (!Schema::hasColumn('newsletter', 'author_id')) {
+                    $table->unsignedBigInteger('author_id');
+                }
                 if (!Schema::hasColumn('newsletter', 'name')) {
                     $table->string('name');
                 }
@@ -52,7 +57,7 @@ class CreateNewsletterTable extends Migration
                 }
                 if (!Schema::hasColumn('newsletter', 'news_type_id')) {
                     $table->unsignedBigInteger('news_type_id');
-                    $table->foreign('news_type_id')->references('id')->on('news_types')->onDelete('cascade');
+                    $table->foreign('news_type_id')->references('id')->on('news_type')->onDelete('cascade');
                 }
                 if (!Schema::hasColumn('newsletter', 'status')) {
                     $table->string('status')->default('draft');
@@ -71,6 +76,9 @@ class CreateNewsletterTable extends Migration
                 }
                 if (!Schema::hasColumn('newsletter', 'mediaSrc')) {
                     $table->string('mediaSrc')->nullable();
+                }
+                if (!Schema::hasColumn('newsletter', 'featuredImage')) {
+                    $table->string('featuredImage')->nullable();
                 }
                 if (!Schema::hasColumn('newsletter', 'tags')) {
                     $table->json('tags')->nullable();

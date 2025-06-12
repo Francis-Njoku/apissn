@@ -413,6 +413,10 @@ class ArticleController extends Controller
         }
 
         // Initialize an empty data array
+        // Convert tags to proper JSON format if present
+        $tags = $request->input('tags');
+        $tagsArray = $tags ? explode(',', $tags) : [];
+
         $data = [
             'news_type_id' => $request->input('news_type_id'),
             'name' => $request->input('name'),
@@ -420,7 +424,7 @@ class ArticleController extends Controller
             'news_date' => $request->input('news_date'),
             'body' => $request->input('body'),
             'status' => $request->input('status'),
-            'tags' => $request->input('tags'),
+            'tags' => json_encode($tagsArray),
             'mediaType' => $request->input('mediaType'),
             'media' => $request->input('media'),
             'mediaSrc' => $request->input('mediaSrc'),
@@ -446,8 +450,10 @@ class ArticleController extends Controller
      */
     public function show(string $id)
     {
-        // Retrieve the item or fail with a 404 error
-        $item = Newsletter::findOrFail($id);
+        // Retrieve the item with comments and fail with a 404 error
+        $item = Newsletter::with(['comments' => function ($query) {
+            $query->approved()->with('user');
+        }])->withCount('comments')->findOrFail($id);
 
         // Return the item wrapped in an API resource
         return new ArticleResource($item);
@@ -458,8 +464,10 @@ class ArticleController extends Controller
      */
     public function showSingleArticle(string $slug)
     {
-        // Retrieve the item or fail with a 404 error
-        $item = Newsletter::where('slug', $slug)->firstOrFail();
+        // Retrieve the item with comments and fail with a 404 error
+        $item = Newsletter::with(['comments' => function ($query) {
+            $query->approved()->with('user');
+        }])->withCount('comments')->where('slug', $slug)->firstOrFail();
 
         // Return the item wrapped in an API resource
         return new ArticleResource($item);

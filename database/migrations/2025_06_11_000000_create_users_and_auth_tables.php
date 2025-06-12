@@ -13,16 +13,16 @@ class CreateUsersAndAuthTables extends Migration
      */
     public function up()
     {
-        // Create roles table
-        if (!Schema::hasTable('roles')) {
-            Schema::create('roles', function (Blueprint $table) {
+        // Create role table
+        if (!Schema::hasTable('role')) {
+            Schema::create('role', function (Blueprint $table) {
                 $table->id();
                 $table->string('name')->unique();
                 $table->timestamps();
             });
         } else {
-            Schema::table('roles', function (Blueprint $table) {
-                if (!Schema::hasColumn('roles', 'name')) {
+            Schema::table('role', function (Blueprint $table) {
+                if (!Schema::hasColumn('role', 'name')) {
                     $table->string('name')->unique();
                 }
             });
@@ -44,7 +44,7 @@ class CreateUsersAndAuthTables extends Migration
                 $table->rememberToken();
                 $table->timestamps();
 
-                $table->foreign('role_id')->references('id')->on('roles')->onDelete('set null');
+                $table->foreign('role_id')->references('id')->on('role')->onDelete('set null');
             });
         } else {
             Schema::table('users', function (Blueprint $table) {
@@ -65,7 +65,7 @@ class CreateUsersAndAuthTables extends Migration
                 }
                 if (!Schema::hasColumn('users', 'role_id')) {
                     $table->unsignedBigInteger('role_id')->nullable();
-                    $table->foreign('role_id')->references('id')->on('roles')->onDelete('set null');
+                    $table->foreign('role_id')->references('id')->on('role')->onDelete('set null');
                 }
                 if (!Schema::hasColumn('users', 'identity')) {
                     $table->string('identity')->nullable();
