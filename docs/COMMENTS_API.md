@@ -25,7 +25,12 @@ Admin/moderators can:
 ### Get Comments
 `GET /public/comments` (under /api base path)
 
-Returns approved comments for a newsletter.
+Returns comments for a newsletter with the following visibility rules:
+- Approved comments are visible to all users
+- Pending comments are visible only to their authors
+- Rejected/spam comments are not visible to regular users
+
+Admin/moderators can see all comments regardless of status.
 
 #### Parameters:
 ```json
@@ -43,7 +48,7 @@ Returns approved comments for a newsletter.
     {
       "id": 1,
       "content": "Great article!",
-      "status": "approved",
+      "status": "approved", // Possible values: pending, approved, rejected, spam
       "author": {
         "id": 123,
         "name": "John Doe"
@@ -91,8 +96,8 @@ Create a new comment. Requires authentication.
   "message": "Comment created successfully",
   "data": {
     "id": 3,
-    "content": "This is my comment",
-    "status": "pending",
+      "content": "This is my comment",
+      "status": "pending", // New comments start as pending unless auto-approved
     "author": {
       "id": 789,
       "name": "Current User"

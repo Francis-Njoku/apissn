@@ -30,9 +30,15 @@ class CommentController extends Controller
         $query = Comment::with(['user', 'replies.user'])
             ->where('newsletter_id', $request->newsletter_id);
 
-        // Only show approved comments to regular users
+        // Show approved comments to everyone, and pending comments to their authors
         if (!Auth::user() || !Auth::user()->hasAnyRole(['admin', 'moderator'])) {
-            $query->approved();
+            $query->where(function ($q) {
+                $q->approved()
+                  ->orWhere(function ($q2) {
+                      $q2->pending()
+                         ->where('user_id', Auth::id());
+                  });
+            });
         } elseif ($request->has('status')) {
             $query->where('status', $request->status);
         }
@@ -45,7 +51,13 @@ class CommentController extends Controller
             $query->with('user')
                   ->when(
                       !Auth::user() || !Auth::user()->hasAnyRole(['admin', 'moderator']),
-                      fn ($q) => $q->approved()
+                      fn ($q) => $q->where(function ($q2) {
+                          $q2->approved()
+                             ->orWhere(function ($q3) {
+                                 $q3->pending()
+                                    ->where('user_id', Auth::id());
+                             });
+                      })
                   );
         }])->get();
 
@@ -98,7 +110,9 @@ class CommentController extends Controller
         $comment->load(['user', 'replies.user']);
 
         // Check if user can view this comment
-        if (!$comment->isApproved() && !$this->canModerate()) {
+        if (!$comment->isApproved() &&
+            !$this->canModerate() &&
+            !(Auth::check() && $comment->user_id === Auth::id())) {
             return response()->json(['message' => 'Comment not found'], 404);
         }
 
