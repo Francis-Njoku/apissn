@@ -49,6 +49,7 @@ class ActiveSubscription
         
         return Payment::where('user_id', Auth::id())
             ->where('status', 'active')
+            ->where('due_date', '>', now())
             ->exists();
     }
     
