@@ -47,10 +47,13 @@ class ActiveSubscription
             return false;
         }
         
-        return Payment::where('user_id', Auth::id())
+        $latestPayment = Payment::where('user_id', Auth::id())
             ->where('status', 'active')
             ->where('due_date', '>', now())
-            ->exists();
+            ->orderByDesc('due_date')
+            ->first();
+
+        return $latestPayment !== null;
     }
     
     /**
