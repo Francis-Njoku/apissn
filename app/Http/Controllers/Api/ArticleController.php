@@ -161,8 +161,8 @@ class ArticleController extends Controller
         }
     }
     /**
-     * Display a single sample article for unsubscribed users.
-     * This doesn't require database modifications and returns just one article.
+     * Display sample articles for unsubscribed users.
+     * This doesn't require database modifications and returns 8 articles.
      */
     public function sampleArticle(Request $request)
     {
@@ -183,18 +183,18 @@ class ArticleController extends Controller
             $baseQuery->where('news_type_id', $newsType);
         }
 
-        // Get the oldest approved article
-        $sampleArticle = $baseQuery->first();
+        // Get 8 oldest approved articles
+        $sampleArticles = $baseQuery->take(8)->get();
 
-        if (!$sampleArticle) {
+        if ($sampleArticles->isEmpty()) {
             return response()->json([
                 'status' => 'error',
-                'message' => 'No sample article available'
+                'message' => 'No sample articles available'
             ], 404);
         }
 
-        // Return the single article as a resource
-        return new ArticleAllResource($sampleArticle);
+        // Return the articles as a collection
+        return ArticleAllResource::collection($sampleArticles);
     }
 
 
