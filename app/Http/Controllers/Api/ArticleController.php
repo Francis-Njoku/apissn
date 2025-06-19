@@ -171,7 +171,7 @@ class ArticleController extends Controller
 
         // Start with a base query for approved articles
         $baseQuery = Newsletter::where('status', 'approved')
-                          ->orderBy('news_date', 'asc');
+                          ->orderBy('news_date', 'desc');
 
         // Apply media type filter if provided
         if ($media) {
@@ -183,7 +183,7 @@ class ArticleController extends Controller
             $baseQuery->where('news_type_id', $newsType);
         }
 
-        // Get 8 oldest approved articles
+        // Get 8 latest approved articles
         $sampleArticles = $baseQuery->take(8)->get();
 
         if ($sampleArticles->isEmpty()) {
