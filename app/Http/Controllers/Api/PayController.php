@@ -137,7 +137,6 @@ class PayController extends Controller
         $fees = (($paymentDetails['data']['fees'])) / 100;
         $email = (($paymentDetails['data']['customer']['email']));
         $customer_code = (($paymentDetails['data']['customer']['customer_code']));
-
         // Now you have the payment details,
         // you can store the authorization_code in your db to allow for recurrent subscriptions
         // you can then redirect or do whatever you want
@@ -236,7 +235,14 @@ class PayController extends Controller
 
     public function paymentStatus()
     {
-        if (Payment::where('user_id', Auth::id())->where('status', 'active')->exists()) {
+        $userId = Auth::id();
+
+        $hasActiveSubscription = Payment::where('user_id', $userId)
+            ->where('status', 'active')
+            ->where('due_date', '>', Carbon::now())
+            ->exists();
+
+        if ($hasActiveSubscription) {
             return response()->json([
                 'status' => 'active',
                 'message' => 'User has an active subscription'
@@ -244,7 +250,7 @@ class PayController extends Controller
         } else {
             return response()->json([
                 'status' => 'inactive',
-                'message' => 'User does not an active subscription'
+                'message' => 'User does not have an active subscription'
             ], 200);
         }
     }
