@@ -216,28 +216,23 @@ class PayController extends Controller
 
     public function paymentStatus()
     {
-        $payment = Payment::where('user_id', Auth::id())
+        $userId = Auth::id();
+
+        $hasActiveSubscription = Payment::where('user_id', $userId)
             ->where('status', 'active')
-            ->latest('created_at')
-            ->first();
+            ->where('due_date', '>', Carbon::now())
+            ->exists();
 
-        if (!$payment) {
-            return response()->json([
-                'status' => 'inactive',
-                'message' => 'User does not have any subscription'
-            ], 200);
-        }
-
-        if ($payment->due_date > now()) {
+        if ($hasActiveSubscription) {
             return response()->json([
                 'status' => 'active',
                 'message' => 'User has an active subscription'
             ], 200);
+        } else {
+            return response()->json([
+                'status' => 'inactive',
+                'message' => 'User does not have an active subscription'
+            ], 200);
         }
-
-        return response()->json([
-            'status' => 'expired',
-            'message' => 'User subscription has expired'
-        ], 200);
     }
 }
