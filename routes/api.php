@@ -3,6 +3,7 @@
 use Illuminate\Support\Facades\Route;
 use Illuminate\Http\Request;
 use Illuminate\Foundation\Auth\EmailVerificationRequest;
+use App\Http\Controllers\StockPickController;
 use App\Http\Controllers\Api\PlanController;
 use App\Http\Controllers\Api\PayController;
 use App\Http\Controllers\Api\Auth\UserController;
@@ -19,6 +20,9 @@ use App\Http\Controllers\Api\ArticleController;
 |
 */
 
+// Stock Picks API Routes
+Route::middleware('auth:api')->group(function () {
+});
 
 // No auth
 Route::get('/articles/sample/', [ArticleController::class, 'sampleArticle']);
@@ -30,14 +34,8 @@ Route::prefix('auth')->group(function () {
     Route::post('/forgot', [UserController::class, 'forgot']);
     Route::post('/reset', [UserController::class, 'reset']);
     Route::post('/login', [UserController::class, 'loginUser']);
-    Route::post(
-        '/forgot-password',
-        [UserController::class, 'forgotPassword']
-    );
-    Route::post(
-        '/reset-password',
-        [UserController::class, 'resetPassword']
-    );
+    Route::post('/forgot-password', [UserController::class, 'forgotPassword']);
+    Route::post('/reset-password', [UserController::class, 'resetPassword']);
 });
 
 // auth
@@ -47,7 +45,6 @@ Route::prefix('email')->group(function () {
     })->middleware('auth')->name('verification.notice');
     Route::get('/verify/{id}/{hash}', function (EmailVerificationRequest $request) {
         $request->fulfill();
-        #return redirect('/');
         return redirect()->route('home');
     })->middleware(['auth', 'signed'])->name('verification.verify');
     Route::post('/verification-notification', function (Request $request) {
@@ -55,6 +52,7 @@ Route::prefix('email')->group(function () {
         return back()->with('message', 'Verification link sent!');
     })->middleware(['auth', 'throttle:6,1'])->name('verification.send');
 });
+
 Route::group(['middleware' => ['auth.jwt']], function () {
     Route::prefix('auth')->group(function () {
         Route::post('/signout/', [UserController::class, 'signout']);
@@ -71,8 +69,19 @@ Route::group(['middleware' => ['auth.jwt']], function () {
         Route::get('/status/', [PayController::class, 'paymentStatus']);
     });
 
-    Route::post('/store/ftm/', [ArticleController::class, 'store']);
-    Route::get('/generate/slug/', [ArticleController::class, 'newsletterGenerateSlug']);
+});
+
+Route::get('/pay/callback/', [PayController::class, 'handleGatewayCallback']);
+Route::get('/pay/reference/{reference}', [PayController::class, 'paymentReference']);
+
+Route::group(['middleware' => ['auth.jwt', 'subscribed']], function () {
+    Route::prefix('articles')->group(function () {
+        Route::get('/', [ArticleController::class, 'index']);
+        Route::get('/all/', [ArticleController::class, 'indexNoAuth']);
+        Route::get('/latest/', [ArticleController::class, 'getLatest']);
+        Route::get('/by-media/', [ArticleController::class, 'indexByMediaType']);
+        Route::get('/{slug}/', [ArticleController::class, 'showSingleArticle']);
+    });
 
 
     // comments
@@ -91,24 +100,18 @@ Route::group(['middleware' => ['auth.jwt']], function () {
         Route::delete('/{comment}/report', [App\Http\Controllers\Api\CommentReportController::class, 'unreport']);
     });
 
-});
 
-Route::get('/pay/callback/', [PayController::class, 'handleGatewayCallback']);
-Route::get('/pay/reference/{reference}', [PayController::class, 'paymentReference']);
 
-Route::group(['middleware' => ['auth.jwt', 'subscribed']], function () {
-    Route::prefix('articles')->group(function () {
-        Route::get('/', [ArticleController::class, 'index']);
-        Route::get('/all/', [ArticleController::class, 'indexNoAuth']);
-        Route::get('/latest/', [ArticleController::class, 'getLatest']);
-        Route::get('/by-media/', [ArticleController::class, 'indexByMediaType']);
-        // Route::get('/{id}', [ArticleController::class, 'show']);
-        Route::get('/{slug}/', [ArticleController::class, 'showSingleArticle']);
-    });
+    Route::get('/stockpicks', [StockPickController::class, 'index']);
 
 });
 
 Route::prefix('admin')->middleware(['auth.jwt', 'admin'])->group(function () {
+
+    Route::post('/store/ftm/', [ArticleController::class, 'store']);
+    Route::get('/generate/slug/', [ArticleController::class, 'newsletterGenerateSlug']);
+
+
     // Media routes
     Route::prefix('media')->group(function () {
         Route::get('/', [ArticleController::class, 'listFiles']);
@@ -129,7 +132,6 @@ Route::prefix('admin')->middleware(['auth.jwt', 'admin'])->group(function () {
         Route::post('/create', [UserController::class, 'adminCreateUser']);
     });
 
-
     // Moderation routes (admin/moderator only)
     Route::prefix('comments')->group(function () {
         Route::get('/pending', [App\Http\Controllers\Api\CommentModerationController::class, 'pending']);
@@ -138,5 +140,11 @@ Route::prefix('admin')->middleware(['auth.jwt', 'admin'])->group(function () {
         Route::patch('/{comment}/moderate', [App\Http\Controllers\Api\CommentModerationController::class, 'moderate']);
         Route::patch('/bulk-moderate', [App\Http\Controllers\Api\CommentModerationController::class, 'bulkModerate']);
     });
+
+
+    Route::post('/stockpicks', [StockPickController::class, 'store']);
+    Route::put('/stockpicks/{stockPick}', [StockPickController::class, 'update']);
+    Route::patch('/stockpicks/{stockPick}/price', [StockPickController::class, 'updatePrice']);
+    Route::post('/stockpicks/batch-update-prices', [StockPickController::class, 'batchUpdatePrices']);
 
 });
