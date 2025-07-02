@@ -235,4 +235,19 @@ class PayController extends Controller
             ], 200);
         }
     }
+
+    public function allPaymentsWithUsers(Request $request)
+    {
+        $perPage = $request->input('per_page', 15);
+        $all = $request->input('all', false);
+
+        $query = Payment::with('user')
+            ->orderBy('created_at', 'desc');
+
+        if ($all) {
+            return PaymentResource::collection($query->get());
+        }
+
+        return PaymentResource::collection($query->paginate($perPage));
+    }
 }

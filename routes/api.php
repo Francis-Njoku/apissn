@@ -129,6 +129,10 @@ Route::prefix('admin')->middleware(['auth.jwt', 'admin'])->group(function () {
         Route::post('/create', [UserController::class, 'adminCreateUser']);
     });
 
+    // Payment routes
+    Route::prefix('pay')->group(function () {
+        Route::get('/all', [PayController::class, 'allPaymentsWithUsers']);
+    });
 
     // Moderation routes (admin/moderator only)
     Route::prefix('comments')->group(function () {
