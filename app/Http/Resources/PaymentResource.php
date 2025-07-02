@@ -18,12 +18,12 @@ class PaymentResource extends JsonResource
         $getPlan = DB::table('plan')->select('plan_name', 'plan_type', 'amount')->where('track', '=', $this->plan_id)->first();
         return [
             'id' => $this->id,
-            'user' => [
+            'user' => $this->user ? [
                 'id' => $this->user->id,
                 'first_name' => $this->user->first_name,
                 'last_name' => $this->user->last_name,
                 'email' => $this->user->email,
-            ],
+            ] : null,
             'order_id' => $this->order_id,
             'coupon_id' => $this->coupon_id,
             'amount' => $this->amount,
