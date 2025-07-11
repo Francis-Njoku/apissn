@@ -3,7 +3,7 @@
 use Illuminate\Support\Facades\Route;
 use Illuminate\Http\Request;
 use Illuminate\Foundation\Auth\EmailVerificationRequest;
-use App\Http\Controllers\StockPickController;
+use App\Http\Controllers\Api\StockPickController;
 use App\Http\Controllers\Api\PlanController;
 use App\Http\Controllers\Api\PayController;
 use App\Http\Controllers\Api\Auth\UserController;

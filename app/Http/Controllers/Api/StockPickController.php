@@ -5,6 +5,7 @@ namespace App\Http\Controllers\Api;
 use Illuminate\Support\Facades\Auth;
 use Illuminate\Http\Request;
 use App\Models\StockPick;
+use App\Http\Controllers\Controller;
 
 class StockPickController extends Controller
 {
