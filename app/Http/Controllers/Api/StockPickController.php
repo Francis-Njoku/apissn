@@ -2,7 +2,6 @@
 
 namespace App\Http\Controllers\Api;
 
-use Illuminate\Support\Facades\Auth;
 use Illuminate\Http\Request;
 use App\Models\StockPick;
 use App\Http\Controllers\Controller;
@@ -16,9 +15,6 @@ class StockPickController extends Controller
 
     public function store(Request $request)
     {
-        if (!Auth::user()->hasRole('admin')) {
-            return response()->json(['error' => 'Unauthorized'], 403);
-        }
 
         $validated = $request->validate([
             'symbol' => 'required|string|max:10',
@@ -34,10 +30,6 @@ class StockPickController extends Controller
 
     public function update(Request $request, StockPick $stockPick)
     {
-        if (!Auth::user()->hasRole('admin')) {
-            return response()->json(['error' => 'Unauthorized'], 403);
-        }
-
         $validated = $request->validate([
             'symbol' => 'sometimes|string|max:10',
             'newsletter_id' => 'nullable|exists:newsletter,id',
@@ -52,10 +44,6 @@ class StockPickController extends Controller
 
     public function updatePrice(Request $request, StockPick $stockPick)
     {
-        if (!Auth::user()->hasRole('admin')) {
-            return response()->json(['error' => 'Unauthorized'], 403);
-        }
-
         $validated = $request->validate([
             'current_price' => 'required|numeric'
         ]);
@@ -66,9 +54,6 @@ class StockPickController extends Controller
 
     public function batchUpdatePrices(Request $request)
     {
-        if (!Auth::user()->hasRole('admin')) {
-            return response()->json(['error' => 'Unauthorized'], 403);
-        }
 
         $validated = $request->validate([
             'updates' => 'required|array',
