@@ -5,10 +5,14 @@ namespace App\Http\Controllers\Api;
 use Illuminate\Support\Str;
 use Illuminate\Support\Facades\Validator;
 use Illuminate\Support\Facades\Storage;
+use Illuminate\Support\Facades\Mail;
+use Illuminate\Support\Facades\DB;
 use Illuminate\Pagination\LengthAwarePaginator;
 use Illuminate\Http\Request;
 use Carbon\Carbon;
+use App\Models\User;
 use App\Models\Newsletter;
+use App\Jobs\SendNewPostEmail;
 use App\Http\Resources\ArticleResource;
 use App\Http\Resources\ArticleAllResource;
 use App\Http\Requests\ArticleRequest;
@@ -96,19 +100,19 @@ class ArticleController extends Controller
         $media = $request->get('m');
 
         if ($media == "bytes") {
-            $latestRow = Newsletter::where('mediaType', 'bytes')->orderBy('created_at', 'desc')->first();
+            $latestRow = Newsletter::where('mediaType', 'bytes')->orderBy('news_date', 'desc')->first();
 
             return new ArticleAllResource($latestRow);
         } elseif ($media == "audio") {
-            $latestRow = Newsletter::where('mediaType', 'audio')->orderBy('created_at', 'desc')->first();
+            $latestRow = Newsletter::where('mediaType', 'audio')->orderBy('news_date', 'desc')->first();
 
             return new ArticleAllResource($latestRow);
         } elseif ($media == "video") {
-            $latestRow = Newsletter::where('mediaType', 'video')->orderBy('created_at', 'desc')->first();
+            $latestRow = Newsletter::where('mediaType', 'video')->orderBy('news_date', 'desc')->first();
 
             return new ArticleAllResource($latestRow);
         } else {
-            $latestRow = Newsletter::where('mediaType', 'text')->orderBy('created_at', 'desc')->first();
+            $latestRow = Newsletter::where('mediaType', 'text')->orderBy('news_date', 'desc')->first();
 
             return new ArticleAllResource($latestRow);
         }
@@ -130,21 +134,21 @@ class ArticleController extends Controller
             return ArticleResource::collection(
                 Newsletter::where('news_type_id', $newsType)
                     ->where('mediaType', $media)
-                    ->orderBy('created_at', 'desc')
+                    ->orderBy('news_date', 'desc')
                     ->paginate(10)
             );
         } elseif ($newsType) {
             //echo $filter;
             return ArticleResource::collection(
                 Newsletter::where('news_type_id', $newsType)
-                    ->orderBy('created_at', 'desc')
+                    ->orderBy('news_date', 'desc')
                     ->paginate(10)
             );
         } elseif ($media) {
             //echo $filter;
             return ArticleResource::collection(
                 Newsletter::where('mediaType', $media)
-                    ->orderBy('created_at', 'desc')
+                    ->orderBy('news_date', 'desc')
                     ->paginate(10)
             );
         } elseif ($filter) {
@@ -152,17 +156,17 @@ class ArticleController extends Controller
             return ArticleResource::collection(
                 Newsletter::where('name', 'like', '%' . $filter . '%')
                     ->orWhere('title', 'like', '%' . $filter . '%')
-                    ->orderBy('created_at', 'desc')
+                    ->orderBy('news_date', 'desc')
                     ->paginate(10)
             );
         } else {
-            return ArticleResource::collection(Newsletter::orderBy('created_at', 'desc')
+            return ArticleResource::collection(Newsletter::orderBy('news_date', 'desc')
                 ->paginate(10));
         }
     }
     /**
-     * Display a single sample article for unsubscribed users.
-     * This doesn't require database modifications and returns just one article.
+     * Display sample articles for unsubscribed users.
+     * This doesn't require database modifications and returns 8 articles.
      */
     public function sampleArticle(Request $request)
     {
@@ -171,7 +175,7 @@ class ArticleController extends Controller
 
         // Start with a base query for approved articles
         $baseQuery = Newsletter::where('status', 'approved')
-                          ->orderBy('created_at', 'asc');
+                          ->orderBy('news_date', 'desc');
 
         // Apply media type filter if provided
         if ($media) {
@@ -183,18 +187,18 @@ class ArticleController extends Controller
             $baseQuery->where('news_type_id', $newsType);
         }
 
-        // Get the oldest approved article
-        $sampleArticle = $baseQuery->first();
+        // Get 8 latest approved articles
+        $sampleArticles = $baseQuery->take(8)->get();
 
-        if (!$sampleArticle) {
+        if ($sampleArticles->isEmpty()) {
             return response()->json([
                 'status' => 'error',
-                'message' => 'No sample article available'
+                'message' => 'No sample articles available'
             ], 404);
         }
 
-        // Return the single article as a resource
-        return new ArticleAllResource($sampleArticle);
+        // Return the articles as a collection
+        return ArticleAllResource::collection($sampleArticles);
     }
 
 
@@ -202,14 +206,14 @@ class ArticleController extends Controller
     {
         $media = $request->get('m');
         if ($media) {
-            // Query the latest 10 posts by created_at date
-            $posts = Newsletter::where('mediaType', $media)->orderBy('created_at', 'desc')->take(10)->get();
+            // Query the latest 10 posts by news_date date
+            $posts = Newsletter::where('mediaType', $media)->orderBy('news_date', 'desc')->take(10)->get();
 
             // Wrap the result with the API resource
             return ArticleAllResource::collection($posts);
         } else {
-            // Query the latest 10 posts by created_at date
-            $posts = Newsletter::orderBy('created_at', 'desc')->take(10)->get();
+            // Query the latest 10 posts by news_date date
+            $posts = Newsletter::orderBy('news_date', 'desc')->take(10)->get();
 
             // Wrap the result with the API resource
             return ArticleAllResource::collection($posts);
@@ -231,21 +235,21 @@ class ArticleController extends Controller
             return ArticleAllResource::collection(
                 Newsletter::where('news_type_id', $newsType)
                     ->where('mediaType', $media)
-                    ->orderBy('created_at', 'desc')
+                    ->orderBy('news_date', 'desc')
                     ->paginate(10)
             );
         } elseif ($newsType) {
             //echo $filter;
             return ArticleAllResource::collection(
                 Newsletter::where('news_type_id', $newsType)
-                    ->orderBy('created_at', 'desc')
+                    ->orderBy('news_date', 'desc')
                     ->paginate(10)
             );
         } elseif ($media) {
             //echo $filter;
             return ArticleAllResource::collection(
                 Newsletter::where('mediaType', $media)
-                    ->orderBy('created_at', 'desc')
+                    ->orderBy('news_date', 'desc')
                     ->paginate(10)
             );
         } elseif ($filter) {
@@ -253,11 +257,11 @@ class ArticleController extends Controller
             return ArticleAllResource::collection(
                 Newsletter::where('name', 'like', '%' . $filter . '%')
                     ->orWhere('title', 'like', '%' . $filter . '%')
-                    ->orderBy('created_at', 'desc')
+                    ->orderBy('news_date', 'desc')
                     ->paginate(10)
             );
         } else {
-            return ArticleAllResource::collection(Newsletter::orderBy('created_at', 'desc')
+            return ArticleAllResource::collection(Newsletter::orderBy('news_date', 'desc')
                 ->paginate(10));
         }
     }
@@ -319,8 +323,9 @@ class ArticleController extends Controller
             'title' => 'required|string',
             'news_date' => 'required|date',
             'bytes' => 'nullable|string',
-            'body' => 'nullable|string|min:10|max:10000',
+            'body' => 'nullable|string|min:10|max:100000',
             'featuredImage' => 'nullable|file|mimetypes:image/jpeg,image/png,image/jpg',
+            'author_id' => 'required|integer',
 
         ]);
 
@@ -341,6 +346,7 @@ class ArticleController extends Controller
             'body' => $request->input('body'),
             'status' => 'approved',
             'featuredImage' => $this->storeFileNoDirectory($request->file('featuredImage')),
+            'author_id' => $request->input('author_id'),
         ];
 
         // Check for and handle each file type
@@ -392,12 +398,13 @@ class ArticleController extends Controller
             'name' => 'required|string',
             'title' => 'required|string',
             'news_date' => 'required|date',
-            'body' => 'nullable|string|min:10|max:10000',
+            'body' => 'nullable|string|min:10|max:100000',
             'featuredImage' => 'required|string',
             'media' => 'nullable|string',
             'mediaSrc' => 'nullable|string',
             'status' => 'required|string',
             'tags' => 'nullable|string',
+            'author_id' => 'required|integer',
 
         ]);
 
@@ -410,6 +417,10 @@ class ArticleController extends Controller
         }
 
         // Initialize an empty data array
+        // Convert tags to proper JSON format if present
+        $tags = $request->input('tags');
+        $tagsArray = $tags ? explode(',', $tags) : [];
+
         $data = [
             'news_type_id' => $request->input('news_type_id'),
             'name' => $request->input('name'),
@@ -417,15 +428,19 @@ class ArticleController extends Controller
             'news_date' => $request->input('news_date'),
             'body' => $request->input('body'),
             'status' => $request->input('status'),
-            'tags' => $request->input('tags'),
+            'tags' => json_encode($tagsArray),
             'mediaType' => $request->input('mediaType'),
             'media' => $request->input('media'),
             'mediaSrc' => $request->input('mediaSrc'),
             'featuredImage' => $request->input('featuredImage'),
+            'author_id' => $request->input('author_id'),
         ];
 
 
         $media = Newsletter::create($data);
+
+        // Dispatch the email job to notify users
+        SendNewPostEmail::dispatch($media->title);
 
         return response()->json([
             'status' => 'success',
@@ -439,8 +454,10 @@ class ArticleController extends Controller
      */
     public function show(string $id)
     {
-        // Retrieve the item or fail with a 404 error
-        $item = Newsletter::findOrFail($id);
+        // Retrieve the item with comments and fail with a 404 error
+        $item = Newsletter::with(['comments' => function ($query) {
+            $query->approved()->with('user');
+        }])->withCount('comments')->findOrFail($id);
 
         // Return the item wrapped in an API resource
         return new ArticleResource($item);
@@ -451,11 +468,46 @@ class ArticleController extends Controller
      */
     public function showSingleArticle(string $slug)
     {
-        // Retrieve the item or fail with a 404 error
-        $item = Newsletter::where('slug', $slug)->firstOrFail();
+        // Retrieve the item with comments and fail with a 404 error
+        $item = Newsletter::with(['comments' => function ($query) {
+            $query->approved()->with('user');
+        }])->withCount('comments')->where('slug', $slug)->firstOrFail();
 
         // Return the item wrapped in an API resource
         return new ArticleResource($item);
+    }
+
+    /**
+     * Search articles by title, content or tags
+     */
+    public function search(Request $request)
+    {
+        $query = $request->input('q');
+        
+        if (empty($query)) {
+            return response()->json(['error' => 'Search query is required'], 400);
+        }
+
+        $limit = $request->input('limit', 10);
+        $articles = Newsletter::where('title', 'like', "%{$query}%")
+            ->orWhere('body', 'like', "%{$query}%")
+            ->orWhere('tags', 'like', '%"'.$query.'"%')
+            ->limit($limit)
+            ->get();
+
+        // Return empty array if no results found
+        if ($articles->isEmpty()) {
+            return response()->json([]);
+        }
+
+        return response()->json($articles->map(function ($article) {
+            return [
+                'id' => $article->id,
+                'slug' => $article->slug,
+                'title' => $article->title,
+                'mediaType' => $article->mediaType
+            ];
+        }));
     }
 
     /**
@@ -470,7 +522,7 @@ class ArticleController extends Controller
         $validatedData = $request->validate([
             'title' => 'nullable|string',
             'news_date' => 'nullable|date',
-            'body' => 'nullable|string|min:10|max:10000',
+            'body' => 'nullable|string|min:10|max:100000',
             'featuredImage' => 'nullable|string',
             'media' => 'nullable|string',
             'status' => 'nullable|string',
@@ -514,6 +566,39 @@ class ArticleController extends Controller
     public function destroy(string $id)
     {
         //
+    }
+
+    /**
+     * List articles with pagination and sorting
+     */
+    public function listArticles(Request $request)
+    {
+        // Validate request parameters
+        $validated = $request->validate([
+            'page' => 'sometimes|integer|min:1',
+            'per_page' => 'sometimes|integer|min:1|max:100',
+            'sort_by' => 'sometimes|in:title,news_date,created_at',
+            'sort_order' => 'sometimes|in:asc,desc'
+        ]);
+
+        // Set defaults
+        $page = $validated['page'] ?? 1;
+        $perPage = $validated['per_page'] ?? 10;
+        $sortBy = $validated['sort_by'] ?? 'news_date';
+        $sortOrder = $validated['sort_order'] ?? 'desc';
+
+        $articles = Newsletter::query()
+            ->orderBy($sortBy, $sortOrder)
+            ->paginate($perPage, ['*'], 'page', $page);
+
+        return response()->json($articles->map(function ($article) {
+            return [
+                'id' => $article->id,
+                'slug' => $article->slug,
+                'title' => $article->title,
+                'mediaType' => $article->mediaType
+            ];
+        }));
     }
 
     public function listFiles(Request $request)

@@ -19,6 +19,7 @@ class ArticleResource extends JsonResource
         $data = [
             'id' => $this->id,
             'news_type_id' => $this->news_type_id,
+            'author_id' => $this->author_id,
             'name' => $this->name,
             'title' => $this->title,
             'body' => $this->body,
@@ -43,6 +44,24 @@ class ArticleResource extends JsonResource
                 $data['media'] = null;
                 break;
         }
+        if ($this->relationLoaded('comments')) {
+            $data['comments'] = $this->comments->map(function ($comment) {
+                return [
+                    'id' => $comment->id,
+                    'content' => $comment->content,
+                    'status' => $comment->status,
+                    'created_at' => $comment->created_at,
+                    'user' => $comment->user ? [
+                        'id' => $comment->user->id,
+                        'name' => $comment->user->name
+                    ] : [
+                        'name' => $comment->author_name
+                    ]
+                ];
+            });
+            $data['comments_count'] = $this->comments_count;
+        }
+
         return $data;
     }
 }

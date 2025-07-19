@@ -3,6 +3,7 @@
 use Illuminate\Support\Facades\Route;
 use Illuminate\Http\Request;
 use Illuminate\Foundation\Auth\EmailVerificationRequest;
+use App\Http\Controllers\Api\StockPickController;
 use App\Http\Controllers\Api\PlanController;
 use App\Http\Controllers\Api\PayController;
 use App\Http\Controllers\Api\Auth\UserController;
@@ -19,6 +20,9 @@ use App\Http\Controllers\Api\ArticleController;
 |
 */
 
+// Stock Picks API Routes
+Route::middleware('auth:api')->group(function () {
+});
 
 // No auth
 Route::get('/articles/sample/', [ArticleController::class, 'sampleArticle']);
@@ -30,14 +34,8 @@ Route::prefix('auth')->group(function () {
     Route::post('/forgot', [UserController::class, 'forgot']);
     Route::post('/reset', [UserController::class, 'reset']);
     Route::post('/login', [UserController::class, 'loginUser']);
-    Route::post(
-        '/forgot-password',
-        [UserController::class, 'forgotPassword']
-    );
-    Route::post(
-        '/reset-password',
-        [UserController::class, 'resetPassword']
-    );
+    Route::post('/forgot-password', [UserController::class, 'forgotPassword']);
+    Route::post('/reset-password', [UserController::class, 'resetPassword']);
 });
 
 // auth
@@ -47,7 +45,6 @@ Route::prefix('email')->group(function () {
     })->middleware('auth')->name('verification.notice');
     Route::get('/verify/{id}/{hash}', function (EmailVerificationRequest $request) {
         $request->fulfill();
-        #return redirect('/');
         return redirect()->route('home');
     })->middleware(['auth', 'signed'])->name('verification.verify');
     Route::post('/verification-notification', function (Request $request) {
@@ -55,58 +52,69 @@ Route::prefix('email')->group(function () {
         return back()->with('message', 'Verification link sent!');
     })->middleware(['auth', 'throttle:6,1'])->name('verification.send');
 });
+
 Route::group(['middleware' => ['auth.jwt']], function () {
+    
     Route::prefix('auth')->group(function () {
         Route::post('/signout/', [UserController::class, 'signout']);
     });
 
     Route::prefix('user')->group(function () {
         Route::get('/profile/', [UserController::class, 'profile']);
-        Route::get('/role/', [UserController::class, 'userStatus']);        
-    });  
-    
+        Route::get('/role/', [UserController::class, 'userStatus']);
+    });
+
     Route::prefix('pay')->group(function () {
         Route::post('/', [PayController::class, 'redirectToGateway']);
-        Route::get('/callback/', [PayController::class, 'handleGatewayCallback']);
-        Route::get('/reference/{reference}', [PayController::class, 'paymentReference']);
         Route::get('/history/', [PayController::class, 'paymentHistory']);
-        // Route::get('/payment/status/', [PayController::class, 'paymentStatus']);
         Route::get('/status/', [PayController::class, 'paymentStatus']);
     });
-    
-    Route::post('/store/ftm/', [ArticleController::class, 'store']);
-    Route::get('/generate/slug/', [ArticleController::class, 'newsletterGenerateSlug']);
+
 });
+
+Route::get('/pay/callback/', [PayController::class, 'handleGatewayCallback']);
+Route::get('/pay/reference/{reference}', [PayController::class, 'paymentReference']);
 
 Route::group(['middleware' => ['auth.jwt', 'subscribed']], function () {
     Route::prefix('articles')->group(function () {
+        Route::get('/search', [ArticleController::class, 'search']);
+        Route::get('/list', [ArticleController::class, 'listArticles']);
         Route::get('/', [ArticleController::class, 'index']);
         Route::get('/all/', [ArticleController::class, 'indexNoAuth']);
         Route::get('/latest/', [ArticleController::class, 'getLatest']);
         Route::get('/by-media/', [ArticleController::class, 'indexByMediaType']);
-        Route::get('/{id}', [ArticleController::class, 'show']);
         Route::get('/{slug}/', [ArticleController::class, 'showSingleArticle']);
     });
 
-    Route::prefix('comments')->group(function () {
-        // Store a new comment
-    Route::post('/', [CommentController::class, 'store']);
-    
-    // Update an existing comment
-    Route::put('/{comment}', [CommentController::class, 'update']);
-    Route::patch('/{comment}', [CommentController::class, 'update']);
 
-    
+    // comments
+    Route::get('/public/comments', [App\Http\Controllers\Api\CommentController::class, 'index']);
+
+    // Comments routes
+    Route::prefix('comments')->group(function () {
+        Route::get('/', [App\Http\Controllers\Api\CommentController::class, 'index']);
+        Route::post('/', [App\Http\Controllers\Api\CommentController::class, 'store']);
+        Route::get('/{comment}', [App\Http\Controllers\Api\CommentController::class, 'show']);
+        Route::put('/{comment}', [App\Http\Controllers\Api\CommentController::class, 'update']);
+        Route::delete('/{comment}', [App\Http\Controllers\Api\CommentController::class, 'destroy']);
+
+        // Comment reporting
+        Route::post('/{comment}/report', [App\Http\Controllers\Api\CommentReportController::class, 'report']);
+        Route::delete('/{comment}/report', [App\Http\Controllers\Api\CommentReportController::class, 'unreport']);
     });
+
+
+
+    Route::get('/stockpicks', [StockPickController::class, 'index']);
 
 });
 
-// Public routes (view comments)
-Route::get('/comments/', [CommentController::class, 'index']); // All or filtered comments
-Route::get('/comments/{comment}/', [CommentController::class, 'show']); // Single comment
-
-
 Route::prefix('admin')->middleware(['auth.jwt', 'admin'])->group(function () {
+
+    Route::post('/store/ftm/', [ArticleController::class, 'store']);
+    Route::get('/generate/slug/', [ArticleController::class, 'newsletterGenerateSlug']);
+
+
     // Media routes
     Route::prefix('media')->group(function () {
         Route::get('/', [ArticleController::class, 'listFiles']);
@@ -123,10 +131,28 @@ Route::prefix('admin')->middleware(['auth.jwt', 'admin'])->group(function () {
 
     // User management routes
     Route::prefix('users')->group(function () {
+        Route::get('/', [UserController::class, 'listUsers']);
         Route::post('/create', [UserController::class, 'adminCreateUser']);
-        Route::get('/list', [UserController::class, 'listUsers']);
     });
 
-    // Delete a comment
-    Route::delete('/comments/{comment}', [CommentController::class, 'destroy']);
+    // Payment routes
+    Route::prefix('pay')->group(function () {
+        Route::get('/all', [PayController::class, 'allPaymentsWithUsers']);
+    });
+
+    // Moderation routes (admin/moderator only)
+    Route::prefix('comments')->group(function () {
+        Route::get('/pending', [App\Http\Controllers\Api\CommentModerationController::class, 'pending']);
+        Route::get('/flagged', [App\Http\Controllers\Api\CommentModerationController::class, 'flagged']);
+        Route::get('/stats', [App\Http\Controllers\Api\CommentModerationController::class, 'stats']);
+        Route::patch('/{comment}/moderate', [App\Http\Controllers\Api\CommentModerationController::class, 'moderate']);
+        Route::patch('/bulk-moderate', [App\Http\Controllers\Api\CommentModerationController::class, 'bulkModerate']);
+    });
+
+
+    Route::post('/stockpicks', [StockPickController::class, 'store']);
+    Route::put('/stockpicks/{stockPick}', [StockPickController::class, 'update']);
+    Route::patch('/stockpicks/{stockPick}/price', [StockPickController::class, 'updatePrice']);
+    Route::post('/stockpicks/batch-update-prices', [StockPickController::class, 'batchUpdatePrices']);
+
 });

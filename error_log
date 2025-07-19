@@ -18,6 +18,24 @@ Stack trace:
 Stack trace:
 #0 {main}
   thrown in /home/ftmnlywl/test-server.ftm.ng/artisan on line 18
+<<<<<<< HEAD
+[27-Apr-2025 23:14:37 UTC] PHP Fatal error:  Composer detected issues in your platform: Your Composer dependencies require a PHP version ">= 8.1.0". You are running 7.3.33. in /home/nairametrics/follow/vendor/composer/platform_check.php on line 28
+[27-Apr-2025 23:14:37 UTC] PHP Fatal error:  Composer detected issues in your platform: Your Composer dependencies require a PHP version ">= 8.1.0". You are running 7.3.33. in /home/nairametrics/follow/vendor/composer/platform_check.php on line 28
+[27-Apr-2025 23:14:37 UTC] PHP Fatal error:  Composer detected issues in your platform: Your Composer dependencies require a PHP version ">= 8.1.0". You are running 7.3.33. in /home/nairametrics/follow/vendor/composer/platform_check.php on line 28
+[27-Apr-2025 23:14:37 UTC] PHP Fatal error:  Composer detected issues in your platform: Your Composer dependencies require a PHP version ">= 8.1.0". You are running 7.3.33. in /home/nairametrics/follow/vendor/composer/platform_check.php on line 28
+[27-Apr-2025 23:15:27 UTC] PHP Fatal error:  Composer detected issues in your platform: Your Composer dependencies require a PHP version ">= 8.1.0". You are running 7.3.33. in /home/nairametrics/follow/vendor/composer/platform_check.php on line 28
+[27-Apr-2025 23:15:27 UTC] PHP Fatal error:  Composer detected issues in your platform: Your Composer dependencies require a PHP version ">= 8.1.0". You are running 7.3.33. in /home/nairametrics/follow/vendor/composer/platform_check.php on line 28
+[27-Apr-2025 23:15:27 UTC] PHP Fatal error:  Composer detected issues in your platform: Your Composer dependencies require a PHP version ">= 8.1.0". You are running 7.3.33. in /home/nairametrics/follow/vendor/composer/platform_check.php on line 28
+[27-Apr-2025 23:15:27 UTC] PHP Fatal error:  Composer detected issues in your platform: Your Composer dependencies require a PHP version ">= 8.1.0". You are running 7.3.33. in /home/nairametrics/follow/vendor/composer/platform_check.php on line 28
+[27-Apr-2025 23:36:50 UTC] PHP Fatal error:  Composer detected issues in your platform: Your Composer dependencies require a PHP version ">= 8.1.0". You are running 7.3.33. in /home/nairametrics/follow/vendor/composer/platform_check.php on line 28
+[27-Apr-2025 23:48:30 UTC] PHP Fatal error:  Composer detected issues in your platform: Your Composer dependencies require a PHP version ">= 8.1.0". You are running 7.3.33. in /home/nairametrics/follow/vendor/composer/platform_check.php on line 28
+[27-Apr-2025 23:55:57 UTC] PHP Fatal error:  Composer detected issues in your platform: Your Composer dependencies require a PHP version ">= 8.1.0". You are running 7.3.33. in /home/nairametrics/follow/vendor/composer/platform_check.php on line 28
+[27-Apr-2025 23:59:31 UTC] PHP Fatal error:  Composer detected issues in your platform: Your Composer dependencies require a PHP version ">= 8.1.0". You are running 7.3.33. in /home/nairametrics/follow/vendor/composer/platform_check.php on line 28
+[28-Apr-2025 11:09:57 UTC] PHP Fatal error:  Composer detected issues in your platform: Your Composer dependencies require a PHP version ">= 8.1.0". You are running 7.3.33. in /home/nairametrics/follow/vendor/composer/platform_check.php on line 28
+[28-Apr-2025 11:09:58 UTC] PHP Fatal error:  Composer detected issues in your platform: Your Composer dependencies require a PHP version ">= 8.1.0". You are running 7.3.33. in /home/nairametrics/follow/vendor/composer/platform_check.php on line 28
+[28-Apr-2025 11:09:58 UTC] PHP Fatal error:  Composer detected issues in your platform: Your Composer dependencies require a PHP version ">= 8.1.0". You are running 7.3.33. in /home/nairametrics/follow/vendor/composer/platform_check.php on line 28
+[28-Apr-2025 11:09:58 UTC] PHP Fatal error:  Composer detected issues in your platform: Your Composer dependencies require a PHP version ">= 8.1.0". You are running 7.3.33. in /home/nairametrics/follow/vendor/composer/platform_check.php on line 28
+=======
 [28-Apr-2025 11:38:22 UTC] PHP Warning:  require(/home/ftmnlywl/server.ftm.ng/vendor/autoload.php): Failed to open stream: No such file or directory in /home/ftmnlywl/server.ftm.ng/artisan on line 18
 [28-Apr-2025 11:38:22 UTC] PHP Fatal error:  Uncaught Error: Failed opening required '/home/ftmnlywl/server.ftm.ng/vendor/autoload.php' (include_path='.:/opt/cpanel/ea-php82/root/usr/share/pear') in /home/ftmnlywl/server.ftm.ng/artisan:18
 Stack trace:
@@ -38,3 +56,4 @@ Stack trace:
 Stack trace:
 #0 {main}
   thrown in /home/ftmnlywl/server.ftm.ng/artisan on line 18
+>>>>>>> 9589c674d27cc1cc3b7d90540c63ff341b524e31

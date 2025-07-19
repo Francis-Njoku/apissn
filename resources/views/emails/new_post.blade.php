@@ -8,6 +8,6 @@
 </head>
 <body>
     <h1>New Post: {{ $title }}</h1>
-    <p>A new post has been published on our platform. Check it out!</p>
+    <p>A new post has been published on our platform. Check it out at <a href="https://ftm.ng">ftm.ng</a>!</p>
 </body>
 </html>

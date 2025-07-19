@@ -2,11 +2,11 @@
 
 namespace App\Http\Resources;
 
-use App\Models\UserGroup;
-use Illuminate\Http\Resources\Json\JsonResource;
 use Illuminate\Support\Facades\DB;
-use App\Http\Resources\UserGroupResource;
+use Illuminate\Http\Resources\Json\JsonResource;
 use Carbon\Carbon;
+use App\Models\UserGroup;
+use App\Http\Resources\UserGroupResource;
 
 class UserResource extends JsonResource
 {
@@ -24,7 +24,7 @@ class UserResource extends JsonResource
         //UserGroup::where('user_id', $this->id)->get();
 
         return [
-            //'id' => $this->id,
+            'id' => $this->id,
             'name' => $this->name,
             'first_name' => $this->first_name,
             'last_name' => $this->last_name,

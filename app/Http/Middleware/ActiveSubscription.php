@@ -47,7 +47,7 @@ class ActiveSubscription
             return false;
         }
         
-        $latestPayment = Payment::where('user_id', Auth::id())
+        return Payment::where('user_id', Auth::id())
             ->where('status', 'active')
             ->where('due_date', '>', now())
             ->orderByDesc('due_date')
