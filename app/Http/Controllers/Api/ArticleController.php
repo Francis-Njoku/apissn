@@ -17,6 +17,10 @@ use App\Http\Resources\ArticleResource;
 use App\Http\Resources\ArticleAllResource;
 use App\Http\Requests\ArticleRequest;
 use App\Http\Controllers\Controller;
+use App\Jobs\SendNewPostEmail;
+use Illuminate\Support\Facades\DB;
+use App\Models\User;
+use Illuminate\Support\Facades\Mail;
 
 class ArticleController extends Controller
 {

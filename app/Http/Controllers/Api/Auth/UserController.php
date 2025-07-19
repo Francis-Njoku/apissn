@@ -21,6 +21,8 @@ use App\Models\UserGroup;
 use App\Models\User;
 use App\Mail\WelcomeMail;
 use App\Mail\ResetPassword;
+use App\Mail\WelcomeEmail;
+
 //use App\Enum\UserAuth;
 use App\Http\Resources\UserResource;
 use App\Http\Requests\ForgotPasswordRequest;
@@ -172,9 +174,6 @@ class UserController extends Controller
 
             // Send email to new user
             event(new Registered($user));
-
-            // Send email to the newly created user
-            Mail::to($user->email)->send(new WelcomeMail($user));
 
             //$accessToken = $user->createToken('access_token', [UserATokenAbility::ACCESS_API->value], Carbon::now()->addMinutes(config('sanctum.ac_expiration')));
             //$refreshToken = $user->createToken('refresh_token', [TokenAbility::ISSUE_ACCESS_TOKEN->value], Carbon::now()->addMinutes(config('sanctum.rt_expiration')));

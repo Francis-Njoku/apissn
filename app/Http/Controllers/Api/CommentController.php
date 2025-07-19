@@ -201,5 +201,6 @@ class CommentController extends Controller
         }
 
         return $user->id === $comment->user_id || $user->hasAnyRole(['admin', 'moderator']);
+
     }
 }

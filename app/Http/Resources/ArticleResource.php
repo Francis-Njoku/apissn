@@ -5,6 +5,7 @@ namespace App\Http\Resources;
 use Illuminate\Support\Facades\URL;
 use Illuminate\Http\Resources\Json\JsonResource;
 use Illuminate\Http\Request;
+use App\Http\Resources\CommentResource;
 
 class ArticleResource extends JsonResource
 {
@@ -27,6 +28,7 @@ class ArticleResource extends JsonResource
             'image_url' => $this->featuredImage ? URL::to('storage/'.$this->featuredImage) : null,
             'status' => $this->status,
             'tags' => $this->tags,
+            'comments' => CommentResource::collection($this->comments),
             'created_at' => (new \DateTime($this->created_at))->format('Y-m-d H:i:s'),
             'updated_at' => (new \DateTime($this->updated_at))->format('Y-m-d H:i:s'),
         ];
