@@ -474,6 +474,39 @@ class ArticleController extends Controller
     }
 
     /**
+     * Search articles by title, content or tags
+     */
+    public function search(Request $request)
+    {
+        $query = $request->input('q');
+        
+        if (empty($query)) {
+            return response()->json(['error' => 'Search query is required'], 400);
+        }
+
+        $limit = $request->input('limit', 10);
+        $articles = Newsletter::where('title', 'like', "%{$query}%")
+            ->orWhere('body', 'like', "%{$query}%")
+            ->orWhere('tags', 'like', '%"'.$query.'"%')
+            ->limit($limit)
+            ->get();
+
+        // Return empty array if no results found
+        if ($articles->isEmpty()) {
+            return response()->json([]);
+        }
+
+        return response()->json($articles->map(function ($article) {
+            return [
+                'id' => $article->id,
+                'slug' => $article->slug,
+                'title' => $article->title,
+                'mediaType' => $article->mediaType
+            ];
+        }));
+    }
+
+    /**
      * Update the specified resource in storage.
      */
     public function update(Request $request, string $slug)
@@ -529,6 +562,39 @@ class ArticleController extends Controller
     public function destroy(string $id)
     {
         //
+    }
+
+    /**
+     * List articles with pagination and sorting
+     */
+    public function listArticles(Request $request)
+    {
+        // Validate request parameters
+        $validated = $request->validate([
+            'page' => 'sometimes|integer|min:1',
+            'per_page' => 'sometimes|integer|min:1|max:100',
+            'sort_by' => 'sometimes|in:title,news_date,created_at',
+            'sort_order' => 'sometimes|in:asc,desc'
+        ]);
+
+        // Set defaults
+        $page = $validated['page'] ?? 1;
+        $perPage = $validated['per_page'] ?? 10;
+        $sortBy = $validated['sort_by'] ?? 'news_date';
+        $sortOrder = $validated['sort_order'] ?? 'desc';
+
+        $articles = Newsletter::query()
+            ->orderBy($sortBy, $sortOrder)
+            ->paginate($perPage, ['*'], 'page', $page);
+
+        return response()->json($articles->map(function ($article) {
+            return [
+                'id' => $article->id,
+                'slug' => $article->slug,
+                'title' => $article->title,
+                'mediaType' => $article->mediaType
+            ];
+        }));
     }
 
     public function listFiles(Request $request)

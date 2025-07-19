@@ -54,6 +54,7 @@ Route::prefix('email')->group(function () {
 });
 
 Route::group(['middleware' => ['auth.jwt']], function () {
+    
     Route::prefix('auth')->group(function () {
         Route::post('/signout/', [UserController::class, 'signout']);
     });
@@ -76,6 +77,8 @@ Route::get('/pay/reference/{reference}', [PayController::class, 'paymentReferenc
 
 Route::group(['middleware' => ['auth.jwt', 'subscribed']], function () {
     Route::prefix('articles')->group(function () {
+        Route::get('/search', [ArticleController::class, 'search']);
+        Route::get('/list', [ArticleController::class, 'listArticles']);
         Route::get('/', [ArticleController::class, 'index']);
         Route::get('/all/', [ArticleController::class, 'indexNoAuth']);
         Route::get('/latest/', [ArticleController::class, 'getLatest']);
