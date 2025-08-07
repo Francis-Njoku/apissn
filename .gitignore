@@ -19,3 +19,7 @@ yarn-error.log
 /.vscode
 .htaccess
 deploy.sh
+
+# Cline rules and memory bank
+memory-bank/
+.clinerules/
