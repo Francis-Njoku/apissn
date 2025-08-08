@@ -404,13 +404,13 @@ class ArticleController extends Controller
 
         ]);
 
-        if ($validator->fails()) {
-            return response()->json([
-                'status' => 'error',
-                'message' => 'Validation failed',
-                'errors' => $validator->errors()
-            ], 422);
-        }
+        // if ($validator->fails()) {
+        //     return response()->json([
+        //         'status' => 'error',
+        //         'message' => 'Validation failed',
+        //         'errors' => $validator->errors()
+        //     ], 422);
+        // }
 
         // Initialize an empty data array
         // Convert tags to proper JSON format if present
@@ -525,8 +525,26 @@ class ArticleController extends Controller
             'tags' => 'nullable|string',
         ]);
 
+
+
+
+        // Initialize an empty data array
+        // Convert tags to proper JSON format if present
+        $tags = $request->input('tags');
+        $tagsArray = $tags ? explode(',', $tags) : [];
+
+        $data = [
+            'title' => $request->input('title'),
+            'news_date' => $request->input('news_date'),
+            'body' => $request->input('body'),
+            'status' => $request->input('status'),
+            'tags' => json_encode($tagsArray),
+            'media' => $request->input('media'),
+            'featuredImage' => $request->input('featuredImage'),
+        ];
+
         // Update the resource with validated data
-        $resource->update($validatedData);
+        $resource->update($data);
 
         // Optionally, you can return a response
         return response()->json([
@@ -592,7 +610,9 @@ class ArticleController extends Controller
                 'id' => $article->id,
                 'slug' => $article->slug,
                 'title' => $article->title,
-                'mediaType' => $article->mediaType
+                'mediaType' => $article->mediaType,
+                'news_date' => $article->news_date,
+                'status' => $article->status
             ];
         }));
     }
