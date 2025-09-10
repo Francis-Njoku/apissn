@@ -461,12 +461,12 @@ class UserController extends Controller
         }
         
         // Log query parameters for debugging
-        dump('User list query parameters', [
-            'role' => $role,
-            'normalized_role' => $normalizedRole,
-            'subscriber_status' => $request->input('subscriber_status'),
-            'normalized_subscriber_status' => $status ?? null
-        ]);
+        // dump('User list query parameters', [
+        //     'role' => $role,
+        //     'normalized_role' => $normalizedRole,
+        //     'subscriber_status' => $request->input('subscriber_status'),
+        //     'normalized_subscriber_status' => $status ?? null
+        // ]);
         
         return UserResource::collection($query->paginate(10));
     }
