@@ -20,8 +20,8 @@ use Carbon\Carbon;
 use App\Models\UserGroup;
 use App\Models\User;
 use App\Mail\WelcomeMail;
-use App\Mail\ResetPassword;
 use App\Mail\WelcomeEmail;
+use App\Mail\ResetPassword;
 
 //use App\Enum\UserAuth;
 use App\Http\Resources\UserResource;
@@ -425,14 +425,49 @@ class UserController extends Controller
     public function listUsers(Request $request)
     {
         $role = $request->query('role');
-        $query = User::query();
+        $query = User::select([
+            'id', 'name', 'first_name', 'last_name', 'email',
+            'phone', 'role_id', 'status', 'created_at', 'updated_at'
+        ]);
 
-        if ($role === 'admin') {
+        // Handle role parameter case-insensitively with trimming and decoding
+        $normalizedRole = strtolower(trim(urldecode($role)));
+        if ($normalizedRole === 'admin') {
             $query->where('role_id', 1);
-        } elseif ($role === 'user') {
+        } elseif ($normalizedRole === 'user') {
             $query->where('role_id', 2);
         }
 
+        if ($request->has('subscriber_status')) {
+            $status = strtolower(trim(urldecode($request->input('subscriber_status'))));
+            
+            // Validate subscriber_status
+            $validStatuses = ['active', 'never_subscribed', 'expired_non_renewed'];
+            if (!in_array($status, $validStatuses)) {
+                Log::warning('Invalid subscriber_status value: ' . $status);
+            } else {
+                switch ($status) {
+                    case 'active':
+                        $query->withActiveSubscription();
+                        break;
+                    case 'never_subscribed':
+                        $query->withNeverSubscribed();
+                        break;
+                    case 'expired_non_renewed':
+                        $query->withExpiredSubscription();
+                        break;
+                }
+            }
+        }
+        
+        // Log query parameters for debugging
+        dump('User list query parameters', [
+            'role' => $role,
+            'normalized_role' => $normalizedRole,
+            'subscriber_status' => $request->input('subscriber_status'),
+            'normalized_subscriber_status' => $status ?? null
+        ]);
+        
         return UserResource::collection($query->paginate(10));
     }
 

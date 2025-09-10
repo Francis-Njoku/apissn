@@ -25,6 +25,14 @@ List all users (paginated). Retrieves a list of all users in the system, with op
 #### Query Parameters:
 
 -   `role` (string, optional): Filter users by their role. Accepted values: `admin`, `user`.
+-   `subscriber_status` (string, optional): Filter users by their subscription status. Accepted values:
+
+    -   `active` - Users with active subscriptions (payments with status 'active' and due_date in the future)
+    -   `never_subscribed` - Users who have never had any subscription
+    -   `expired_non_renewed` - Users with any payment that has due_date in the past (expired)
+
+    Note: All users will be categorized into one of these three statuses.
+
 -   `per_page` (integer, optional): Number of users to display per page. Defaults to 10.
 
 #### Response:
@@ -49,7 +57,9 @@ Returns a paginated JSON object containing user data:
             "email": "admin@example.com",
             "role_id": 1,
             "status": "approved",
-            "created_at": "2025-06-15T08:30:00Z"
+            "created_at": "2025-06-15T08:30:00Z",
+            "subscriber_status": "active",
+            "last_payment_date": "2025-06-15T08:30:00Z"
         }
     ],
     "meta": {

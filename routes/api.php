@@ -6,6 +6,7 @@ use Illuminate\Foundation\Auth\EmailVerificationRequest;
 use App\Http\Controllers\Api\StockPickController;
 use App\Http\Controllers\Api\PlanController;
 use App\Http\Controllers\Api\PayController;
+use App\Http\Controllers\Api\CommentController;
 use App\Http\Controllers\Api\Auth\UserController;
 use App\Http\Controllers\Api\ArticleController;
 
@@ -88,15 +89,15 @@ Route::group(['middleware' => ['auth.jwt', 'subscribed']], function () {
 
 
     // comments
-    Route::get('/public/comments', [App\Http\Controllers\Api\CommentController::class, 'index']);
+    Route::get('/public/comments', [CommentController::class, 'index']);
 
     // Comments routes
     Route::prefix('comments')->group(function () {
-        Route::get('/', [App\Http\Controllers\Api\CommentController::class, 'index']);
-        Route::post('/', [App\Http\Controllers\Api\CommentController::class, 'store']);
-        Route::get('/{comment}', [App\Http\Controllers\Api\CommentController::class, 'show']);
-        Route::put('/{comment}', [App\Http\Controllers\Api\CommentController::class, 'update']);
-        Route::delete('/{comment}', [App\Http\Controllers\Api\CommentController::class, 'destroy']);
+        Route::get('/', [CommentController::class, 'index']);
+        Route::post('/', [CommentController::class, 'store']);
+        Route::get('/{comment}', [CommentController::class, 'show']);
+        Route::put('/{comment}', [CommentController::class, 'update']);
+        Route::delete('/{comment}', [CommentController::class, 'destroy']);
 
         // Comment reporting
         Route::post('/{comment}/report', [App\Http\Controllers\Api\CommentReportController::class, 'report']);
@@ -155,4 +156,12 @@ Route::prefix('admin')->middleware(['auth.jwt', 'admin'])->group(function () {
     Route::patch('/stockpicks/{stockPick}/price', [StockPickController::class, 'updatePrice']);
     Route::post('/stockpicks/batch-update-prices', [StockPickController::class, 'batchUpdatePrices']);
 
+});
+
+Route::prefix('admin/metrics')->middleware(['auth.jwt', 'admin'])->group(function () {
+    Route::get('user-funnel', [\App\Http\Controllers\Api\AdminMetricsController::class, 'userFunnel']);
+    Route::get('subscription-health', [\App\Http\Controllers\Api\AdminMetricsController::class, 'subscriptionHealth']);
+    Route::get('cohorts/{period}', [\App\Http\Controllers\Api\AdminMetricsController::class, 'cohortAnalysis']);
+    Route::get('engagement/{user_id?}', [\App\Http\Controllers\Api\AdminMetricsController::class, 'engagementMetrics']);
+    Route::get('payment-analytics', [\App\Http\Controllers\Api\AdminMetricsController::class, 'paymentAnalytics']);
 });

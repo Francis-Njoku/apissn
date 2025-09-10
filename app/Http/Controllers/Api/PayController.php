@@ -18,7 +18,6 @@ use App\Models\Entries;
 use App\Models\Coupons;
 use App\Http\Resources\PaymentResource;
 use App\Http\Controllers\Controller;
-use Carbon\Carbon;
 
 class PayController extends Controller
 {
@@ -117,7 +116,9 @@ class PayController extends Controller
         $ip_address = (($paymentDetails['data']['ip_address']));
         $plan_type = (($paymentDetails['data']['metadata']['planType']));
         $userId = (($paymentDetails['data']['metadata']['userId']));
+        $callBackUrl = (($paymentDetails['data']['metadata']['callBackUrl']));
         $customer_code = (($paymentDetails['data']['customer']['customer_code']));
+        $gateway_response = $message; // Use payment message as gateway response
 
         // Now you have the payment details,
         // you can store the authorization_code in your db to allow for recurrent subscriptions
