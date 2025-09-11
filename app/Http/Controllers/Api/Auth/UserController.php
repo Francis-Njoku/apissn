@@ -468,7 +468,11 @@ class UserController extends Controller
         //     'normalized_subscriber_status' => $status ?? null
         // ]);
         
-        return UserResource::collection($query->paginate(10));
+        // Handle per_page parameter with validation (min: 1, max: 100, default: 10)
+        $perPage = $request->query('per_page', 10);
+        $perPage = max(1, min(100, (int) $perPage));
+        
+        return UserResource::collection($query->paginate($perPage));
     }
 
     /**
