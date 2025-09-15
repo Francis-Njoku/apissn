@@ -71,7 +71,7 @@ Route::group(['middleware' => ['auth.jwt']], function () {
     });
 
 });
-
+Route::get('/pay/summary', [PayController::class, 'paymentsSummary']);
 Route::get('/pay/callback/', [PayController::class, 'handleGatewayCallback']);
 Route::get('/pay/reference/{reference}', [PayController::class, 'paymentReference']);
 
