@@ -429,4 +429,84 @@ class PayController extends Controller
     }
 
 
+    /**
+     * Manually add a payment record.
+     *
+     * @param  \Illuminate\Http\Request  $request
+     * @return \Illuminate\Http\Response
+     */
+    public function addManualPayment(Request $request)
+    {
+        $validatedData = $request->validate([
+            'user_id' => 'required_without:user_email|nullable|exists:users,id',
+            'user_email' => 'required_without:user_id|nullable|email|exists:users,email',
+            'amount' => 'required|numeric|min:0',
+            'reference' => 'required|unique:payment,reference',
+            'status' => 'required|in:active,inactive,pending,failed,success',
+            'payment_method' => 'nullable|string|max:255',
+            'transaction_id' => 'nullable|string|max:255',
+'plan_id' => 'nullable|integer|exists:plan,track',
+            'due_date' => 'nullable|date',
+            'paid_at' => 'nullable|date',
+            'currency' => 'nullable|string|max:3',
+            'metadata' => 'nullable|array',
+            'ip_address' => 'nullable|ip',
+            'order_id' => 'nullable|string|max:255',
+            'gateway_response' => 'nullable|string',
+            'status_response' => 'nullable|string',
+        ]);
+
+        try {
+            // Get user ID from either user_id or user_email
+            $userId = $validatedData['user_id'] ?? null;
+            if (!$userId && isset($validatedData['user_email'])) {
+                $user = User::where('email', $validatedData['user_email'])->first();
+                if ($user) {
+                    $userId = $user->id;
+                }
+            }
+
+            // Validate that we have a user ID
+            if (!$userId) {
+                return response()->json([
+                    'status' => 'error',
+                    'message' => 'User not found. Please provide a valid user_id or user_email.'
+                ], 404);
+            }
+
+            // Create the payment record
+            $payment = new Payment();
+            $payment->user_id = $userId;
+            $payment->amount = $validatedData['amount'];
+            $payment->reference = $validatedData['reference'];
+            $payment->status = $validatedData['status'];
+            
+            // Optional fields
+            $payment->payment_method = $validatedData['payment_method'] ?? null;
+            $payment->transaction_id = $validatedData['transaction_id'] ?? null;
+            $payment->plan_id = $validatedData['plan_id'] ?? null;
+            $payment->due_date = isset($validatedData['due_date']) ? Carbon::parse($validatedData['due_date'])->format('Y-m-d') : null;
+            $payment->paid_at = isset($validatedData['paid_at']) ? Carbon::parse($validatedData['paid_at'])->format('Y-m-d H:i:s') : null;
+            $payment->currency = $validatedData['currency'] ?? 'NGN';
+            $payment->metadata = isset($validatedData['metadata']) ? json_encode($validatedData['metadata']) : null;
+            $payment->ip_address = $validatedData['ip_address'] ?? null;
+            $payment->order_id = $validatedData['order_id'] ?? null;
+            $payment->gateway_response = $validatedData['gateway_response'] ?? null;
+            $payment->status_response = $validatedData['status_response'] ?? null;
+            
+            $payment->save();
+
+            return response()->json([
+                'status' => 'success',
+                'message' => 'Payment record added successfully',
+                'data' => new PaymentResource($payment)
+            ], 201);
+        } catch (\Exception $e) {
+            return response()->json([
+                'status' => 'error',
+                'message' => 'Failed to add payment record',
+                'error' => $e->getMessage()
+            ], 500);
+        }
+    }
 }

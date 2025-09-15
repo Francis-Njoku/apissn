@@ -14,6 +14,12 @@ class Payment extends Model
     // Fillable
     protected $fillable = ['user_id', 'order_id', 'coupon_id', 'ip_address','gateway_response','plan_id','amount','reference','status_response','due_date','status'];
 
+    // Date casting
+    protected $casts = [
+        'due_date' => 'date',
+        'paid_at' => 'datetime',
+    ];
+
     public function user()
     {
         return $this->belongsTo(User::class);

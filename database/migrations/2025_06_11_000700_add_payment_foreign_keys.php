@@ -28,13 +28,13 @@ return new class () extends Migration {
                     });
                 }
 
-                if (Schema::hasTable('payment') && Schema::hasTable('plans')) {
+                if (Schema::hasTable('payment') && Schema::hasTable('plan')) {
                     Schema::table('payment', function (Blueprint $table) {
                         if (Schema::hasColumn('payment', 'plan_id') && 
-                            Schema::hasColumn('plans', 'id')) {
+                            Schema::hasColumn('plan', 'id')) {
                             $table->foreign('plan_id')
                                 ->references('id')
-                                ->on('plans')
+                                ->on('plan')
                                 ->onDelete('set null');
                         }
                     });

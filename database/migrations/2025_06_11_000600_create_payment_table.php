@@ -95,9 +95,9 @@ class CreatePaymentTable extends Migration
             });
         }
 
-        if (Schema::hasTable('payment') && Schema::hasTable('plans')) {
+        if (Schema::hasTable('payment') && Schema::hasTable('plan')) {
             Schema::table('payment', function (Blueprint $table) {
-                $table->foreign('plan_id')->references('id')->on('plans')->onDelete('set null');
+                $table->foreign('plan_id')->references('id')->on('plan')->onDelete('set null');
             });
         }
     }
