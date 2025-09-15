@@ -22,7 +22,6 @@ class UserResource extends JsonResource
 
         //$getUser = DB::table('users')->select('firstName','lastName','email')->where('id', '=', $this->manager_id)->get();
         //UserGroup::where('user_id', $this->id)->get();
-
         return [
             'id' => $this->id,
             'name' => $this->name,
@@ -34,6 +33,7 @@ class UserResource extends JsonResource
             'created_at' => (new \DateTime($this->created_at))->format('Y-m-d H:i:s'),
             'updated_at' => (new \DateTime($this->updated_at))->format('Y-m-d H:i:s'),
             'subscriber_status' => $this->subscriber_status,
+            'role' => $this->role->name,
             'last_payment_date' => $this->last_payment_date ? (new \DateTime($this->last_payment_date))->format('Y-m-d H:i:s') : null,
         ];
     }

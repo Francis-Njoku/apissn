@@ -21,37 +21,38 @@ use App\Http\Controllers\Api\ArticleController;
 |
 */
 
-// Stock Picks API Routes
-Route::middleware('auth:api')->group(function () {
-});
+Route::group([ ],function () {
 
-// No auth
-Route::get('/articles/sample/', [ArticleController::class, 'sampleArticle']);
-Route::get('/plans/', [PlanController::class, 'index']);
-Route::prefix('auth')->group(function () {
-    Route::post('/refresh', [UserController::class, 'refresh']);
-    Route::post('/register', [UserController::class, 'createUser']);
-    Route::post('/logout', [UserController::class, 'logout']);
-    Route::post('/forgot', [UserController::class, 'forgot']);
-    Route::post('/reset', [UserController::class, 'reset']);
-    Route::post('/login', [UserController::class, 'loginUser']);
-    Route::post('/forgot-password', [UserController::class, 'forgotPassword']);
-    Route::post('/reset-password', [UserController::class, 'resetPassword']);
-});
+    Route::get('/articles/sample/', [ArticleController::class, 'sampleArticle']);
+    Route::get('/plans/', [PlanController::class, 'index']);
 
-// auth
-Route::prefix('email')->group(function () {
-    Route::get('/verify', function () {
-        return view('auth.verify-email');
-    })->middleware('auth')->name('verification.notice');
-    Route::get('/verify/{id}/{hash}', function (EmailVerificationRequest $request) {
-        $request->fulfill();
-        return redirect()->route('home');
-    })->middleware(['auth', 'signed'])->name('verification.verify');
-    Route::post('/verification-notification', function (Request $request) {
-        $request->user()->sendEmailVerificationNotification();
-        return back()->with('message', 'Verification link sent!');
-    })->middleware(['auth', 'throttle:6,1'])->name('verification.send');
+    Route::prefix('auth')->group(function () {
+        Route::post('/refresh', [UserController::class, 'refresh']);
+        Route::post('/register', [UserController::class, 'createUser']);
+        Route::post('/logout', [UserController::class, 'logout']);
+        Route::post('/forgot', [UserController::class, 'forgot']);
+        Route::post('/reset', [UserController::class, 'reset']);
+        Route::post('/login', [UserController::class, 'loginUser']);
+        Route::post('/forgot-password', [UserController::class, 'forgotPassword']);
+        Route::post('/reset-password', [UserController::class, 'resetPassword']);
+    });
+
+    Route::prefix('email')->group(function () {
+        Route::get('/verify', function () {
+            return view('auth.verify-email');
+        })->middleware('auth')->name('verification.notice');
+        Route::get('/verify/{id}/{hash}', function (EmailVerificationRequest $request) {
+            $request->fulfill();
+            return redirect()->route('home');
+        })->middleware(['auth', 'signed'])->name('verification.verify');
+        Route::post('/verification-notification', function (Request $request) {
+            $request->user()->sendEmailVerificationNotification();
+            return back()->with('message', 'Verification link sent!');
+        })->middleware(['auth', 'throttle:6,1'])->name('verification.send');
+    });
+
+    Route::get('/pay/callback/', [PayController::class, 'handleGatewayCallback']);
+    Route::get('/pay/reference/{reference}', [PayController::class, 'paymentReference']);
 });
 
 Route::group(['middleware' => ['auth.jwt']], function () {
@@ -73,9 +74,6 @@ Route::group(['middleware' => ['auth.jwt']], function () {
 
 });
 
-Route::get('/pay/callback/', [PayController::class, 'handleGatewayCallback']);
-Route::get('/pay/reference/{reference}', [PayController::class, 'paymentReference']);
-
 Route::group(['middleware' => ['auth.jwt', 'subscribed']], function () {
     Route::prefix('articles')->group(function () {
         Route::get('/search', [ArticleController::class, 'search']);
@@ -87,24 +85,18 @@ Route::group(['middleware' => ['auth.jwt', 'subscribed']], function () {
         Route::get('/{slug}/', [ArticleController::class, 'showSingleArticle']);
     });
 
-
-    // comments
-    Route::get('/public/comments', [CommentController::class, 'index']);
-
     // Comments routes
     Route::prefix('comments')->group(function () {
+        Route::get('/public', [CommentController::class, 'index']);
         Route::get('/', [CommentController::class, 'index']);
         Route::post('/', [CommentController::class, 'store']);
         Route::get('/{comment}', [CommentController::class, 'show']);
         Route::put('/{comment}', [CommentController::class, 'update']);
         Route::delete('/{comment}', [CommentController::class, 'destroy']);
-
         // Comment reporting
         Route::post('/{comment}/report', [App\Http\Controllers\Api\CommentReportController::class, 'report']);
         Route::delete('/{comment}/report', [App\Http\Controllers\Api\CommentReportController::class, 'unreport']);
     });
-
-
 
     Route::get('/stockpicks', [StockPickController::class, 'index']);
 
@@ -134,11 +126,13 @@ Route::prefix('admin')->middleware(['auth.jwt', 'admin'])->group(function () {
     Route::prefix('users')->group(function () {
         Route::get('/', [UserController::class, 'listUsers']);
         Route::post('/create', [UserController::class, 'adminCreateUser']);
+        Route::put('/{id}', [UserController::class, 'updateUser']);
     });
 
     // Payment routes
     Route::prefix('pay')->group(function () {
         Route::get('/all', [PayController::class, 'allPaymentsWithUsers']);
+        Route::get('/user/{identifier}', [PayController::class, 'userPaymentHistory']);
     });
 
     // Moderation routes (admin/moderator only)
@@ -150,18 +144,20 @@ Route::prefix('admin')->middleware(['auth.jwt', 'admin'])->group(function () {
         Route::patch('/bulk-moderate', [App\Http\Controllers\Api\CommentModerationController::class, 'bulkModerate']);
     });
 
+    Route::prefix('metrics')->group(function () {
+        Route::get('user-funnel', [\App\Http\Controllers\Api\AdminMetricsController::class, 'userFunnel']);
+        Route::get('subscription-health', [\App\Http\Controllers\Api\AdminMetricsController::class, 'subscriptionHealth']);
+        Route::get('cohorts/{period}', [\App\Http\Controllers\Api\AdminMetricsController::class, 'cohortAnalysis']);
+        Route::get('engagement/{user_id?}', [\App\Http\Controllers\Api\AdminMetricsController::class, 'engagementMetrics']);
+        Route::get('payment-analytics', [\App\Http\Controllers\Api\AdminMetricsController::class, 'paymentAnalytics']);
+    });
 
-    Route::post('/stockpicks', [StockPickController::class, 'store']);
-    Route::put('/stockpicks/{stockPick}', [StockPickController::class, 'update']);
-    Route::patch('/stockpicks/{stockPick}/price', [StockPickController::class, 'updatePrice']);
-    Route::post('/stockpicks/batch-update-prices', [StockPickController::class, 'batchUpdatePrices']);
+    Route::prefix('stockpicks')->group(function () {
+        Route::post('/', [StockPickController::class, 'store']);
+        Route::put('/{stockPick}', [StockPickController::class, 'update']);
+        Route::patch('/{stockPick}/price', [StockPickController::class, 'updatePrice']);
+        Route::post('/batch-update-prices', [StockPickController::class, 'batchUpdatePrices']);
+    });
 
 });
 
-Route::prefix('admin/metrics')->middleware(['auth.jwt', 'admin'])->group(function () {
-    Route::get('user-funnel', [\App\Http\Controllers\Api\AdminMetricsController::class, 'userFunnel']);
-    Route::get('subscription-health', [\App\Http\Controllers\Api\AdminMetricsController::class, 'subscriptionHealth']);
-    Route::get('cohorts/{period}', [\App\Http\Controllers\Api\AdminMetricsController::class, 'cohortAnalysis']);
-    Route::get('engagement/{user_id?}', [\App\Http\Controllers\Api\AdminMetricsController::class, 'engagementMetrics']);
-    Route::get('payment-analytics', [\App\Http\Controllers\Api\AdminMetricsController::class, 'paymentAnalytics']);
-});

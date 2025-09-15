@@ -237,10 +237,48 @@ class PayController extends Controller
         }
     }
 
-    public function allPaymentsWithUsers(Request $request)
+    public function userPaymentHistory(Request $request, $identifier)
     {
         $perPage = $request->input('per_page', 15);
-        $all = $request->input('all', false);
+        
+        // Check if identifier is numeric (ID) or email
+        if (is_numeric($identifier)) {
+            // Identifier is an ID
+            $user = User::find($identifier);
+        } else {
+            // Identifier is an email
+            $user = User::where('email', $identifier)->first();
+        }
+        
+        // Check if user exists
+        if (!$user) {
+            return response()->json([
+                'status' => false,
+                'message' => 'User not found'
+            ], 404);
+        }
+        
+        $query = Payment::with('user')
+            ->where('user_id', $user->id)
+            ->orderBy('created_at', 'desc');
+
+        return PaymentResource::collection($query->paginate($perPage));
+    }
+
+    /**
+     * List all payments with user details.
+     *
+     * @param  \Illuminate\Http\Request  $request
+     * @return \Illuminate\Http\Response
+     */
+    public function allPaymentsWithUsers(Request $request)
+    {
+        // Handle per_page parameter with validation (min: 1, max: 100, default: 15)
+        $perPage = $request->query('per_page', 15);
+        $perPage = max(1, min(100, (int) $perPage));
+        
+        // Handle all parameter for returning all records
+        $all = filter_var($request->query('all', false), FILTER_VALIDATE_BOOLEAN);
 
         $query = Payment::with('user')
             ->orderBy('created_at', 'desc');

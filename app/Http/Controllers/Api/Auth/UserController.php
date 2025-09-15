@@ -491,7 +491,7 @@ class UserController extends Controller
     /**
      * Create User
      * @param Request $request
-     * @return User
+     * // @return User
      */
     public function adminCreateUser(Request $request)
     {
@@ -516,32 +516,19 @@ class UserController extends Controller
                 ], 401);
             }
 
-            $this->isValidTimezoneId($request->gmt);
+            // $this->isValidTimezoneId($request->gmt);
 
-            if ($request->manager_id) {
-                $user = User::create([
-                    'name' => $this->generateUser(),
-                    'email' => $request->email,
-                    'first_name' => $request->firstName,
-                    'last_name' => $request->lastName,
-                    'phone' => $request->phone,
-                    'identity' => $this->generateIdentity(),
-                    'role_id' => 2,
-                    'status' => 'approved',
-                    'password' => Hash::make($request->password)
-                ]);
-            } else {
-                $user = User::create([
-                    'name' => $this->generateUser(),
-                    'email' => $request->email,
-                    'first_name' => $request->firstName,
-                    'last_name' => $request->lastName,
-                    'phone' => $request->phone,
-                    'identity' => $this->generateIdentity(),
-                    'role_id' => 2,
-                    'password' => Hash::make($request->password)
-                ]);
-            }
+            $user = User::create([
+                'email' => $request->email,
+                'first_name' => $request->first_name,
+                'last_name' => $request->last_name,
+                'phone' => $request->phone,
+                'role_id' => $request->role_id,
+                'password' => Hash::make($request->password),
+                'status' => 'approved',
+                'name' => $this->generateUser(),
+                'identity' => $this->generateIdentity()
+            ]);
 
 
             /*$userGroup = UserGroup::create([
@@ -579,6 +566,101 @@ class UserController extends Controller
                 'status' => 'user',
                 'message' => 'User is unauthorized'
             ], 200);
+        }
+    }
+
+    /**
+     * Update the specified user.
+     *
+     * @param  \Illuminate\Http\Request  $request
+     * @param  int  $id (optional) User ID for admin updates
+     * @return \Illuminate\Http\Response
+     */
+    public function updateUser(Request $request, $id = null)
+    {
+        try {
+            // Validate the request data
+            $validateUser = Validator::make($request->all(), [
+                'first_name' => 'string|max:255',
+                'last_name' => 'string|max:255',
+                'phone' => 'string|max:20',
+                'email' => 'email|unique:users,email,' . ($id ?? Auth::id()),
+                'role_id' => 'integer|exists:roles,id',
+                'status' => 'string|in:approved,pending,blocked',
+                'password' => 'string|min:6|confirmed',
+                'current_password' => 'string|required_with:password',
+            ]);
+
+            if ($validateUser->fails()) {
+                return response()->json([
+                    'status' => false,
+                    'message' => 'Validation error',
+                    'errors' => $validateUser->errors()
+                ], 400);
+            }
+
+            // Get the authenticated user
+            $authUser = Auth::user();
+            
+            // Determine which user to update
+            if ($id) {
+                // Admin is updating a specific user
+                $user = User::findOrFail($id);
+            } else {
+                // User is updating their own profile
+                $user = $authUser;
+            }
+
+            // If password is being updated, verify current password (unless admin)
+            if ($request->filled('password')) {
+                // Check if the authenticated user is an admin
+                $isAdmin = $authUser->hasRole('admin');
+                
+                // If not admin, verify current password
+                if (!$isAdmin) {
+                    if (!$request->filled('current_password')) {
+                        return response()->json([
+                            'status' => false,
+                            'message' => 'Current password is required to change password'
+                        ], 400);
+                    }
+
+                    if (!Hash::check($request->current_password, $user->password)) {
+                        return response()->json([
+                            'status' => false,
+                            'message' => 'Current password is incorrect'
+                        ], 400);
+                    }
+                }
+            }
+
+            // Prepare data for update, excluding empty values
+            $updateData = array_filter($request->only([
+                'first_name', 'last_name', 'phone', 'email', 'role_id', 'status'
+            ]), function ($value) {
+                return $value !== null && $value !== '';
+            });
+
+            // If password is being updated, add it to update data
+            if ($request->filled('password')) {
+                $updateData['password'] = Hash::make($request->password);
+            }
+
+            // Update user data
+            if (!empty($updateData)) {
+                $user->update($updateData);
+            }
+
+            return response()->json([
+                'status' => true,
+                'message' => 'User updated successfully',
+                'data' => new UserResource($user)
+            ], 200);
+        } catch (\Throwable $th) {
+            return response()->json([
+                'status' => false,
+                'message' => 'Error updating user: ' . $th->getMessage()
+            ], 500);
         }
     }
 

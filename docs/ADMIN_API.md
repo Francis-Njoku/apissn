@@ -266,6 +266,11 @@ On successful upload, returns:
 
 List all payments with user details. Administrators can view all payment records across all users, including associated user information.
 
+#### Query Parameters:
+
+-   `per_page` (integer, optional): Number of payments to display per page. Defaults to 15. Minimum value is 1, maximum value is 100.
+-   `all` (boolean, optional): If set to true, returns all payments without pagination. Defaults to false.
+
 #### Response:
 
 Returns a paginated list of payment records, including user details:
@@ -298,6 +303,55 @@ Returns a paginated list of payment records, including user details:
         "current_page": 1,
         "per_page": 15,
         "total": 100
+    }
+}
+```
+
+### GET /api/admin/pay/user/{identifier}
+
+Get payment history for a specific user. Administrators can view all payment records for a specific user by providing either the user ID or email address.
+
+#### Parameters:
+
+-   `identifier` (integer|string, required): The ID or email of the user whose payment history is being requested.
+-   `per_page` (integer, optional): Number of payments to display per page. Defaults to 15.
+
+#### Response:
+
+Returns a paginated list of payment records for the specified user:
+
+-   `data` (array): An array of payment objects, each containing:
+    -   `id` (integer): Unique identifier for the payment record.
+    -   `amount` (float): The amount paid.
+    -   `user` (object): Information about the user who made the payment:
+        -   `id` (integer): The user's ID.
+        -   `first_name` (string): The user's first name.
+        -   `last_name` (string): The user's last name.
+        -   `email` (string): The user's email address.
+    -   `status` (string): The status of the payment ('completed', 'pending', etc.).
+    -   `created_at` (string): Timestamp of when the payment was made.
+-   `meta` (object): Pagination metadata, including `current_page`, `per_page`, and `total`.
+
+```json
+{
+    "data": [
+        {
+            "id": 1,
+            "amount": 5000.0,
+            "user": {
+                "id": 123,
+                "first_name": "John",
+                "last_name": "Doe",
+                "email": "john.doe@example.com"
+            },
+            "status": "completed",
+            "created_at": "2025-07-01T10:00:00Z"
+        }
+    ],
+    "meta": {
+        "current_page": 1,
+        "per_page": 15,
+        "total": 5
     }
 }
 ```
