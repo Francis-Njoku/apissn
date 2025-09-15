@@ -133,6 +133,8 @@ Route::prefix('admin')->middleware(['auth.jwt', 'admin'])->group(function () {
     Route::prefix('pay')->group(function () {
         Route::get('/all', [PayController::class, 'allPaymentsWithUsers']);
         Route::get('/user/{identifier}', [PayController::class, 'userPaymentHistory']);
+        Route::get('/summary', [PayController::class, 'paymentsSummary']);
+
     });
 
     // Moderation routes (admin/moderator only)

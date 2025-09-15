@@ -289,4 +289,144 @@ class PayController extends Controller
 
         return PaymentResource::collection($query->paginate($perPage));
     }
+
+    public function paymentsSummary(Request $request)
+    {
+        // Optional query params
+        $userId      = $request->query('user_id');                  // e.g. /api/pay/summary?user_id=42
+        $onlySuccess = filter_var($request->query('only_success', 'true'), FILTER_VALIDATE_BOOLEAN);
+        $dateField   = $request->query('date_field', 'created_at'); // created_at | updated_at | due_date
+
+        // Whitelist the date field
+        $allowedDateFields = ['created_at', 'updated_at', 'due_date'];
+        if (!in_array($dateField, $allowedDateFields, true)) {
+            $dateField = 'created_at';
+        }
+
+        // Periods
+        $now = Carbon::now();
+
+        // Month windows
+        $thisMonthStart = $now->copy()->startOfMonth();
+        $thisMonthEnd   = $now->copy()->endOfMonth();
+        $lastMonthStart = $now->copy()->subMonthNoOverflow()->startOfMonth();
+        $lastMonthEnd   = $now->copy()->subMonthNoOverflow()->endOfMonth();
+
+        // Year windows
+        $thisYearStart  = $now->copy()->startOfYear();
+        $thisYearEnd    = $now->copy()->endOfYear(); // use endOfYear; switch to $now for YTD if you prefer
+        $lastYearStart  = $now->copy()->subYearNoOverflow()->startOfYear();
+        $lastYearEnd    = $now->copy()->subYearNoOverflow()->endOfYear();
+
+        // Base query with filters (no date window yet)
+        $base = Payment::query();
+
+        if ($userId) {
+            $base->where('user_id', $userId);
+        }
+
+        if ($onlySuccess) {
+            // Adjust these semantics to match your gateway statuses
+            $base->where(function ($q) {
+                $q->where('status', 'active')
+                ->orWhere('status_response', 'success')
+                ->orWhere('gateway_response', 'successful');
+            });
+        }
+
+        // ===== Month totals & counts =====
+        $thisMonthTotal = (clone $base)
+            ->whereBetween($dateField, [$thisMonthStart, $thisMonthEnd])
+            ->sum('amount');
+
+        $lastMonthTotal = (clone $base)
+            ->whereBetween($dateField, [$lastMonthStart, $lastMonthEnd])
+            ->sum('amount');
+
+        $thisMonthCount = (clone $base)
+            ->whereBetween($dateField, [$thisMonthStart, $thisMonthEnd])
+            ->count();
+
+        $lastMonthCount = (clone $base)
+            ->whereBetween($dateField, [$lastMonthStart, $lastMonthEnd])
+            ->count();
+
+        // ===== Year totals & counts =====
+        $thisYearTotal = (clone $base)
+            ->whereBetween($dateField, [$thisYearStart, $thisYearEnd])
+            ->sum('amount');
+
+        $lastYearTotal = (clone $base)
+            ->whereBetween($dateField, [$lastYearStart, $lastYearEnd])
+            ->sum('amount');
+
+        $thisYearCount = (clone $base)
+            ->whereBetween($dateField, [$thisYearStart, $thisYearEnd])
+            ->count();
+
+        $lastYearCount = (clone $base)
+            ->whereBetween($dateField, [$lastYearStart, $lastYearEnd])
+            ->count();
+
+        // ===== Subscription (all-time) =====
+        $subscriptionTotal = (clone $base)->sum('amount');
+        $subscriptionCount = (clone $base)->count();
+
+        // Month deltas
+        $monthChangeAbs = (float) $thisMonthTotal - (float) $lastMonthTotal;
+        $monthChangePct = ((float) $lastMonthTotal) == 0.0 ? null : round(($monthChangeAbs / (float) $lastMonthTotal) * 100, 2);
+
+        // Year deltas
+        $yearChangeAbs = (float) $thisYearTotal - (float) $lastYearTotal;
+        $yearChangePct = ((float) $lastYearTotal) == 0.0 ? null : round(($yearChangeAbs / (float) $lastYearTotal) * 100, 2);
+
+        return response()->json([
+            'period' => [
+                'this_month' => [
+                    'start' => $thisMonthStart->toDateTimeString(),
+                    'end'   => $thisMonthEnd->toDateTimeString(),
+                ],
+                'last_month' => [
+                    'start' => $lastMonthStart->toDateTimeString(),
+                    'end'   => $lastMonthEnd->toDateTimeString(),
+                ],
+                'this_year' => [
+                    'start' => $thisYearStart->toDateTimeString(),
+                    'end'   => $thisYearEnd->toDateTimeString(),
+                ],
+                'last_year' => [
+                    'start' => $lastYearStart->toDateTimeString(),
+                    'end'   => $lastYearEnd->toDateTimeString(),
+                ],
+            ],
+            'filters' => [
+                'user_id'      => $userId,
+                'only_success' => $onlySuccess,
+                'date_field'   => $dateField,
+            ],
+            'totals' => [
+                // month
+                'this_month'       => (float) $thisMonthTotal,
+                'last_month'       => (float) $lastMonthTotal,
+                'month_change_abs' => (float) $monthChangeAbs,
+                'month_change_pct' => $monthChangePct,
+                // year
+                'this_year'        => (float) $thisYearTotal,
+                'last_year'        => (float) $lastYearTotal,
+                'year_change_abs'  => (float) $yearChangeAbs,
+                'year_change_pct'  => $yearChangePct,
+                // all-time
+                'subscription_total' => (float) $subscriptionTotal,
+            ],
+            'counts' => [
+                'this_month'         => $thisMonthCount,
+                'last_month'         => $lastMonthCount,
+                'this_year'          => $thisYearCount,
+                'last_year'          => $lastYearCount,
+                'subscription_count' => $subscriptionCount,
+            ],
+        ], 200);
+    }
+
+
 }
