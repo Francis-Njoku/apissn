@@ -449,7 +449,6 @@ class PayController extends Controller
             'due_date' => 'nullable|date',
             'paid_at' => 'nullable|date',
             'currency' => 'nullable|string|max:3',
-            'metadata' => 'nullable|array',
             'ip_address' => 'nullable|ip',
             'order_id' => 'nullable|string|max:255',
             'gateway_response' => 'nullable|string',
@@ -488,7 +487,6 @@ class PayController extends Controller
             $payment->due_date = isset($validatedData['due_date']) ? Carbon::parse($validatedData['due_date'])->format('Y-m-d') : null;
             $payment->paid_at = isset($validatedData['paid_at']) ? Carbon::parse($validatedData['paid_at'])->format('Y-m-d H:i:s') : null;
             $payment->currency = $validatedData['currency'] ?? 'NGN';
-            $payment->metadata = isset($validatedData['metadata']) ? json_encode($validatedData['metadata']) : null;
             $payment->ip_address = $validatedData['ip_address'] ?? null;
             $payment->order_id = $validatedData['order_id'] ?? null;
             $payment->gateway_response = $validatedData['gateway_response'] ?? null;
