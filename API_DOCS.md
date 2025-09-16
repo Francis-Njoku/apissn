@@ -750,6 +750,54 @@ Response:
 }
 ```
 
+### GET /api/admin/pay/summary
+
+Summarize payments over standard time windows (this month, last month, this year, last year) with optional filters. Returns totals (sum of amounts), counts, and month-over-month/year-over-year deltas.
+
+Query parameters:
+- user_id (integer, optional): Limit the summary to a specific user.
+- only_success (boolean, optional; default true): If true, filters to successful payments, defined as any of:
+  - status = "active"
+  - status_response = "success"
+  - gateway_response = "successful"
+- date_field (string, optional; default created_at): Which timestamp to bucket by. Allowed values: created_at | updated_at | due_date
+
+Response:
+
+```json path=null start=null
+{
+  "period": {
+    "this_month": { "start": "2025-09-01 00:00:00", "end": "2025-09-30 23:59:59" },
+    "last_month": { "start": "2025-08-01 00:00:00", "end": "2025-08-31 23:59:59" },
+    "this_year": { "start": "2025-01-01 00:00:00", "end": "2025-12-31 23:59:59" },
+    "last_year": { "start": "2024-01-01 00:00:00", "end": "2024-12-31 23:59:59" }
+  },
+  "filters": {
+    "user_id": 123,
+    "only_success": true,
+    "date_field": "created_at"
+  },
+  "totals": {
+    "this_month": 150000.0,
+    "last_month": 120000.0,
+    "month_change_abs": 30000.0,
+    "month_change_pct": 25.0,
+    "this_year": 1250000.0,
+    "last_year": 950000.0,
+    "year_change_abs": 300000.0,
+    "year_change_pct": 31.58,
+    "subscription_total": 3200000.0
+  },
+  "counts": {
+    "this_month": 45,
+    "last_month": 36,
+    "this_year": 410,
+    "last_year": 355,
+    "subscription_count": 980
+  }
+}
+```
+
 ### POST /api/admin/pay/add
 
 Manually add a payment record.
