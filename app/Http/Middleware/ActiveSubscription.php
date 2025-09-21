@@ -51,7 +51,7 @@ class ActiveSubscription
             ->where('status', 'active')
             ->where('due_date', '>', now())
             ->orderByDesc('due_date')
-            ->first();
+            ->exists();
 
         return $latestPayment !== null;
     }
