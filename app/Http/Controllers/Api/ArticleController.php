@@ -322,6 +322,7 @@ class ArticleController extends Controller
             'bytes' => 'nullable|string',
             'body' => 'nullable|string|min:10|max:100000',
             'featuredImage' => 'nullable|file|mimetypes:image/jpeg,image/png,image/jpg',
+            'featured' => 'nullable|boolean',
             'author_id' => 'required|integer',
 
         ]);
@@ -342,6 +343,7 @@ class ArticleController extends Controller
             'news_date' => $request->input('news_date'),
             'body' => $request->input('body'),
             'status' => 'approved',
+            'featured' => $request->input('featured', false),
             'featuredImage' => $this->storeFileNoDirectory($request->file('featuredImage')),
             'author_id' => $request->input('author_id'),
         ];
@@ -397,6 +399,7 @@ class ArticleController extends Controller
             'news_date' => 'required|date',
             'body' => 'nullable|string|min:10|max:100000',
             'featuredImage' => 'required|string',
+            'featured' => 'nullable|boolean',
             'media' => 'nullable|string',
             'mediaSrc' => 'nullable|string',
             'status' => 'required|string',
@@ -425,6 +428,7 @@ class ArticleController extends Controller
             'news_date' => $request->input('news_date'),
             'body' => $request->input('body'),
             'status' => $request->input('status'),
+            'featured' => $request->input('featured', false),
             'tags' => json_encode($tagsArray),
             'mediaType' => $request->input('mediaType'),
             'media' => $request->input('media'),
@@ -525,6 +529,7 @@ class ArticleController extends Controller
             'news_date' => 'nullable|date',
             'body' => 'nullable|string|min:10|max:100000',
             'featuredImage' => 'nullable|string',
+            'featured' => 'nullable|boolean',
             'media' => 'nullable|string',
             'status' => 'nullable|string',
             'tags' => 'nullable|string',
@@ -543,6 +548,7 @@ class ArticleController extends Controller
             'news_date' => $request->input('news_date'),
             'body' => $request->input('body'),
             'status' => $request->input('status'),
+            'featured' => $request->input('featured'),
             'tags' => json_encode($tagsArray),
             'media' => $request->input('media'),
             'featuredImage' => $request->input('featuredImage'),
