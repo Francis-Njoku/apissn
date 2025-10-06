@@ -170,12 +170,12 @@ class ArticleController extends Controller
      */
     public function sampleArticle(Request $request)
     {
-        $media = $request->get('m');
+        $media    = $request->get('m');
         $newsType = $request->get('n');
 
         // Start with a base query for approved articles
         $baseQuery = Newsletter::where('status', 'approved')
-                          ->orderBy('news_date', 'desc');
+            ->orderBy('news_date', 'desc');
 
         // Apply media type filter if provided
         if ($media) {
@@ -399,7 +399,8 @@ class ArticleController extends Controller
             'title' => 'required|string',
             'news_date' => 'required|date',
             'body' => 'nullable|string|min:10|max:100000',
-            'featuredImage' => 'required|string',
+            'featuredImage' => 'nullable|string',
+            'featured' => 'nullable|boolean',
             'media' => 'nullable|string',
             'mediaSrc' => 'nullable|string',
             'status' => 'required|string',
@@ -418,7 +419,7 @@ class ArticleController extends Controller
 
         // Initialize an empty data array
         // Convert tags to proper JSON format if present
-        $tags = $request->input('tags');
+        $tags      = $request->input('tags');
         $tagsArray = $tags ? explode(',', $tags) : [];
 
         $data = [
@@ -455,9 +456,11 @@ class ArticleController extends Controller
     public function show(string $id)
     {
         // Retrieve the item with comments and fail with a 404 error
-        $item = Newsletter::with(['comments' => function ($query) {
-            $query->approved()->with('user');
-        }])->withCount('comments')->findOrFail($id);
+        $item = Newsletter::with([
+            'comments' => function ($query) {
+                $query->approved()->with('user');
+            }
+        ])->withCount('comments')->findOrFail($id);
 
         // Return the item wrapped in an API resource
         return new ArticleResource($item);
@@ -469,9 +472,11 @@ class ArticleController extends Controller
     public function showSingleArticle(string $slug)
     {
         // Retrieve the item with comments and fail with a 404 error
-        $item = Newsletter::with(['comments' => function ($query) {
-            $query->approved()->with('user');
-        }])->withCount('comments')->where('slug', $slug)->firstOrFail();
+        $item = Newsletter::with([
+            'comments' => function ($query) {
+                $query->approved()->with('user');
+            }
+        ])->withCount('comments')->where('slug', $slug)->firstOrFail();
 
         // Return the item wrapped in an API resource
         return new ArticleResource($item);
@@ -483,15 +488,15 @@ class ArticleController extends Controller
     public function search(Request $request)
     {
         $query = $request->input('q');
-        
+
         if (empty($query)) {
             return response()->json(['error' => 'Search query is required'], 400);
         }
 
-        $limit = $request->input('limit', 10);
+        $limit    = $request->input('limit', 10);
         $articles = Newsletter::where('title', 'like', "%{$query}%")
             ->orWhere('body', 'like', "%{$query}%")
-            ->orWhere('tags', 'like', '%"'.$query.'"%')
+            ->orWhere('tags', 'like', '%"' . $query . '"%')
             ->limit($limit)
             ->get();
 
@@ -533,19 +538,36 @@ class ArticleController extends Controller
 
 
         // Initialize an empty data array
-        // Convert tags to proper JSON format if present
-        $tags = $request->input('tags');
-        $tagsArray = $tags ? explode(',', $tags) : [];
+        $data = [];
 
-        $data = [
-            'title' => $request->input('title'),
-            'news_date' => $request->input('news_date'),
-            'body' => $request->input('body'),
-            'status' => $request->input('status'),
-            'tags' => json_encode($tagsArray),
-            'media' => $request->input('media'),
-            'featuredImage' => $request->input('featuredImage'),
-        ];
+        // Only update fields if they are present in the request
+        if ($request->has('title')) {
+            $data['title'] = $request->input('title');
+        }
+        if ($request->has('news_date')) {
+            $data['news_date'] = $request->input('news_date');
+        }
+        if ($request->has('body')) {
+            $data['body'] = $request->input('body');
+        }
+        if ($request->has('status')) {
+            $data['status'] = $request->input('status');
+        }
+        if ($request->has('tags')) {
+            // Convert tags to proper JSON format if present
+            $tags         = $request->input('tags');
+            $tagsArray    = $tags ? explode(',', $tags) : [];
+            $data['tags'] = json_encode($tagsArray);
+        }
+        if ($request->has('media')) {
+            $data['media'] = $request->input('media');
+        }
+        if ($request->has('featuredImage')) {
+            $data['featuredImage'] = $request->input('featuredImage');
+        }
+        if ($request->has('featured')) {
+            $data['featured'] = $request->input('featured');
+        }
 
         // Update the resource with validated data
         $resource->update($data);
@@ -600,9 +622,9 @@ class ArticleController extends Controller
         ]);
 
         // Set defaults
-        $page = $validated['page'] ?? 1;
-        $perPage = $validated['per_page'] ?? 10;
-        $sortBy = $validated['sort_by'] ?? 'news_date';
+        $page      = $validated['page'] ?? 1;
+        $perPage   = $validated['per_page'] ?? 10;
+        $sortBy    = $validated['sort_by'] ?? 'news_date';
         $sortOrder = $validated['sort_order'] ?? 'desc';
 
         $articles = Newsletter::query()
@@ -616,7 +638,8 @@ class ArticleController extends Controller
                 'title' => $article->title,
                 'mediaType' => $article->mediaType,
                 'news_date' => $article->news_date,
-                'status' => $article->status
+                'status' => $article->status,
+                'featured' => $article->featured
             ];
         }));
     }

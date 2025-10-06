@@ -25,8 +25,9 @@ class ArticleResource extends JsonResource
             'body' => $this->body,
             'mediaType' => $this->mediaType,
             'news_date' => $this->news_date,
-            'image_url' => $this->featuredImage ? URL::to('storage/'.$this->featuredImage) : null,
+            'image_url' => $this->featuredImage ? URL::to('storage/' . $this->featuredImage) : null,
             'status' => $this->status,
+            'featured' => $this->featured,
             'tags' => $this->tags,
             'comments' => CommentResource::collection($this->comments),
             'created_at' => (new \DateTime($this->created_at))->format('Y-m-d H:i:s'),
@@ -35,17 +36,17 @@ class ArticleResource extends JsonResource
 
         switch ($this->mediaType) {
             case 'video':
-                $data['media'] = $this->media ? URL::to('storage/'.$this->media) : null;
+                $data['media'] = $this->media ? URL::to('storage/' . $this->media) : null;
                 break;
             case 'audio':
-                $data['media'] = $this->media ? URL::to('storage/'.$this->media) : null;
+                $data['media'] = $this->media ? URL::to('storage/' . $this->media) : null;
                 break;
             default:
                 $data['media'] = null;
                 break;
         }
         if ($this->relationLoaded('comments')) {
-            $data['comments'] = $this->comments->map(function ($comment) {
+            $data['comments']       = $this->comments->map(function ($comment) {
                 return [
                     'id' => $comment->id,
                     'content' => $comment->content,

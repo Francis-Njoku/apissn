@@ -27,8 +27,9 @@ class ArticleAllResource extends JsonResource
             'mediaType' => $this->mediaType,
             'mediaSrc' => $this->mediaSrc,
             'news_date' => $this->news_date,
-            'image_url' => $this->featuredImage ? URL::to('storage/'.$this->featuredImage) : null,
+            'image_url' => $this->featuredImage ? URL::to('storage/' . $this->featuredImage) : null,
             'status' => $this->status,
+            'featured' => $this->featured,
             'tags' => $this->tags,
             'comments' => CommentResource::collection($this->comments),
             'featured_image' => $this->featuredImage ? $this->featuredImage : null,
@@ -38,16 +39,16 @@ class ArticleAllResource extends JsonResource
 
         switch ($this->mediaType) {
             case 'video':
-                $data['media'] =  $this->media
-                ? ($this->mediaSrc !== 'youtube' ? URL::to('storage/'.$this->media) : $this->media)
-                // ? ( $this->mediaSrc === 'local' ?  URL::to('storage/'.$this->media ) : $this->media )
-                : null  ;
+                $data['media'] = $this->media
+                    ? ($this->mediaSrc !== 'youtube' ? URL::to('storage/' . $this->media) : $this->media)
+                    // ? ( $this->mediaSrc === 'local' ?  URL::to('storage/'.$this->media ) : $this->media )
+                    : null;
                 break;
             case 'audio':
-                $data['media'] =  $this->media
-                ? ($this->mediaSrc !== 'spotify' ? URL::to('storage/'.$this->media) : $this->media)
-                // ? ( $this->mediaSrc === 'local' ?  URL::to('storage/'.$this->media ) : $this->media )
-                : null  ;
+                $data['media'] = $this->media
+                    ? ($this->mediaSrc !== 'spotify' ? URL::to('storage/' . $this->media) : $this->media)
+                    // ? ( $this->mediaSrc === 'local' ?  URL::to('storage/'.$this->media ) : $this->media )
+                    : null;
         }
 
         return $data;
