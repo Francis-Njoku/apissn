@@ -166,29 +166,26 @@ class ArticleController extends Controller
     }
     /**
      * Display sample articles for unsubscribed users.
-     * This doesn't require database modifications and returns 8 articles.
+     * This doesn't require database modifications and returns 8 featured articles.
      */
-    public function sampleArticle(Request $request)
+    public function featuredArticle(Request $request)
     {
-        $media    = $request->get('m');
-        $newsType = $request->get('n');
+        $media = $request->get('m');
 
-        // Start with a base query for approved articles
+        // Start with a base query for approved and featured articles
         $baseQuery = Newsletter::where('status', 'approved')
+            ->where('featured', true)
             ->orderBy('news_date', 'desc');
 
         // Apply media type filter if provided
         if ($media) {
             $baseQuery->where('mediaType', $media);
+        } else {
+            $baseQuery->where('mediaType', '!=', 'video');
         }
 
-        // Apply news type filter if provided
-        if ($newsType) {
-            $baseQuery->where('news_type_id', $newsType);
-        }
-
-        // Get 8 latest approved articles
-        $sampleArticles = $baseQuery->take(8)->get();
+        // Get 6 latest approved featured articles
+        $sampleArticles = $baseQuery->take(6)->get();
 
         if ($sampleArticles->isEmpty()) {
             return response()->json([
@@ -325,6 +322,7 @@ class ArticleController extends Controller
             'bytes' => 'nullable|string',
             'body' => 'nullable|string|min:10|max:100000',
             'featuredImage' => 'nullable|file|mimetypes:image/jpeg,image/png,image/jpg',
+            'featured' => 'nullable|boolean',
             'author_id' => 'required|integer',
 
         ]);
@@ -345,6 +343,7 @@ class ArticleController extends Controller
             'news_date' => $request->input('news_date'),
             'body' => $request->input('body'),
             'status' => 'approved',
+            'featured' => $request->input('featured', false),
             'featuredImage' => $this->storeFileNoDirectory($request->file('featuredImage')),
             'author_id' => $request->input('author_id'),
         ];
@@ -399,7 +398,7 @@ class ArticleController extends Controller
             'title' => 'required|string',
             'news_date' => 'required|date',
             'body' => 'nullable|string|min:10|max:100000',
-            'featuredImage' => 'nullable|string',
+            'featuredImage' => 'required|string',
             'featured' => 'nullable|boolean',
             'media' => 'nullable|string',
             'mediaSrc' => 'nullable|string',
@@ -429,6 +428,7 @@ class ArticleController extends Controller
             'news_date' => $request->input('news_date'),
             'body' => $request->input('body'),
             'status' => $request->input('status'),
+            'featured' => $request->input('featured', false),
             'tags' => json_encode($tagsArray),
             'mediaType' => $request->input('mediaType'),
             'media' => $request->input('media'),
@@ -529,6 +529,7 @@ class ArticleController extends Controller
             'news_date' => 'nullable|date',
             'body' => 'nullable|string|min:10|max:100000',
             'featuredImage' => 'nullable|string',
+            'featured' => 'nullable|boolean',
             'media' => 'nullable|string',
             'status' => 'nullable|string',
             'tags' => 'nullable|string',
@@ -538,36 +539,20 @@ class ArticleController extends Controller
 
 
         // Initialize an empty data array
-        $data = [];
+        // Convert tags to proper JSON format if present
+        $tags      = $request->input('tags');
+        $tagsArray = $tags ? explode(',', $tags) : [];
 
-        // Only update fields if they are present in the request
-        if ($request->has('title')) {
-            $data['title'] = $request->input('title');
-        }
-        if ($request->has('news_date')) {
-            $data['news_date'] = $request->input('news_date');
-        }
-        if ($request->has('body')) {
-            $data['body'] = $request->input('body');
-        }
-        if ($request->has('status')) {
-            $data['status'] = $request->input('status');
-        }
-        if ($request->has('tags')) {
-            // Convert tags to proper JSON format if present
-            $tags         = $request->input('tags');
-            $tagsArray    = $tags ? explode(',', $tags) : [];
-            $data['tags'] = json_encode($tagsArray);
-        }
-        if ($request->has('media')) {
-            $data['media'] = $request->input('media');
-        }
-        if ($request->has('featuredImage')) {
-            $data['featuredImage'] = $request->input('featuredImage');
-        }
-        if ($request->has('featured')) {
-            $data['featured'] = $request->input('featured');
-        }
+        $data = [
+            'title' => $request->input('title'),
+            'news_date' => $request->input('news_date'),
+            'body' => $request->input('body'),
+            'status' => $request->input('status'),
+            'featured' => $request->input('featured'),
+            'tags' => json_encode($tagsArray),
+            'media' => $request->input('media'),
+            'featuredImage' => $request->input('featuredImage'),
+        ];
 
         // Update the resource with validated data
         $resource->update($data);

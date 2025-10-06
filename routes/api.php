@@ -23,7 +23,7 @@ use App\Http\Controllers\Api\ArticleController;
 
 Route::group([ ],function () {
 
-    Route::get('/articles/sample/', [ArticleController::class, 'sampleArticle']);
+    Route::get('/articles/featured/', [ArticleController::class, 'featuredArticle']);
     Route::get('/plans/', [PlanController::class, 'index']);
 
     Route::prefix('auth')->group(function () {

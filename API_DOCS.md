@@ -309,8 +309,7 @@ Response:
             "title": "Sample Article Title",
             "mediaType": "text",
             "news_date": "2025-07-01",
-            "featuredImage": "https://example.com/storage/featured_image/sample_image.jpg",
-            "featured": true
+            "featuredImage": "https://example.com/storage/featured_image/sample_image.jpg"
         }
     ]
 }
@@ -379,8 +378,7 @@ Response:
             "title": "Article Title One",
             "mediaType": "text",
             "news_date": "2025-07-01",
-            "status": "published",
-            "featured": true
+            "status": "published"
         },
         {
             "id": 2,
@@ -388,8 +386,7 @@ Response:
             "title": "Article Title Two",
             "mediaType": "video",
             "news_date": "2025-06-28",
-            "status": "published",
-            "featured": false
+            "status": "published"
         }
     ],
     "meta": { "current_page": 1, "per_page": 10, "total": 100 }
@@ -409,7 +406,6 @@ Response:
     "body": "This is the full content of the article...",
     "mediaType": "text",
     "featuredImage": "https://example.com/storage/featured_image/article_image.jpg",
-    "featured": true,
     "comments_count": 5,
     "comments": [
         {
@@ -697,6 +693,7 @@ Request body:
     "news_date": "2025-07-01",
     "body": "This is the content of the new article. It should be detailed and informative.",
     "featuredImage": "https://example.com/storage/featured_image/new_article_image.jpg",
+    "featured": false,
     "status": "draft",
     "author_id": 1
 }
@@ -718,6 +715,7 @@ Request body (partial updates):
 {
     "title": "Updated Article Title",
     "body": "This is the updated content of the article.",
+    "featured": true,
     "status": "published"
 }
 ```
