@@ -7,6 +7,7 @@ use App\Http\Controllers\Api\StockPickController;
 use App\Http\Controllers\Api\PlanController;
 use App\Http\Controllers\Api\PayController;
 use App\Http\Controllers\Api\CommentController;
+use App\Http\Controllers\Api\CommentModerationController;
 use App\Http\Controllers\Api\Auth\UserController;
 use App\Http\Controllers\Api\ArticleController;
 
@@ -140,11 +141,14 @@ Route::prefix('admin')->middleware(['auth.jwt', 'admin'])->group(function () {
 
     // Moderation routes (admin/moderator only)
     Route::prefix('comments')->group(function () {
-        Route::get('/pending', [App\Http\Controllers\Api\CommentModerationController::class, 'pending']);
-        Route::get('/flagged', [App\Http\Controllers\Api\CommentModerationController::class, 'flagged']);
-        Route::get('/stats', [App\Http\Controllers\Api\CommentModerationController::class, 'stats']);
-        Route::patch('/{comment}/moderate', [App\Http\Controllers\Api\CommentModerationController::class, 'moderate']);
-        Route::patch('/bulk-moderate', [App\Http\Controllers\Api\CommentModerationController::class, 'bulkModerate']);
+        Route::get('/', [CommentModerationController::class, 'index']);
+        Route::get('/pending', [CommentModerationController::class, 'pending']);
+        Route::get('/flagged', [CommentModerationController::class, 'flagged']);
+        Route::get('/stats', [CommentModerationController::class, 'stats']);
+        Route::get('/search', [CommentModerationController::class, 'search']);
+        Route::get('/{comment}/history', [CommentModerationController::class, 'moderationHistory']);
+        Route::patch('/{comment}/moderate', [CommentModerationController::class, 'moderate']);
+        Route::patch('/bulk-moderate', [CommentModerationController::class, 'bulkModerate']);
     });
 
     Route::prefix('metrics')->group(function () {

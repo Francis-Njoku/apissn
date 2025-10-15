@@ -160,6 +160,13 @@ return [
          * Package Service Providers...
          */
 
+        Unicodeveloper\Paystack\PaystackServiceProvider::class,
+        Maatwebsite\Excel\ExcelServiceProvider::class,
+        Spatie\Newsletter\NewsletterServiceProvider::class,
+        Khill\Lavacharts\Laravel\LavachartsServiceProvider::class,
+        niklasravnsborg\LaravelPdf\PdfServiceProvider::class,
+        Laravel\Socialite\SocialiteServiceProvider::class,
+
         /*
          * Application Service Providers...
          */
@@ -169,12 +176,6 @@ return [
         App\Providers\EventServiceProvider::class,
         App\Providers\RouteServiceProvider::class,
 
-        Unicodeveloper\Paystack\PaystackServiceProvider::class,
-        Maatwebsite\Excel\ExcelServiceProvider::class,
-        Spatie\Newsletter\NewsletterServiceProvider::class,
-        Khill\Lavacharts\Laravel\LavachartsServiceProvider::class,
-        niklasravnsborg\LaravelPdf\PdfServiceProvider::class,
-        Laravel\Socialite\SocialiteServiceProvider::class,
     ])->toArray(),
 
     /*

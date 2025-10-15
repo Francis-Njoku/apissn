@@ -41,12 +41,12 @@ class SendNewPostEmail implements ShouldQueue
      */
     public function handle()
     {
-        // Get unique user emails from the payment table by joining with the users table
-        $userEmails = DB::table('payment')
-        ->join('users', 'payment.user_id', '=', 'users.id')
-        ->select('users.email')
-        ->distinct()
-        ->get(); // Fetch emails
+        // Get all user emails including unsubscribed users
+        $userEmails = DB::table("users")
+            ->whereNotNull("email")
+            ->select("email")
+            ->distinct()
+            ->get(); // Fetch emails
 
         // Send emails in batches of 100
         $userEmails->chunk(100)->each(function ($chunk) {

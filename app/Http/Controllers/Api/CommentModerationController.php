@@ -3,6 +3,7 @@
 namespace App\Http\Controllers\Api;
 
 use Illuminate\Validation\Rule;
+use Illuminate\Support\Facades\Validator;
 use Illuminate\Support\Facades\Auth;
 use Illuminate\Http\Request;
 use Illuminate\Http\JsonResponse;
@@ -17,12 +18,145 @@ class CommentModerationController extends Controller
         $this->middleware(['auth.jwt', 'admin']);
     }
 
-    public function pending(): JsonResponse
+    public function index(Request $request): JsonResponse
     {
-        $comments = Comment::with(['user', 'newsletter'])
-            ->pending()
-            ->orderBy('created_at', 'asc')
-            ->paginate(20);
+        $validator = Validator::make($request->all(), [
+            'status' => 'sometimes|in:pending,approved,rejected,spam,all',
+            'newsletter_id' => 'sometimes|integer|exists:newsletter,id',
+            'author_type' => 'sometimes|in:guest,registered',
+            'date_from' => 'sometimes|date',
+            'date_to' => 'sometimes|date|after_or_equal:date_from',
+            'per_page' => 'sometimes|integer|min:1|max:100',
+            'sort' => 'sometimes|in:newest,oldest',
+            'search' => 'sometimes|string|max:255',
+            'user_id' => 'sometimes|integer|exists:users,id',
+            'ip_address' => 'sometimes|ip',
+        ]);
+
+        if ($validator->fails()) {
+            return response()->json(['errors' => $validator->errors()], 422);
+        }
+
+        $query = Comment::with(['user', 'newsletter', 'moderatedBy']);
+
+        // Status filter - support multiple statuses or 'all'
+        if ($request->has('status') && $request->status !== 'all') {
+            $query->where('status', $request->status);
+        }
+
+        // Newsletter filter
+        if ($request->has('newsletter_id')) {
+            $query->where('newsletter_id', $request->newsletter_id);
+        }
+
+        // Author type filter
+        if ($request->has('author_type')) {
+            if ($request->author_type === 'guest') {
+                $query->whereNull('user_id');
+            } elseif ($request->author_type === 'registered') {
+                $query->whereNotNull('user_id');
+            }
+        }
+
+        // Date range filter
+        if ($request->has('date_from')) {
+            $query->where('created_at', '>=', $request->date_from);
+        }
+        if ($request->has('date_to')) {
+            $query->where('created_at', '<=', $request->date_to);
+        }
+
+        // User filter
+        if ($request->has('user_id')) {
+            $query->where('user_id', $request->user_id);
+        }
+
+        // IP address filter
+        if ($request->has('ip_address')) {
+            $query->where('ip_address', $request->ip_address);
+        }
+
+        // Search filter
+        if ($request->has('search')) {
+            $searchTerm = '%' . $request->search . '%';
+            $query->where(function ($q) use ($searchTerm) {
+                $q->where('content', 'like', $searchTerm)
+                      ->orWhere('author_name', 'like', $searchTerm)
+                      ->orWhere('author_email', 'like', $searchTerm);
+            });
+        }
+
+        $sort = $request->get('sort', 'newest');
+        $query->orderBy('created_at', $sort === 'newest' ? 'desc' : 'asc');
+
+        $comments = $query->paginate($request->get('per_page', 20));
+
+        return response()->json([
+            'data' => CommentResource::collection($comments),
+            'meta' => [
+                'current_page' => $comments->currentPage(),
+                'last_page' => $comments->lastPage(),
+                'per_page' => $comments->perPage(),
+                'total' => $comments->total(),
+            ]
+        ]);
+    }
+
+    public function pending(Request $request): JsonResponse
+    {
+        $validator = Validator::make($request->all(), [
+            'newsletter_id' => 'sometimes|integer|exists:newsletter,id',
+            'author_type' => 'sometimes|in:guest,registered',
+            'date_from' => 'sometimes|date',
+            'date_to' => 'sometimes|date|after_or_equal:date_from',
+            'per_page' => 'sometimes|integer|min:1|max:100',
+            'sort' => 'sometimes|in:newest,oldest',
+            'search' => 'sometimes|string|max:255',
+        ]);
+
+        if ($validator->fails()) {
+            return response()->json(['errors' => $validator->errors()], 422);
+        }
+
+        $query = Comment::with(['user', 'newsletter'])
+            ->pending();
+
+        // Apply filters
+        if ($request->has('newsletter_id')) {
+            $query->where('newsletter_id', $request->newsletter_id);
+        }
+
+        // Author type filter
+        if ($request->has('author_type')) {
+            if ($request->author_type === 'guest') {
+                $query->whereNull('user_id');
+            } elseif ($request->author_type === 'registered') {
+                $query->whereNotNull('user_id');
+            }
+        }
+
+        // Date range filter
+        if ($request->has('date_from')) {
+            $query->where('created_at', '>=', $request->date_from);
+        }
+        if ($request->has('date_to')) {
+            $query->where('created_at', '<=', $request->date_to);
+        }
+
+        // Search filter
+        if ($request->has('search')) {
+            $searchTerm = '%' . $request->search . '%';
+            $query->where(function ($q) use ($searchTerm) {
+                $q->where('content', 'like', $searchTerm)
+                      ->orWhere('author_name', 'like', $searchTerm)
+                      ->orWhere('author_email', 'like', $searchTerm);
+            });
+        }
+
+        $sort = $request->get('sort', 'newest');
+        $query->orderBy('created_at', $sort === 'newest' ? 'desc' : 'asc');
+
+        $comments = $query->paginate($request->get('per_page', 20));
 
         return response()->json([
             'data' => CommentResource::collection($comments),
@@ -99,17 +233,75 @@ class CommentModerationController extends Controller
         return response()->json(['data' => $stats]);
     }
 
-    public function flagged(): JsonResponse
+    public function flagged(Request $request): JsonResponse
     {
-        // Get comments that might need attention (reported, contains flagged words, etc.)
-        $flaggedComments = Comment::with(['user', 'newsletter'])
-            ->where(function ($query) {
-                $query->where('content', 'like', '%spam%')
-                      ->orWhere('content', 'like', '%inappropriate%')
-                      ->orWhereJsonContains('metadata->flags', true);
-            })
-            ->orderBy('created_at', 'desc')
-            ->paginate(20);
+        $validator = Validator::make($request->all(), [
+            'newsletter_id' => 'sometimes|integer|exists:newsletter,id',
+            'date_from' => 'sometimes|date',
+            'date_to' => 'sometimes|date|after_or_equal:date_from',
+            'per_page' => 'sometimes|integer|min:1|max:100',
+            'sort' => 'sometimes|in:newest,oldest',
+            'flag_type' => 'sometimes|in:spam,inappropriate,reported,all',
+        ]);
+
+        if ($validator->fails()) {
+            return response()->json(['errors' => $validator->errors()], 422);
+        }
+
+        // Define spam keywords
+        $spamKeywords = [
+            'spam', 'viagra', 'casino', 'lottery', 'gambling', 'porn',
+            'xxx', 'adult', 'click here', 'buy now', 'discount', 'free money',
+            'make money', 'work from home', 'get rich', 'earn cash'
+        ];
+
+        // Define inappropriate keywords
+        $inappropriateKeywords = [
+            'inappropriate', 'offensive', 'hate speech', 'racist',
+            'sexist', 'violence', 'threat', 'harassment'
+        ];
+
+        $query = Comment::with(['user', 'newsletter']);
+
+        // Apply newsletter filter
+        if ($request->has('newsletter_id')) {
+            $query->where('newsletter_id', $request->newsletter_id);
+        }
+
+        // Date range filter
+        if ($request->has('date_from')) {
+            $query->where('created_at', '>=', $request->date_from);
+        }
+        if ($request->has('date_to')) {
+            $query->where('created_at', '<=', $request->date_to);
+        }
+
+        // Flag type filtering
+        $flagType = $request->get('flag_type', 'all');
+        
+        $query->where(function ($q) use ($flagType, $spamKeywords, $inappropriateKeywords) {
+            if ($flagType === 'all' || $flagType === 'spam') {
+                foreach ($spamKeywords as $keyword) {
+                    $q->orWhere('content', 'like', '%' . $keyword . '%');
+                }
+            }
+            
+            if ($flagType === 'all' || $flagType === 'inappropriate') {
+                foreach ($inappropriateKeywords as $keyword) {
+                    $q->orWhere('content', 'like', '%' . $keyword . '%');
+                }
+            }
+            
+            if ($flagType === 'all' || $flagType === 'reported') {
+                $q->orWhereJsonContains('metadata->reports', true)
+                  ->orWhereJsonLength('metadata->reports', '>', 0);
+            }
+        });
+
+        $sort = $request->get('sort', 'newest');
+        $query->orderBy('created_at', $sort === 'newest' ? 'desc' : 'asc');
+
+        $flaggedComments = $query->paginate($request->get('per_page', 20));
 
         return response()->json([
             'data' => CommentResource::collection($flaggedComments),
@@ -120,5 +312,108 @@ class CommentModerationController extends Controller
                 'total' => $flaggedComments->total(),
             ]
         ]);
+    }
+
+    public function search(Request $request): JsonResponse
+    {
+        $validator = Validator::make($request->all(), [
+            'q' => 'required|string|min:2|max:255',
+            'newsletter_id' => 'sometimes|integer|exists:newsletter,id',
+            'status' => 'sometimes|in:pending,approved,rejected,spam,all',
+            'date_from' => 'sometimes|date',
+            'date_to' => 'sometimes|date|after_or_equal:date_from',
+            'per_page' => 'sometimes|integer|min:1|max:100',
+            'sort' => 'sometimes|in:newest,oldest',
+        ]);
+
+        if ($validator->fails()) {
+            return response()->json(['errors' => $validator->errors()], 422);
+        }
+
+        $query = Comment::with(['user', 'newsletter', 'moderatedBy']);
+
+        // Search across multiple fields
+        $searchTerm = '%' . $request->q . '%';
+        $query->where(function ($q) use ($searchTerm) {
+            $q->where('content', 'like', $searchTerm)
+                  ->orWhere('author_name', 'like', $searchTerm)
+                  ->orWhere('author_email', 'like', $searchTerm)
+                  ->orWhere('ip_address', 'like', $searchTerm)
+                  ->orWhereHas('user', function ($userQuery) use ($searchTerm) {
+                      $userQuery->where('first_name', 'like', $searchTerm)
+                               ->orWhere('last_name', 'like', $searchTerm);
+                  });
+        });
+
+        // Status filter
+        if ($request->has('status') && $request->status !== 'all') {
+            $query->where('status', $request->status);
+        }
+
+        // Newsletter filter
+        if ($request->has('newsletter_id')) {
+            $query->where('newsletter_id', $request->newsletter_id);
+        }
+
+        // Date range filter
+        if ($request->has('date_from')) {
+            $query->where('created_at', '>=', $request->date_from);
+        }
+        if ($request->has('date_to')) {
+            $query->where('created_at', '<=', $request->date_to);
+        }
+
+        $sort = $request->get('sort', 'newest');
+        $query->orderBy('created_at', $sort === 'newest' ? 'desc' : 'asc');
+
+        $comments = $query->paginate($request->get('per_page', 20));
+
+        return response()->json([
+            'data' => CommentResource::collection($comments),
+            'meta' => [
+                'current_page' => $comments->currentPage(),
+                'last_page' => $comments->lastPage(),
+                'per_page' => $comments->perPage(),
+                'total' => $comments->total(),
+            ]
+        ]);
+    }
+
+    public function moderationHistory(Comment $comment): JsonResponse
+    {
+        $history = [
+            'comment_id' => $comment->id,
+            'content' => $comment->content,
+            'current_status' => $comment->status,
+            'moderation_history' => []
+        ];
+
+        // Add creation event
+        $history['moderation_history'][] = [
+            'action' => 'created',
+            'status' => 'pending',
+            'created_at' => $comment->created_at->toISOString(),
+            'author' => [
+                'name' => $comment->author_name,
+                'email' => $comment->author_email,
+                'user_id' => $comment->user_id
+            ]
+        ];
+
+        // Add moderation events from metadata
+        if ($comment->moderated_at) {
+            $history['moderation_history'][] = [
+                'action' => 'moderated',
+                'status' => $comment->status,
+                'moderated_by' => $comment->moderatedBy ? [
+                    'id' => $comment->moderatedBy->id,
+                    'name' => $comment->moderatedBy->name,
+                ] : null,
+                'moderated_at' => $comment->moderated_at->toISOString(),
+                'reason' => $comment->metadata['moderation_reason'] ?? null
+            ];
+        }
+
+        return response()->json(['data' => $history]);
     }
 }

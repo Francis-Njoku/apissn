@@ -484,7 +484,7 @@ Response:
 
 # Community API
 
-Endpoints for managing article comments (threaded), available to subscribed users. Admin/moderator endpoints are under Admin API below.
+Endpoints for managing article comments (threaded), available to subscribed users. Comments include the article slug in the newsletter object. Admin/moderator endpoints are under Admin API below.
 
 ## Subscriber Endpoints
 
@@ -945,9 +945,76 @@ Response:
 
 ## Comment Moderation
 
+### GET /api/admin/comments
+
+List all comments with comprehensive filtering capabilities.
+
+Query parameters:
+
+-   `status` (optional): Filter by status - `pending`, `approved`, `rejected`, `spam`, or `all`
+-   `newsletter_id` (optional): Filter by specific newsletter ID
+-   `author_type` (optional): Filter by author type - `guest` or `registered`
+-   `date_from` (optional): Filter comments created after this date (YYYY-MM-DD)
+-   `date_to` (optional): Filter comments created before this date (YYYY-MM-DD)
+-   `user_id` (optional): Filter by specific user ID
+-   `ip_address` (optional): Filter by IP address
+-   `search` (optional): Search across content, author name, and email
+-   `per_page` (optional): Number of results per page (default: 20, max: 100)
+-   `sort` (optional): Sort order - `newest` or `oldest` (default: newest)
+
+Response:
+
+```json path=null start=null
+{
+    "data": [
+        {
+            "id": 1,
+            "content": "This is a comment awaiting moderation.",
+            "status": "pending",
+            "author": {
+                "id": 123,
+                "name": "John Doe",
+                "email": "john@example.com",
+                "avatar": null
+            },
+            "newsletter": {
+                "id": 42,
+                "title": "Market Analysis Report",
+                "slug": "market-analysis-report"
+            },
+            "parent_id": null,
+            "replies_count": 0,
+            "replies": [],
+            "created_at": "2025-07-01T10:00:00Z",
+            "updated_at": "2025-07-01T10:00:00Z",
+            "moderated_at": null,
+            "moderated_by": null,
+            "can_edit": true,
+            "can_delete": true
+        }
+    ],
+    "meta": {
+        "current_page": 1,
+        "last_page": 5,
+        "per_page": 20,
+        "total": 95
+    }
+}
+```
+
 ### GET /api/admin/comments/pending
 
-List comments awaiting moderation.
+List comments awaiting moderation with enhanced filtering.
+
+Query parameters:
+
+-   `newsletter_id` (optional): Filter by specific newsletter ID
+-   `author_type` (optional): Filter by author type - `guest` or `registered`
+-   `date_from` (optional): Filter comments created after this date (YYYY-MM-DD)
+-   `date_to` (optional): Filter comments created before this date (YYYY-MM-DD)
+-   `search` (optional): Search across content, author name, and email
+-   `per_page` (optional): Number of results per page (default: 20, max: 100)
+-   `sort` (optional): Sort order - `newest` or `oldest` (default: newest)
 
 Response:
 
@@ -958,9 +1025,158 @@ Response:
             "id": 1,
             "content": "Pending comment awaiting review.",
             "status": "pending",
-            "user": { "name": "John Doe" }
+            "author": {
+                "id": null,
+                "name": "Guest User",
+                "email": "guest@example.com",
+                "avatar": null
+            },
+            "newsletter": {
+                "id": 42,
+                "title": "Market Analysis Report",
+                "slug": "market-analysis-report"
+            },
+            "created_at": "2025-07-01T10:00:00Z",
+            "updated_at": "2025-07-01T10:00:00Z"
         }
-    ]
+    ],
+    "meta": {
+        "current_page": 1,
+        "last_page": 3,
+        "per_page": 20,
+        "total": 45
+    }
+}
+```
+
+### GET /api/admin/comments/flagged
+
+List potentially problematic comments based on content analysis.
+
+Query parameters:
+
+-   `newsletter_id` (optional): Filter by specific newsletter ID
+-   `date_from` (optional): Filter comments created after this date (YYYY-MM-DD)
+-   `date_to` (optional): Filter comments created before this date (YYYY-MM-DD)
+-   `flag_type` (optional): Filter by flag type - `spam`, `inappropriate`, `reported`, or `all` (default: all)
+-   `per_page` (optional): Number of results per page (default: 20, max: 100)
+-   `sort` (optional): Sort order - `newest` or `oldest` (default: newest)
+
+Response:
+
+```json path=null start=null
+{
+    "data": [
+        {
+            "id": 2,
+            "content": "This looks like spam content with casino links.",
+            "status": "pending",
+            "author": {
+                "id": 456,
+                "name": "Spam User",
+                "email": "spam@example.com",
+                "avatar": null
+            },
+            "newsletter": {
+                "id": 42,
+                "title": "Market Analysis Report",
+                "slug": "market-analysis-report"
+            },
+            "created_at": "2025-07-01T11:00:00Z",
+            "updated_at": "2025-07-01T11:00:00Z"
+        }
+    ],
+    "meta": {
+        "current_page": 1,
+        "last_page": 2,
+        "per_page": 20,
+        "total": 25
+    }
+}
+```
+
+### GET /api/admin/comments/search
+
+Advanced search across all comment fields.
+
+Query parameters:
+
+-   `q` (required): Search term (min: 2 characters, max: 255)
+-   `newsletter_id` (optional): Filter by specific newsletter ID
+-   `status` (optional): Filter by status - `pending`, `approved`, `rejected`, `spam`, or `all`
+-   `date_from` (optional): Filter comments created after this date (YYYY-MM-DD)
+-   `date_to` (optional): Filter comments created before this date (YYYY-MM-DD)
+-   `per_page` (optional): Number of results per page (default: 20, max: 100)
+-   `sort` (optional): Sort order - `newest` or `oldest` (default: newest)
+
+Response:
+
+```json path=null start=null
+{
+    "data": [
+        {
+            "id": 3,
+            "content": "This comment contains the search term.",
+            "status": "approved",
+            "author": {
+                "id": 123,
+                "name": "John Doe",
+                "email": "john@example.com",
+                "avatar": null
+            },
+            "newsletter": {
+                "id": 45,
+                "title": "Weekly Newsletter",
+                "slug": "weekly-newsletter"
+            },
+            "created_at": "2025-07-01T12:00:00Z",
+            "updated_at": "2025-07-01T12:00:00Z"
+        }
+    ],
+    "meta": {
+        "current_page": 1,
+        "last_page": 1,
+        "per_page": 20,
+        "total": 1
+    }
+}
+```
+
+### GET /api/admin/comments/{comment}/history
+
+Get moderation history for a specific comment.
+
+Response:
+
+```json path=null start=null
+{
+    "data": {
+        "comment_id": 1,
+        "content": "This comment was moderated.",
+        "current_status": "approved",
+        "moderation_history": [
+            {
+                "action": "created",
+                "status": "pending",
+                "created_at": "2025-07-01T10:00:00Z",
+                "author": {
+                    "name": "John Doe",
+                    "email": "john@example.com",
+                    "user_id": 123
+                }
+            },
+            {
+                "action": "moderated",
+                "status": "approved",
+                "moderated_by": {
+                    "id": 1,
+                    "name": "Admin User"
+                },
+                "moderated_at": "2025-07-01T14:30:00Z",
+                "reason": "Comment meets community guidelines"
+            }
+        ]
+    }
 }
 ```
 
@@ -971,14 +1187,78 @@ Change a comment's moderation status.
 Request body:
 
 ```json path=null start=null
-{ "status": "approved" }
+{
+    "status": "approved",
+    "reason": "Comment meets community guidelines"
+}
 ```
 
-Additional moderation endpoints (if enabled):
+Response:
 
--   GET /api/admin/comments/flagged
--   GET /api/admin/comments/stats
--   PATCH /api/admin/comments/bulk-moderate
+```json path=null start=null
+{
+    "message": "Comment moderated successfully",
+    "data": {
+        "id": 1,
+        "content": "This comment was moderated.",
+        "status": "approved",
+        "author": {
+            "id": 123,
+            "name": "John Doe",
+            "email": "john@example.com",
+            "avatar": null
+        },
+        "moderated_at": "2025-07-01T14:30:00Z",
+        "moderated_by": {
+            "id": 1,
+            "name": "Admin User"
+        }
+    }
+}
+```
+
+### PATCH /api/admin/comments/bulk-moderate
+
+Bulk moderate multiple comments.
+
+Request body:
+
+```json path=null start=null
+{
+    "comment_ids": [1, 2, 3],
+    "status": "approved",
+    "reason": "Bulk approval of valid comments"
+}
+```
+
+Response:
+
+```json path=null start=null
+{
+    "message": "Successfully moderated 3 comments",
+    "updated_count": 3
+}
+```
+
+### GET /api/admin/comments/stats
+
+Get comment moderation statistics.
+
+Response:
+
+```json path=null start=null
+{
+    "data": {
+        "pending": 15,
+        "approved": 120,
+        "rejected": 8,
+        "spam": 25,
+        "total": 168,
+        "today": 5,
+        "this_week": 32
+    }
+}
+```
 
 ## Stock Pick Management
 

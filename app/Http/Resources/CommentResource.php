@@ -33,6 +33,7 @@ class CommentResource extends JsonResource
                 return [
                     'id' => $this->newsletter->id,
                     'title' => $this->newsletter->title ?? null,
+                    'slug' => $this->newsletter->slug ?? null,
                 ];
             }),
             'parent_id' => $this->parent_id,
