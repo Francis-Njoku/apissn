@@ -22,149 +22,225 @@ use App\Http\Controllers\Api\ArticleController;
 |
 */
 
-Route::group([ ],function () {
+Route::group([], function () {
+    Route::get("/articles/featured/", [
+        ArticleController::class,
+        "featuredArticle",
+    ]);
+    Route::get("/plans/", [PlanController::class, "index"]);
 
-    Route::get('/articles/featured/', [ArticleController::class, 'featuredArticle']);
-    Route::get('/plans/', [PlanController::class, 'index']);
-
-    Route::prefix('auth')->group(function () {
-        Route::post('/refresh', [UserController::class, 'refresh']);
-        Route::post('/register', [UserController::class, 'createUser']);
-        Route::post('/logout', [UserController::class, 'logout']);
-        Route::post('/forgot', [UserController::class, 'forgot']);
-        Route::post('/reset', [UserController::class, 'reset']);
-        Route::post('/login', [UserController::class, 'loginUser']);
-        Route::post('/forgot-password', [UserController::class, 'forgotPassword']);
-        Route::post('/reset-password', [UserController::class, 'resetPassword']);
+    Route::prefix("auth")->group(function () {
+        Route::post("/refresh", [UserController::class, "refresh"]);
+        Route::post("/register", [UserController::class, "createUser"]);
+        Route::post("/logout", [UserController::class, "logout"]);
+        Route::post("/forgot", [UserController::class, "forgot"]);
+        Route::post("/reset", [UserController::class, "reset"]);
+        Route::post("/login", [UserController::class, "loginUser"]);
+        Route::post("/forgot-password", [
+            UserController::class,
+            "forgotPassword",
+        ]);
+        Route::post("/reset-password", [
+            UserController::class,
+            "resetPassword",
+        ]);
     });
 
-    Route::prefix('email')->group(function () {
-        Route::get('/verify', function () {
-            return view('auth.verify-email');
-        })->middleware('auth')->name('verification.notice');
-        Route::get('/verify/{id}/{hash}', function (EmailVerificationRequest $request) {
+    Route::prefix("email")->group(function () {
+        Route::get("/verify", function () {
+            return view("auth.verify-email");
+        })
+            ->middleware("auth")
+            ->name("verification.notice");
+        Route::get("/verify/{id}/{hash}", function (
+            EmailVerificationRequest $request,
+        ) {
             $request->fulfill();
-            return redirect()->route('home');
-        })->middleware(['auth', 'signed'])->name('verification.verify');
-        Route::post('/verification-notification', function (Request $request) {
+            return redirect()->route("home");
+        })
+            ->middleware(["auth", "signed"])
+            ->name("verification.verify");
+        Route::post("/verification-notification", function (Request $request) {
             $request->user()->sendEmailVerificationNotification();
-            return back()->with('message', 'Verification link sent!');
-        })->middleware(['auth', 'throttle:6,1'])->name('verification.send');
+            return back()->with("message", "Verification link sent!");
+        })
+            ->middleware(["auth", "throttle:6,1"])
+            ->name("verification.send");
     });
 
-    Route::get('/pay/callback/', [PayController::class, 'handleGatewayCallback']);
-    Route::get('/pay/reference/{reference}', [PayController::class, 'paymentReference']);
+    Route::get("/pay/callback/", [
+        PayController::class,
+        "handleGatewayCallback",
+    ]);
+    Route::get("/pay/reference/{reference}", [
+        PayController::class,
+        "paymentReference",
+    ]);
 });
 
-Route::group(['middleware' => ['auth.jwt']], function () {
-    
-    Route::prefix('auth')->group(function () {
-        Route::post('/signout/', [UserController::class, 'signout']);
+Route::group(["middleware" => ["auth.jwt"]], function () {
+    Route::prefix("auth")->group(function () {
+        Route::post("/signout/", [UserController::class, "signout"]);
     });
 
-    Route::prefix('user')->group(function () {
-        Route::get('/profile/', [UserController::class, 'profile']);
-        Route::get('/role/', [UserController::class, 'userStatus']);
+    Route::prefix("user")->group(function () {
+        Route::get("/profile/", [UserController::class, "profile"]);
+        Route::get("/role/", [UserController::class, "userStatus"]);
     });
 
-    Route::prefix('pay')->group(function () {
-        Route::post('/', [PayController::class, 'redirectToGateway']);
-        Route::get('/history/', [PayController::class, 'paymentHistory']);
-        Route::get('/status/', [PayController::class, 'paymentStatus']);
+    Route::prefix("pay")->group(function () {
+        Route::post("/", [PayController::class, "redirectToGateway"]);
+        Route::get("/history/", [PayController::class, "paymentHistory"]);
+        Route::get("/status/", [PayController::class, "paymentStatus"]);
     });
-
 });
 
-Route::group(['middleware' => ['auth.jwt', 'subscribed']], function () {
-    Route::prefix('articles')->group(function () {
-        Route::get('/search', [ArticleController::class, 'search']);
-        Route::get('/list', [ArticleController::class, 'listArticles']);
-        Route::get('/', [ArticleController::class, 'index']);
-        Route::get('/all/', [ArticleController::class, 'indexNoAuth']);
-        Route::get('/latest/', [ArticleController::class, 'getLatest']);
-        Route::get('/by-media/', [ArticleController::class, 'indexByMediaType']);
-        Route::get('/{slug}/', [ArticleController::class, 'showSingleArticle']);
+Route::group(["middleware" => ["auth.jwt", "subscribed"]], function () {
+    Route::prefix("articles")->group(function () {
+        Route::get("/search", [ArticleController::class, "search"]);
+        Route::get("/list", [ArticleController::class, "listArticles"]);
+        Route::get("/", [ArticleController::class, "index"]);
+        Route::get("/all/", [ArticleController::class, "indexNoAuth"]);
+        Route::get("/latest/", [ArticleController::class, "getLatest"]);
+        Route::get("/by-media/", [
+            ArticleController::class,
+            "indexByMediaType",
+        ]);
+        Route::get("/{slug}/", [ArticleController::class, "showSingleArticle"]);
     });
 
     // Comments routes
-    Route::prefix('comments')->group(function () {
-        Route::get('/public', [CommentController::class, 'index']);
-        Route::get('/', [CommentController::class, 'index']);
-        Route::post('/', [CommentController::class, 'store']);
-        Route::get('/{comment}', [CommentController::class, 'show']);
-        Route::put('/{comment}', [CommentController::class, 'update']);
-        Route::delete('/{comment}', [CommentController::class, 'destroy']);
+    Route::prefix("comments")->group(function () {
+        Route::get("/public", [CommentController::class, "index"]);
+        Route::get("/", [CommentController::class, "index"]);
+        Route::post("/", [CommentController::class, "store"]);
+        Route::get("/{comment}", [CommentController::class, "show"]);
+        Route::put("/{comment}", [CommentController::class, "update"]);
+        Route::delete("/{comment}", [CommentController::class, "destroy"]);
         // Comment reporting
-        Route::post('/{comment}/report', [App\Http\Controllers\Api\CommentReportController::class, 'report']);
-        Route::delete('/{comment}/report', [App\Http\Controllers\Api\CommentReportController::class, 'unreport']);
+        Route::post("/{comment}/report", [
+            App\Http\Controllers\Api\CommentReportController::class,
+            "report",
+        ]);
+        Route::delete("/{comment}/report", [
+            App\Http\Controllers\Api\CommentReportController::class,
+            "unreport",
+        ]);
     });
 
-    Route::get('/stockpicks', [StockPickController::class, 'index']);
-
+    Route::get("/stockpicks", [StockPickController::class, "index"]);
 });
 
-Route::prefix('admin')->middleware(['auth.jwt', 'admin'])->group(function () {
+Route::prefix("admin")
+    ->middleware(["auth.jwt", "admin"])
+    ->group(function () {
+        Route::post("/store/ftm/", [ArticleController::class, "store"]);
+        Route::get("/generate/slug/", [
+            ArticleController::class,
+            "newsletterGenerateSlug",
+        ]);
 
-    Route::post('/store/ftm/', [ArticleController::class, 'store']);
-    Route::get('/generate/slug/', [ArticleController::class, 'newsletterGenerateSlug']);
+        // Media routes
+        Route::prefix("media")->group(function () {
+            Route::get("/", [ArticleController::class, "listFiles"]);
+            Route::post("/upload", [ArticleController::class, "uploadFile"]);
+        });
 
+        // Article management routes
+        Route::prefix("articles")->group(function () {
+            Route::post("/add", [ArticleController::class, "storeArticle"]);
+            Route::put("/update/{slug}", [ArticleController::class, "update"]);
+            Route::put("/status/update/{slug}", [
+                ArticleController::class,
+                "updateStatus",
+            ]);
+            Route::get("/update-image-paths", [
+                ArticleController::class,
+                "updateImagePaths",
+            ]);
+        });
 
-    // Media routes
-    Route::prefix('media')->group(function () {
-        Route::get('/', [ArticleController::class, 'listFiles']);
-        Route::post('/upload', [ArticleController::class, 'uploadFile']);
+        // User management routes
+        Route::prefix("users")->group(function () {
+            Route::get("/", [UserController::class, "listUsers"]);
+            Route::post("/create", [UserController::class, "adminCreateUser"]);
+            Route::put("/{id}", [UserController::class, "updateUser"]);
+        });
+
+        // Payment routes
+        Route::prefix("pay")->group(function () {
+            Route::get("/all", [PayController::class, "allPaymentsWithUsers"]);
+            Route::get("/user/{identifier}", [
+                PayController::class,
+                "userPaymentHistory",
+            ]);
+            Route::get("/summary", [PayController::class, "paymentsSummary"]);
+            Route::post("/add", [PayController::class, "addManualPayment"]);
+        });
+
+        // Moderation routes (admin/moderator only)
+        Route::prefix("comments")->group(function () {
+            Route::get("/", [CommentModerationController::class, "index"]);
+            Route::get("/pending", [
+                CommentModerationController::class,
+                "pending",
+            ]);
+            Route::get("/flagged", [
+                CommentModerationController::class,
+                "flagged",
+            ]);
+            Route::get("/stats", [CommentModerationController::class, "stats"]);
+            Route::get("/search", [
+                CommentModerationController::class,
+                "search",
+            ]);
+            Route::get("/{comment}/history", [
+                CommentModerationController::class,
+                "moderationHistory",
+            ]);
+            Route::patch("/{comment}/moderate", [
+                CommentModerationController::class,
+                "moderate",
+            ]);
+            Route::patch("/bulk-moderate", [
+                CommentModerationController::class,
+                "bulkModerate",
+            ]);
+        });
+
+        Route::prefix("metrics")->group(function () {
+            Route::get("user-funnel", [
+                \App\Http\Controllers\Api\AdminMetricsController::class,
+                "userFunnel",
+            ]);
+            Route::get("subscription-health", [
+                \App\Http\Controllers\Api\AdminMetricsController::class,
+                "subscriptionHealth",
+            ]);
+            Route::get("cohorts/{period}", [
+                \App\Http\Controllers\Api\AdminMetricsController::class,
+                "cohortAnalysis",
+            ]);
+            Route::get("engagement/{user_id?}", [
+                \App\Http\Controllers\Api\AdminMetricsController::class,
+                "engagementMetrics",
+            ]);
+            Route::get("payment-analytics", [
+                \App\Http\Controllers\Api\AdminMetricsController::class,
+                "paymentAnalytics",
+            ]);
+        });
+
+        Route::prefix("stockpicks")->group(function () {
+            Route::post("/", [StockPickController::class, "store"]);
+            Route::put("/{stockPick}", [StockPickController::class, "update"]);
+            Route::patch("/{stockPick}/price", [
+                StockPickController::class,
+                "updatePrice",
+            ]);
+            Route::post("/batch-update-prices", [
+                StockPickController::class,
+                "batchUpdatePrices",
+            ]);
+        });
     });
-
-    // Article management routes
-    Route::prefix('articles')->group(function () {
-        Route::post('/add', [ArticleController::class, 'storeArticle']);
-        Route::put('/update/{slug}', [ArticleController::class, 'update']);
-        Route::put('/status/update/{slug}', [ArticleController::class, 'updateStatus']);
-        Route::get('/update-image-paths', [ArticleController::class, 'updateImagePaths']);
-    });
-
-    // User management routes
-    Route::prefix('users')->group(function () {
-        Route::get('/', [UserController::class, 'listUsers']);
-        Route::post('/create', [UserController::class, 'adminCreateUser']);
-        Route::put('/{id}', [UserController::class, 'updateUser']);
-    });
-
-    // Payment routes
-    Route::prefix('pay')->group(function () {
-        Route::get('/all', [PayController::class, 'allPaymentsWithUsers']);
-        Route::get('/user/{identifier}', [PayController::class, 'userPaymentHistory']);
-        Route::get('/summary', [PayController::class, 'paymentsSummary']);
-        Route::post('/add', [PayController::class, 'addManualPayment']);
-
-    });
-
-    // Moderation routes (admin/moderator only)
-    Route::prefix('comments')->group(function () {
-        Route::get('/', [CommentModerationController::class, 'index']);
-        Route::get('/pending', [CommentModerationController::class, 'pending']);
-        Route::get('/flagged', [CommentModerationController::class, 'flagged']);
-        Route::get('/stats', [CommentModerationController::class, 'stats']);
-        Route::get('/search', [CommentModerationController::class, 'search']);
-        Route::get('/{comment}/history', [CommentModerationController::class, 'moderationHistory']);
-        Route::patch('/{comment}/moderate', [CommentModerationController::class, 'moderate']);
-        Route::patch('/bulk-moderate', [CommentModerationController::class, 'bulkModerate']);
-    });
-
-    Route::prefix('metrics')->group(function () {
-        Route::get('user-funnel', [\App\Http\Controllers\Api\AdminMetricsController::class, 'userFunnel']);
-        Route::get('subscription-health', [\App\Http\Controllers\Api\AdminMetricsController::class, 'subscriptionHealth']);
-        Route::get('cohorts/{period}', [\App\Http\Controllers\Api\AdminMetricsController::class, 'cohortAnalysis']);
-        Route::get('engagement/{user_id?}', [\App\Http\Controllers\Api\AdminMetricsController::class, 'engagementMetrics']);
-        Route::get('payment-analytics', [\App\Http\Controllers\Api\AdminMetricsController::class, 'paymentAnalytics']);
-    });
-
-    Route::prefix('stockpicks')->group(function () {
-        Route::post('/', [StockPickController::class, 'store']);
-        Route::put('/{stockPick}', [StockPickController::class, 'update']);
-        Route::patch('/{stockPick}/price', [StockPickController::class, 'updatePrice']);
-        Route::post('/batch-update-prices', [StockPickController::class, 'batchUpdatePrices']);
-    });
-
-});
-

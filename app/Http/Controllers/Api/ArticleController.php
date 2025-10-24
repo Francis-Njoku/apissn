@@ -17,6 +17,7 @@ use App\Http\Resources\ArticleResource;
 use App\Http\Resources\ArticleAllResource;
 use App\Http\Requests\ArticleRequest;
 use App\Http\Controllers\Controller;
+use App\Helpers\ApiResponseHelper;
 //use App\Jobs\SendNewPostEmail;
 //use Illuminate\Support\Facades\DB;
 //use App\Models\User;
@@ -188,10 +189,7 @@ class ArticleController extends Controller
         $sampleArticles = $baseQuery->take(6)->get();
 
         if ($sampleArticles->isEmpty()) {
-            return response()->json([
-                'status' => 'error',
-                'message' => 'No sample articles available'
-            ], 404);
+            return ApiResponseHelper::notFound('No sample articles available', 'NO_SAMPLE_ARTICLES');
         }
 
         // Return the articles as a collection
@@ -275,11 +273,7 @@ class ArticleController extends Controller
         ]);
 
         if ($validator->fails()) {
-            return response()->json([
-                'status' => 'error',
-                'message' => 'Validation failed',
-                'errors' => $validator->errors()
-            ], 422);
+            return ApiResponseHelper::validationError($validator->errors()->toArray());
         }
 
         if ($request->hasFile(key: 'file')) {
@@ -328,11 +322,7 @@ class ArticleController extends Controller
         ]);
 
         if ($validator->fails()) {
-            return response()->json([
-                'status' => 'error',
-                'message' => 'Validation failed',
-                'errors' => $validator->errors()
-            ], 422);
+            return ApiResponseHelper::validationError($validator->errors()->toArray());
         }
 
         // Initialize an empty data array
@@ -490,7 +480,7 @@ class ArticleController extends Controller
         $query = $request->input('q');
 
         if (empty($query)) {
-            return response()->json(['error' => 'Search query is required'], 400);
+            return ApiResponseHelper::error('Search query is required', 'SEARCH_QUERY_REQUIRED', null, 400);
         }
 
         $limit    = $request->input('limit', 10);

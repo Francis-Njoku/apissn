@@ -10,6 +10,7 @@ use Illuminate\Http\JsonResponse;
 use App\Models\Comment;
 use App\Http\Resources\CommentResource;
 use App\Http\Controllers\Controller;
+use App\Helpers\ApiResponseHelper;
 
 class CommentModerationController extends Controller
 {
@@ -34,7 +35,7 @@ class CommentModerationController extends Controller
         ]);
 
         if ($validator->fails()) {
-            return response()->json(['errors' => $validator->errors()], 422);
+            return ApiResponseHelper::validationError($validator->errors()->toArray());
         }
 
         $query = Comment::with(['user', 'newsletter', 'moderatedBy']);
@@ -115,7 +116,7 @@ class CommentModerationController extends Controller
         ]);
 
         if ($validator->fails()) {
-            return response()->json(['errors' => $validator->errors()], 422);
+            return ApiResponseHelper::validationError($validator->errors()->toArray());
         }
 
         $query = Comment::with(['user', 'newsletter'])
@@ -245,7 +246,7 @@ class CommentModerationController extends Controller
         ]);
 
         if ($validator->fails()) {
-            return response()->json(['errors' => $validator->errors()], 422);
+            return ApiResponseHelper::validationError($validator->errors()->toArray());
         }
 
         // Define spam keywords
@@ -327,7 +328,7 @@ class CommentModerationController extends Controller
         ]);
 
         if ($validator->fails()) {
-            return response()->json(['errors' => $validator->errors()], 422);
+            return ApiResponseHelper::validationError($validator->errors()->toArray());
         }
 
         $query = Comment::with(['user', 'newsletter', 'moderatedBy']);

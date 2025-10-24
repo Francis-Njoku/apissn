@@ -7,6 +7,7 @@ use Illuminate\Http\Request;
 use Illuminate\Http\JsonResponse;
 use App\Models\Comment;
 use App\Http\Controllers\Controller;
+use App\Helpers\ApiResponseHelper;
 
 class CommentReportController extends Controller
 {
@@ -22,7 +23,7 @@ class CommentReportController extends Controller
 
         // Check if user already reported this comment
         if (collect($reports)->contains('user_id', $userId)) {
-            return response()->json(['message' => 'You have already reported this comment'], 409);
+            return ApiResponseHelper::error('You have already reported this comment', 'ALREADY_REPORTED', null, 409);
         }
 
         $reports[] = [

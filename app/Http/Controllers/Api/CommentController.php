@@ -10,6 +10,7 @@ use Illuminate\Http\JsonResponse;
 use App\Models\Comment;
 use App\Http\Resources\CommentResource;
 use App\Http\Controllers\Controller;
+use App\Helpers\ApiResponseHelper;
 
 class CommentController extends Controller
 {
@@ -23,7 +24,7 @@ class CommentController extends Controller
         ]);
 
         if ($validator->fails()) {
-            return response()->json(['errors' => $validator->errors()], 422);
+            return ApiResponseHelper::validationError($validator->errors()->toArray());
         }
 
 
@@ -82,7 +83,7 @@ class CommentController extends Controller
         ]);
 
         if ($validator->fails()) {
-            return response()->json(['errors' => $validator->errors()], 422);
+            return ApiResponseHelper::validationError($validator->errors()->toArray());
         }
 
         $data = $validator->validated();
@@ -132,7 +133,7 @@ class CommentController extends Controller
         ]);
 
         if ($validator->fails()) {
-            return response()->json(['errors' => $validator->errors()], 422);
+            return ApiResponseHelper::validationError($validator->errors()->toArray());
         }
 
         $comment->update([

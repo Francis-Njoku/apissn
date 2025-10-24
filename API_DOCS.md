@@ -35,6 +35,29 @@ This API powers authentication, subscription billing, content delivery, investme
 -   Admin endpoints require the admin role.
 -   All dates and times are ISO 8601 unless specified.
 
+## Error Response Standardization
+
+All API endpoints now return standardized error responses while preserving existing success response formats. This ensures consistent error handling across the entire API.
+
+### Key Benefits
+
+- **Consistency**: All error responses follow the same structure
+- **Predictability**: Frontend developers can expect consistent error formats
+- **Backward Compatibility**: All existing success responses remain unchanged
+- **Better Debugging**: Error codes and detailed error messages improve debugging
+- **Maintainability**: Centralized error handling makes maintenance easier
+
+### Implementation Details
+
+The error response standardization includes:
+
+1. **ErrorResponse Class** (`app/Http/Responses/ErrorResponse.php`) - Centralized error response creation
+2. **ApiResponseHelper Class** (`app/Helpers/ApiResponseHelper.php`) - Helper functions for error responses
+3. **Updated Controllers** - All API controllers now use standardized error responses
+4. **Preserved Success Responses** - All existing success response formats remain unchanged
+
+For detailed information about the error response format and examples, see the [Error Handling](#error-handling) section below.
+
 ## Authentication
 
 -   Scheme: JWT Bearer
@@ -95,13 +118,25 @@ Request body:
 }
 ```
 
-Response:
+Success Response:
 
 ```json path=null start=null
 {
     "token": "eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9...",
     "refresh_token": "eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9...",
     "group_id": 2
+}
+```
+
+Error Response Examples:
+
+```json path=null start=null
+{
+    "success": false,
+    "code": "INVALID_CREDENTIALS",
+    "message": "Unauthorized",
+    "errors": null,
+    "data": null
 }
 ```
 
@@ -221,10 +256,22 @@ Request body:
 }
 ```
 
-Response:
+Success Response:
 
 ```json path=null start=null
 { "authorization_url": "https://checkout.paystack.com/0peioxfhpn" }
+```
+
+Error Response Example:
+
+```json path=null start=null
+{
+    "success": false,
+    "code": "PAYMENT_INITIATION_ERROR",
+    "message": "Failed to initiate payment. Please try again.",
+    "errors": ["Detailed error message for debugging"],
+    "data": null
+}
 ```
 
 ### GET /api/pay/callback
@@ -431,7 +478,7 @@ Query parameters:
 -   q (string, required)
 -   limit (integer, optional; default 10)
 
-Response:
+Success Response:
 
 ```json path=null start=null
 [
@@ -448,6 +495,18 @@ Response:
         "mediaType": "video"
     }
 ]
+```
+
+Error Response Example:
+
+```json path=null start=null
+{
+    "success": false,
+    "code": "SEARCH_QUERY_REQUIRED",
+    "message": "Search query is required",
+    "errors": null,
+    "data": null
+}
 ```
 
 # Investment API
@@ -544,7 +603,7 @@ Request body:
 }
 ```
 
-Response:
+Success Response:
 
 ```json path=null start=null
 {
@@ -557,6 +616,21 @@ Response:
         "user": null,
         "author_name": "Guest Commenter"
     }
+}
+```
+
+Error Response Example:
+
+```json path=null start=null
+{
+    "success": false,
+    "code": "VALIDATION_ERROR",
+    "message": "Validation failed",
+    "errors": {
+        "newsletter_id": ["The newsletter id field is required."],
+        "content": ["The content field is required."]
+    },
+    "data": null
 }
 ```
 
@@ -1407,18 +1481,99 @@ Response:
 
 # Error Handling
 
-Validation and error responses follow a consistent JSON structure.
+All error responses follow a standardized JSON structure for consistency across all endpoints.
 
-Examples:
+## Standardized Error Response Format
 
 ```json path=null start=null
 {
-    "status": false,
+    "success": false,
+    "code": "ERROR_CODE",
+    "message": "Human-readable error description",
+    "errors": {
+        "field_name": ["Error message for this field"]
+    },
+    "data": null
+}
+```
+
+### Field Descriptions
+
+- **success**: Always `false` for error responses
+- **code**: A machine-readable error code (string or number)
+- **message**: A human-readable description of the error
+- **errors**: An object containing validation errors (optional, null for non-validation errors)
+- **data**: Always `null` for error responses
+
+### Common Error Codes
+
+| Error Code | Description | HTTP Status |
+|-------------|-------------|-------------|
+| VALIDATION_ERROR | Request validation failed | 422 |
+| NOT_FOUND | Resource not found | 404 |
+| UNAUTHORIZED | Authentication required | 401 |
+| INVALID_CREDENTIALS | Invalid login credentials | 401 |
+| TOKEN_NOT_PROVIDED | JWT token not provided | 401 |
+| TOKEN_CREATION_ERROR | JWT token creation failed | 500 |
+| TOKEN_REFRESH_ERROR | JWT token refresh failed | 500 |
+| LOGOUT_ERROR | Logout process failed | 500 |
+| USER_NOT_FOUND | User not found | 404 |
+| INVALID_TIMEZONE | Invalid timezone provided | 500 |
+| USER_UPDATE_ERROR | User update failed | 500 |
+| PAYMENT_INITIATION_ERROR | Payment initiation failed | 500 |
+| PAYMENT_RECORD_ERROR | Payment record creation failed | 500 |
+| ALREADY_REPORTED | Already reported this comment | 409 |
+| SEARCH_QUERY_REQUIRED | Search query is required | 400 |
+| NO_SAMPLE_ARTICLES | No sample articles available | 404 |
+| FORBIDDEN | Access forbidden | 403 |
+| SERVER_ERROR | General server error | 500 |
+
+### Error Response Examples
+
+#### Validation Error
+```json path=null start=null
+{
+    "success": false,
+    "code": "VALIDATION_ERROR",
     "message": "Validation failed",
     "errors": {
-        "email": ["The email has already been taken."],
-        "password": ["The password must be at least 8 characters long."]
-    }
+        "email": ["The email field is required."],
+        "password": ["The password must be at least 8 characters."]
+    },
+    "data": null
+}
+```
+
+#### Not Found Error
+```json path=null start=null
+{
+    "success": false,
+    "code": "NOT_FOUND",
+    "message": "Resource not found",
+    "errors": null,
+    "data": null
+}
+```
+
+#### Unauthorized Error
+```json path=null start=null
+{
+    "success": false,
+    "code": "UNAUTHORIZED",
+    "message": "Invalid credentials",
+    "errors": null,
+    "data": null
+}
+```
+
+#### Server Error
+```json path=null start=null
+{
+    "success": false,
+    "code": "SERVER_ERROR",
+    "message": "Internal server error",
+    "errors": ["Detailed error message for debugging"],
+    "data": null
 }
 ```
 

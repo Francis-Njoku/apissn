@@ -13,6 +13,7 @@ use Illuminate\Support\Facades\Auth;
 use Illuminate\Http\Resources\Json\JsonResource;
 use Illuminate\Http\Request;
 use Illuminate\Http\JsonResponse;
+use App\Helpers\ApiResponseHelper;
 use Illuminate\Auth\Events\Verified;
 use Illuminate\Auth\Events\Registered;
 use Illuminate\Auth\Events\PasswordReset;
@@ -47,7 +48,7 @@ class UserController extends Controller
             return $user->id; //response()->json(['id' => $user->id]);
         } else {
             // Return a not found response
-            return response()->json(['message' => 'User not exist'], 404);
+            return ApiResponseHelper::notFound('User not exist', 'USER_NOT_FOUND');
         }
     }
 
@@ -87,10 +88,7 @@ class UserController extends Controller
             new \DateTimeZone($usertimezone);
             return true;
         } catch (Exception $e) {
-            return response()->json([
-                'status' => false,
-                'message' => 'Wrong Timezone, please try again'
-            ], 500);
+            return ApiResponseHelper::serverError('Wrong Timezone, please try again', 'INVALID_TIMEZONE', [$e->getMessage()]);
         }
         return true;
     }
@@ -188,10 +186,7 @@ class UserController extends Controller
                 //'gmt' => Auth::user()->gmt
             ], 200);
         } catch (\Throwable $th) {
-            return response()->json([
-                'status' => false,
-                'message' => $th->getMessage()
-            ], 500);
+            return ApiResponseHelper::serverError($th->getMessage(), 'USER_UPDATE_ERROR', [$th->getMessage()]);
         }
     }
 
@@ -232,11 +227,11 @@ class UserController extends Controller
 
         try {
             if (!$token = JWTAuth::attempt($credentials)) {
-                return response()->json(['error' => 'Unauthorized'], 401);
+                return ApiResponseHelper::unauthorized('Unauthorized', 'INVALID_CREDENTIALS');
 
             }
         } catch (JWTException $e) {
-            return response()->json(['error' => 'Could not create token'], 500);
+            return ApiResponseHelper::serverError('Could not create token', 'TOKEN_CREATION_ERROR', [$e->getMessage()]);
         }
 
         //$group = UserGroup::where('user_id', Auth::id())->get();
@@ -258,11 +253,11 @@ class UserController extends Controller
         try {
             $token = JWTAuth::getToken();
             if (!$token) {
-                return response()->json(['error' => 'Token not provided'], 401);
+                return ApiResponseHelper::unauthorized('Token not provided', 'TOKEN_NOT_PROVIDED');
             }
             $newToken = JWTAuth::refresh($token);
         } catch (JWTException $e) {
-            return response()->json(['error' => 'Could not refresh token'], 500);
+            return ApiResponseHelper::serverError('Could not refresh token', 'TOKEN_REFRESH_ERROR', [$e->getMessage()]);
         }
 
         return response()->json(['token' => $newToken]);
@@ -294,7 +289,7 @@ class UserController extends Controller
             JWTAuth::invalidate(JWTAuth::getToken());
             return response()->json(['message' => 'Successfully logged out']);
         } catch (JWTException $exception) {
-            return response()->json(['error' => 'Failed to logout, please try again.'], 500);
+            return ApiResponseHelper::serverError('Failed to logout, please try again.', 'LOGOUT_ERROR', [$exception->getMessage()]);
         }
     }
 
@@ -310,7 +305,7 @@ class UserController extends Controller
         ]);
 
         if ($validator->fails()) {
-            return new JsonResponse(['success' => false, 'message' => $validator->errors()], 422);
+            return ApiResponseHelper::validationError($validator->errors()->toArray());
         }
 
         $user = User::where('email', $request->email)->first();
@@ -355,7 +350,7 @@ class UserController extends Controller
         ]);
 
         if ($validator->fails()) {
-            return new JsonResponse(['success' => false, 'message' => $validator->errors()], 422);
+            return ApiResponseHelper::validationError($validator->errors()->toArray());
         }
 
         $check = DB::table('password_resets')->where([
@@ -547,10 +542,7 @@ class UserController extends Controller
                 'message' => 'User Created Successfully',
             ], 200);
         } catch (\Throwable $th) {
-            return response()->json([
-                'status' => false,
-                'message' => $th->getMessage()
-            ], 500);
+            return ApiResponseHelper::serverError($th->getMessage(), 'USER_UPDATE_ERROR', [$th->getMessage()]);
         }
     }
 
