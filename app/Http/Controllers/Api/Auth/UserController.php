@@ -13,7 +13,6 @@ use Illuminate\Support\Facades\Auth;
 use Illuminate\Http\Resources\Json\JsonResource;
 use Illuminate\Http\Request;
 use Illuminate\Http\JsonResponse;
-use App\Helpers\ApiResponseHelper;
 use Illuminate\Auth\Events\Verified;
 use Illuminate\Auth\Events\Registered;
 use Illuminate\Auth\Events\PasswordReset;
@@ -23,11 +22,13 @@ use App\Models\User;
 use App\Mail\WelcomeMail;
 use App\Mail\WelcomeEmail;
 use App\Mail\ResetPassword;
+use App\Http\Resources\UserResource;
 
 //use App\Enum\UserAuth;
-use App\Http\Resources\UserResource;
 use App\Http\Requests\ForgotPasswordRequest;
 use App\Http\Controllers\Controller;
+use App\Helpers\ApiResponseHelper;
+use App\Exceptions\AuthException;
 
 class UserController extends Controller
 {
@@ -116,136 +117,189 @@ class UserController extends Controller
     public function createUser(Request $request)
     {
         try {
-            //Validated
+            // Validate input
             $validateUser = Validator::make(
                 $request->all(),
                 [
-                    'first_name' => '',
-                    'last_name' => '',
-                    'phone' => '',
+                    'first_name' => 'required|string|max:255',
+                    'last_name' => 'required|string|max:255',
+                    'phone' => 'nullable|string|max:20',
                     'email' => 'required|email|unique:users,email',
-                    'password' => 'required'
+                    'password' => 'required|string|min:8|confirmed',
                 ]
             );
 
             if ($validateUser->fails()) {
-                return response()->json([
-                    'status' => false,
-                    'message' => 'validation error',
-                    'errors' => $validateUser->errors()
-                ], 401);
+                return ApiResponseHelper::validationError($validateUser->errors()->toArray());
             }
 
-            //$this->isValidTimezoneId($request->gmt);
-
-            if ($request->manager_id) {
-                $user = User::create([
-                    'name' => $this->generateUser(),
-                    'email' => $request->email,
-                    'first_name' => $request->first_name,
-                    'last_name' => $request->last_name,
-                    'phone' => $request->phone,
-                    'role_id' => 2,
-                    'identity' => $this->generateIdentity(),
-                    'status' => 'approved',
-                    'password' => Hash::make($request->password)
-                ]);
-            } else {
-                $user = User::create([
-                    'name' => $this->generateUser(),
-                    'email' => $request->email,
-                    'first_name' => $request->first_name,
-                    'last_name' => $request->last_name,
-                    'phone' => $request->phone,
-                    'role_id' => 2,
-                    'identity' => $this->generateIdentity(),
-                    'status' => 'approved',
-                    'password' => Hash::make($request->password)
-                ]);
+            // Check if email already exists (additional validation)
+            if (User::where('email', $request->email)->exists()) {
+                throw AuthException::emailAlreadyExists($request->email);
             }
 
+            // Generate user details
+            $userData = [
+                'name' => $this->generateUser(),
+                'email' => $request->email,
+                'first_name' => $request->first_name,
+                'last_name' => $request->last_name,
+                'phone' => $request->phone,
+                'role_id' => $request->manager_id ? 3 : 2, // Different role for manager users
+                'identity' => $this->generateIdentity(),
+                'status' => 'approved',
+                'password' => Hash::make($request->password)
+            ];
 
-            /*$userGroup = UserGroup::create([
-                'user_id' => $user->id,
-                'group_id' => '1'
-            ]);*/
+            // Create user
+            $user = User::create($userData);
 
             // Send email to new user
             event(new Registered($user));
 
-            //$accessToken = $user->createToken('access_token', [UserATokenAbility::ACCESS_API->value], Carbon::now()->addMinutes(config('sanctum.ac_expiration')));
-            //$refreshToken = $user->createToken('refresh_token', [TokenAbility::ISSUE_ACCESS_TOKEN->value], Carbon::now()->addMinutes(config('sanctum.rt_expiration')));
+            Log::info('User created successfully', [
+                'user_id' => $user->id,
+                'email' => $user->email,
+                'ip' => $request->ip(),
+            ]);
 
             return response()->json([
                 'status' => true,
                 'message' => 'User Created Successfully',
-                //'token' => $user->createToken("API TOKEN")->plainTextToken,
-                //'token' => $accessToken->plainTextToken,
-                //'refresh_token' => $refreshToken->plainTextToken,
-                //'group_id' => $group_id,
-                //'gmt' => Auth::user()->gmt
-            ], 200);
+                'user' => [
+                    'id' => $user->id,
+                    'name' => $user->name,
+                    'email' => $user->email,
+                    'first_name' => $user->first_name,
+                    'last_name' => $user->last_name,
+                    'phone' => $user->phone,
+                    'role_id' => $user->role_id,
+                    'status' => $user->status,
+                ],
+                'verification_required' => true,
+                'verification_message' => 'Please check your email for verification instructions.'
+            ], 201);
+
+        } catch (AuthException $e) {
+            return ApiResponseHelper::error(
+                $e->getMessage(),
+                $e->getErrorCode(),
+                $e->getErrorDetails(),
+                $e->getCode()
+            );
         } catch (\Throwable $th) {
-            return ApiResponseHelper::serverError($th->getMessage(), 'USER_UPDATE_ERROR', [$th->getMessage()]);
+            Log::error('User creation error', [
+                'error' => $th->getMessage(),
+                'email' => $request->email ?? 'unknown',
+                'trace' => $th->getTraceAsString()
+            ]);
+
+            return ApiResponseHelper::serverError(
+                'An unexpected error occurred during user registration',
+                'USER_CREATION_ERROR',
+                [$th->getMessage()]
+            );
         }
     }
 
     /**
      * Login The User
      * @param Request $request
-     * @return User
+     * @return JsonResponse
      */
     public function loginUser(Request $request)
     {
-        /*
-        $request->validate([
-            'email' => 'required|string|email',
-            'password' => 'required|string',
+        // Validate input
+        $validator = Validator::make($request->all(), [
+            'email' => 'required|email',
+            'password' => 'required|string|min:1',
         ]);
-        $credentials = $request->only('email', 'password');
-        $token =  Auth::guard('api')->attempt($credentials); //
-        $token2 = Auth::attempt($credentials);
-        $refreshToken = JWTAuth::refresh($token2);
 
-        if (!$token) {
-            return response()->json([
-                'message' => 'Unauthorized',
-            ], 401);
+        if ($validator->fails()) {
+            return ApiResponseHelper::validationError($validator->errors()->toArray());
         }
 
-        $user = Auth::user()->gmt;
-        return response()->json([
-            'user' => Auth::user()->created_at,
-            'authorization' => [
-                'token' => $token,
-                'refresh_token' => $refreshToken,
-                'type' => 'bearer',
-            ]
-        ]);
-        */
         $credentials = $request->only('email', 'password');
 
         try {
-            if (!$token = JWTAuth::attempt($credentials)) {
-                return ApiResponseHelper::unauthorized('Unauthorized', 'INVALID_CREDENTIALS');
+            // Check if user exists
+            $user = User::where('email', $credentials['email'])->first();
 
+            if (!$user) {
+                throw AuthException::userNotFound($credentials['email']);
             }
+
+            // Check if user is verified
+            if (!$user->hasVerifiedEmail()) {
+                throw AuthException::userNotVerified($credentials['email']);
+            }
+
+            // Check if account is suspended
+            if ($user->status === 'suspended') {
+                throw AuthException::accountSuspended($credentials['email']);
+            }
+
+            // Check if account is approved
+            if ($user->status !== 'approved') {
+                throw AuthException::accountSuspended($credentials['email']);
+            }
+
+            // Attempt authentication
+            if (!$token = JWTAuth::attempt($credentials)) {
+                // Log failed attempt for security
+                Log::warning('Failed login attempt', [
+                    'email' => $credentials['email'],
+                    'ip' => $request->ip(),
+                    'user_agent' => $request->userAgent(),
+                ]);
+
+                throw AuthException::invalidCredentials();
+            }
+
+            // Check if user has active subscription (if applicable)
+            // You can add additional business logic here
+
+            return response()->json([
+                'status' => true,
+                'message' => 'Login successful',
+                'token' => $token,
+                'refresh_token' => $this->createRefreshToken($token),
+                'group_id' => Auth::user()->role_id,
+                'user' => [
+                    'id' => Auth::user()->id,
+                    'name' => Auth::user()->name,
+                    'email' => Auth::user()->email,
+                    'first_name' => Auth::user()->first_name,
+                    'last_name' => Auth::user()->last_name,
+                ]
+            ], 200);
+
+        } catch (AuthException $e) {
+            return ApiResponseHelper::error(
+                $e->getMessage(),
+                $e->getErrorCode(),
+                $e->getErrorDetails(),
+                $e->getCode()
+            );
         } catch (JWTException $e) {
-            return ApiResponseHelper::serverError('Could not create token', 'TOKEN_CREATION_ERROR', [$e->getMessage()]);
+            return ApiResponseHelper::serverError(
+                'Could not create authentication token',
+                'TOKEN_CREATION_ERROR',
+                [$e->getMessage()]
+            );
+        } catch (\Throwable $e) {
+            Log::error('Login error', [
+                'error' => $e->getMessage(),
+                'email' => $credentials['email'] ?? 'unknown',
+                'trace' => $e->getTraceAsString()
+            ]);
+
+            return ApiResponseHelper::serverError(
+                'An unexpected error occurred during login',
+                'LOGIN_ERROR',
+                [$e->getMessage()]
+            );
         }
-
-        //$group = UserGroup::where('user_id', Auth::id())->get();
-
-        /*foreach($group as $groups)
-        {
-            $group_id = $groups->group_id;
-        }*/
-        return response()->json([
-            'token' => $token,
-            'refresh_token' => $this->createRefreshToken($token),
-            'group_id' => Auth::user()->role_id,
-        ]);
-
     }
 
     public function refresh()
@@ -308,31 +362,65 @@ class UserController extends Controller
             return ApiResponseHelper::validationError($validator->errors()->toArray());
         }
 
-        $user = User::where('email', $request->email)->first();
+        try {
+            $user = User::where('email', $request->email)->first();
 
-        if (!$user) {
+            if (!$user) {
+                throw AuthException::userNotFound($request->email);
+            }
+
+            // Check if user account is active
+            if ($user->status !== 'approved') {
+                throw AuthException::accountSuspended($request->email);
+            }
+
+            // Delete existing password reset tokens
+            DB::table('password_resets')->where('email', $request->email)->delete();
+
+            $token = random_int(100000, 999999);
+
+            // Store password reset token
+            DB::table('password_resets')->insert([
+                'email' => $request->email,
+                'token' => $token,
+                'created_at' => Carbon::now()
+            ]);
+
+            // Send password reset email
+            Mail::to($request->email)->send(new ResetPassword($token));
+
+            Log::info('Password reset email sent', [
+                'email' => $request->email,
+                'ip' => $request->ip(),
+            ]);
+
             return new JsonResponse([
-                'success' => false,
-                'message' => "This email does not exist"
-            ], 400);
+                'success' => true,
+                'message' => "Please check your email for a 6 digit pin",
+                'expires_in' => 3600, // Token expires in 1 hour
+                'instructions' => 'Enter the 6-digit pin in the password reset form.'
+            ], 200);
+
+        } catch (AuthException $e) {
+            return ApiResponseHelper::error(
+                $e->getMessage(),
+                $e->getErrorCode(),
+                $e->getErrorDetails(),
+                $e->getCode()
+            );
+        } catch (\Throwable $e) {
+            Log::error('Password reset request error', [
+                'error' => $e->getMessage(),
+                'email' => $request->email,
+                'trace' => $e->getTraceAsString()
+            ]);
+
+            return ApiResponseHelper::serverError(
+                'An unexpected error occurred while processing your password reset request',
+                'PASSWORD_RESET_ERROR',
+                [$e->getMessage()]
+            );
         }
-
-        DB::table('password_resets')->where('email', $request->email)->delete();
-
-        $token = random_int(100000, 999999);
-
-        DB::table('password_resets')->insert([
-            'email' => $request->email,
-            'token' => $token,
-            'created_at' => Carbon::now()
-        ]);
-
-        Mail::to($request->email)->send(new ResetPassword($token));
-
-        return new JsonResponse([
-            'success' => true,
-            'message' => "Please check your email for a 6 digit pin"
-        ], 200);
     }
 
 
@@ -346,59 +434,83 @@ class UserController extends Controller
         $validator = Validator::make($request->all(), [
             'email' => ['required', 'string', 'email', 'max:255'],
             'password' => ['required', 'string', 'min:8', 'confirmed'],
-            'token' => ['required'],
+            'token' => ['required', 'string'],
         ]);
 
         if ($validator->fails()) {
             return ApiResponseHelper::validationError($validator->errors()->toArray());
         }
 
-        $check = DB::table('password_resets')->where([
-            ['email', $request->all()['email']],
-            ['token', $request->all()['token']],
-        ]);
+        try {
+            $check = DB::table('password_resets')->where([
+                ['email', $request->email],
+                ['token', $request->token],
+            ]);
 
-        if ($check->exists()) {
+            if (!$check->exists()) {
+                throw AuthException::invalidToken($request->token);
+            }
+
             $difference = Carbon::now()->diffInSeconds($check->first()->created_at);
             if ($difference > 3600) {
-                return new JsonResponse(['success' => false, 'message' => "Token Expired"], 400);
+                throw AuthException::tokenExpired($request->token);
             }
-            $delete = DB::table('password_resets')->where([
-                ['email', $request->all()['email']],
-                ['token', $request->all()['token']],
+
+            // Delete the used token
+            DB::table('password_resets')->where([
+                ['email', $request->email],
+                ['token', $request->token],
             ])->delete();
 
-            $user = User::where('email', $request->email);
+            // Update user password
+            $user = User::where('email', $request->email)->first();
+            if (!$user) {
+                throw AuthException::userNotFound($request->email);
+            }
+
+            // Check if user account is active
+            if ($user->status !== 'approved') {
+                throw AuthException::accountSuspended($request->email);
+            }
+
             $user->update([
                 'password' => Hash::make($request->password)
             ]);
 
-            // $token = $user->first()->createToken('myapptoken')->plainTextToken;
+            // Log password reset
+            Log::info('Password reset successful', [
+                'user_id' => $user->id,
+                'email' => $user->email,
+                'ip' => $request->ip(),
+            ]);
 
             return new JsonResponse(
                 [
                     'success' => true,
-                    'message' => "Your password has been reset",
-                    // 'token' => $token
+                    'message' => "Your password has been reset successfully",
+                    'instructions' => 'You can now log in with your new password.'
                 ],
                 200
             );
 
-            /*
-            return new JsonResponse(
-                [
-                    'success' => true,
-                    'message' => "You can now reset your password"
-                ],
-                200
-            );*/
-        } else {
-            return new JsonResponse(
-                [
-                    'success' => false,
-                    'message' => "Invalid token"
-                ],
-                401
+        } catch (AuthException $e) {
+            return ApiResponseHelper::error(
+                $e->getMessage(),
+                $e->getErrorCode(),
+                $e->getErrorDetails(),
+                $e->getCode()
+            );
+        } catch (\Throwable $e) {
+            Log::error('Password reset error', [
+                'error' => $e->getMessage(),
+                'email' => $request->email,
+                'trace' => $e->getTraceAsString()
+            ]);
+
+            return ApiResponseHelper::serverError(
+                'An unexpected error occurred while resetting your password',
+                'PASSWORD_RESET_ERROR',
+                [$e->getMessage()]
             );
         }
     }
@@ -419,10 +531,18 @@ class UserController extends Controller
      */
     public function listUsers(Request $request)
     {
-        $role = $request->query('role');
+        $role  = $request->query('role');
         $query = User::select([
-            'id', 'name', 'first_name', 'last_name', 'email',
-            'phone', 'role_id', 'status', 'created_at', 'updated_at'
+            'id',
+            'name',
+            'first_name',
+            'last_name',
+            'email',
+            'phone',
+            'role_id',
+            'status',
+            'created_at',
+            'updated_at'
         ]);
 
         // Handle role parameter case-insensitively with trimming and decoding
@@ -435,7 +555,7 @@ class UserController extends Controller
 
         if ($request->has('subscriber_status')) {
             $status = strtolower(trim(urldecode($request->input('subscriber_status'))));
-            
+
             // Validate subscriber_status
             $validStatuses = ['active', 'never_subscribed', 'expired_non_renewed'];
             if (!in_array($status, $validStatuses)) {
@@ -454,7 +574,7 @@ class UserController extends Controller
                 }
             }
         }
-        
+
         // Log query parameters for debugging
         // dump('User list query parameters', [
         //     'role' => $role,
@@ -462,11 +582,11 @@ class UserController extends Controller
         //     'subscriber_status' => $request->input('subscriber_status'),
         //     'normalized_subscriber_status' => $status ?? null
         // ]);
-        
+
         // Handle per_page parameter with validation (min: 1, max: 100, default: 10)
         $perPage = $request->query('per_page', 10);
         $perPage = max(1, min(100, (int) $perPage));
-        
+
         return UserResource::collection($query->paginate($perPage));
     }
 
@@ -593,7 +713,7 @@ class UserController extends Controller
 
             // Get the authenticated user
             $authUser = Auth::user();
-            
+
             // Determine which user to update
             if ($id) {
                 // Admin is updating a specific user
@@ -607,7 +727,7 @@ class UserController extends Controller
             if ($request->filled('password')) {
                 // Check if the authenticated user is an admin
                 $isAdmin = $authUser->hasRole('admin');
-                
+
                 // If not admin, verify current password
                 if (!$isAdmin) {
                     if (!$request->filled('current_password')) {
@@ -628,7 +748,12 @@ class UserController extends Controller
 
             // Prepare data for update, excluding empty values
             $updateData = array_filter($request->only([
-                'first_name', 'last_name', 'phone', 'email', 'role_id', 'status'
+                'first_name',
+                'last_name',
+                'phone',
+                'email',
+                'role_id',
+                'status'
             ]), function ($value) {
                 return $value !== null && $value !== '';
             });

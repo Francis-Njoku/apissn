@@ -2,8 +2,11 @@
 
 namespace App\Exceptions;
 
-use Illuminate\Foundation\Exceptions\Handler as ExceptionHandler;
 use Throwable;
+use Illuminate\Validation\ValidationException;
+use Illuminate\Foundation\Exceptions\Handler as ExceptionHandler;
+use Illuminate\Auth\AuthenticationException;
+use App\Exceptions\AuthExceptionHandler;
 
 class Handler extends ExceptionHandler
 {
@@ -26,5 +29,44 @@ class Handler extends ExceptionHandler
         $this->reportable(function (Throwable $e) {
             //
         });
+
+        $this->renderable(function (Throwable $e, $request) {
+            // Handle authentication-related exceptions specifically
+            if (
+                $e instanceof AuthenticationException ||
+                $e instanceof ValidationException ||
+                str_contains($e->getMessage(), 'authentication') ||
+                str_contains($e->getMessage(), 'login') ||
+                str_contains($e->getMessage(), 'password') ||
+                str_contains($e->getMessage(), 'email')
+            ) {
+
+                return AuthExceptionHandler::handle($e);
+            }
+        });
+    }
+
+    /**
+     * Convert an authentication exception into an unauthenticated response.
+     *
+     * @param \Illuminate\Http\Request $request
+     * @param \Illuminate\Auth\AuthenticationException $exception
+     * @return \Illuminate\Http\JsonResponse
+     */
+    protected function unauthenticated($request, AuthenticationException $exception)
+    {
+        return AuthExceptionHandler::handle($exception);
+    }
+
+    /**
+     * Convert a validation exception into a JSON response.
+     *
+     * @param \Illuminate\Http\Request $request
+     * @param \Illuminate\Validation\ValidationException $exception
+     * @return \Illuminate\Http\JsonResponse
+     */
+    protected function invalidJson($request, ValidationException $exception)
+    {
+        return AuthExceptionHandler::handle($exception);
     }
 }
