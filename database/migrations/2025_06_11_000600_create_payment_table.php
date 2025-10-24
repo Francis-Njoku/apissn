@@ -39,6 +39,42 @@ class CreatePaymentTable extends Migration
         } else {
             // Check and add columns if they don't exist
             Schema::table('payment', function (Blueprint $table) {
+                if (!Schema::hasColumn('payment', 'id')) {
+                    $table->id();
+                }
+                if (!Schema::hasColumn('payment', 'user_id')) {
+                    $table->unsignedBigInteger('user_id');
+                }
+                if (!Schema::hasColumn('payment', 'ip_address')) {
+                    $table->string('ip_address')->nullable();
+                }
+                if (!Schema::hasColumn('payment', 'order_id')) {
+                    $table->string('order_id')->nullable();
+                }
+                if (!Schema::hasColumn('payment', 'gateway_response')) {
+                    $table->text('gateway_response')->nullable();
+                }
+                if (!Schema::hasColumn('payment', 'status_response')) {
+                    $table->text('status_response')->nullable();
+                }
+                if (!Schema::hasColumn('payment', 'reference')) {
+                    $table->string('reference')->unique();
+                }
+                if (!Schema::hasColumn('payment', 'amount')) {
+                    $table->decimal('amount', 10, 2);
+                }
+                if (!Schema::hasColumn('payment', 'plan_id')) {
+                    $table->unsignedBigInteger('plan_id')->nullable();
+                }
+                if (!Schema::hasColumn('payment', 'due_date')) {
+                    $table->date('due_date')->nullable();
+                }
+                if (!Schema::hasColumn('payment', 'status')) {
+                    $table->string('status');
+                }
+                if (!Schema::hasColumn('payment', 'metadata')) {
+                    $table->text('metadata')->nullable();
+                }
                 if (!Schema::hasColumn('payment', 'payment_method')) {
                     $table->string('payment_method')->nullable();
                 }
@@ -51,24 +87,11 @@ class CreatePaymentTable extends Migration
                 if (!Schema::hasColumn('payment', 'paid_at')) {
                     $table->timestamp('paid_at')->nullable();
                 }
-                if (!Schema::hasColumn('payment', 'plan_id')) {
-                    $table->unsignedBigInteger('plan_id')->nullable();
-                    // Foreign key will be added later after plans table exists
+                if (!Schema::hasColumn('payment', 'created_at')) {
+                    $table->timestamps();
                 }
-                if (!Schema::hasColumn('payment', 'interval')) {
-                    $table->string('interval')->nullable(); // monthly, quarterly, etc.
-                }
-                if (!Schema::hasColumn('payment', 'first_name')) {
-                    $table->string('first_name')->nullable();
-                }
-                if (!Schema::hasColumn('payment', 'last_name')) {
-                    $table->string('last_name')->nullable();
-                }
-                if (!Schema::hasColumn('payment', 'email')) {
-                    $table->string('email')->nullable();
-                }
-                if (!Schema::hasColumn('payment', 'phone')) {
-                    $table->string('phone')->nullable();
+                if (!Schema::hasColumn('payment', 'updated_at')) {
+                    $table->timestamps();
                 }
             });
         }
@@ -81,24 +104,20 @@ class CreatePaymentTable extends Migration
      */
     public function down()
     {
-        Schema::dropIfExists('payment');
+        // Only drop the table if it exists
+        if (Schema::hasTable('payment')) {
+            Schema::dropIfExists('payment');
+        }
     }
 
     /**
      * Add foreign key constraints after all tables exist
+     *
+     * @deprecated Use the separate migration 2025_06_11_000700_add_payment_foreign_keys.php instead
      */
     public static function addForeignKeys()
     {
-        if (Schema::hasTable('payment') && Schema::hasTable('users')) {
-            Schema::table('payment', function (Blueprint $table) {
-                $table->foreign('user_id')->references('id')->on('users')->onDelete('cascade');
-            });
-        }
-
-        if (Schema::hasTable('payment') && Schema::hasTable('plan')) {
-            Schema::table('payment', function (Blueprint $table) {
-                $table->foreign('plan_id')->references('id')->on('plan')->onDelete('set null');
-            });
-        }
+        // This method is deprecated - use the separate migration file instead
+        // The foreign keys are now handled in 2025_06_11_000700_add_payment_foreign_keys.php
     }
 }
