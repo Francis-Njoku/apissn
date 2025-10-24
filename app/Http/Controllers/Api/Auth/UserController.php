@@ -176,8 +176,8 @@ class UserController extends Controller
                     'role_id' => $user->role_id,
                     'status' => $user->status,
                 ],
-                'verification_required' => true,
-                'verification_message' => 'Please check your email for verification instructions.'
+                // 'verification_required' => true,
+                // 'verification_message' => 'Please check your email for verification instructions.'
             ], 201);
 
         } catch (AuthException $e) {
@@ -185,7 +185,7 @@ class UserController extends Controller
                 $e->getMessage(),
                 $e->getErrorCode(),
                 $e->getErrorDetails(),
-                $e->getCode()
+                $e->getStatusCode()
             );
         } catch (\Throwable $th) {
             Log::error('User creation error', [
@@ -230,19 +230,15 @@ class UserController extends Controller
             }
 
             // Check if user is verified
-            if (!$user->hasVerifiedEmail()) {
-                throw AuthException::userNotVerified($credentials['email']);
-            }
+            // if (!$user->hasVerifiedEmail()) {
+            //     throw AuthException::userNotVerified($credentials['email']);
+            // }
 
             // Check if account is suspended
-            if ($user->status === 'suspended') {
-                throw AuthException::accountSuspended($credentials['email']);
-            }
+            // if ($user->status === 'suspended') {
+            //     throw AuthException::accountSuspended($credentials['email']);
+            // }
 
-            // Check if account is approved
-            if ($user->status !== 'approved') {
-                throw AuthException::accountSuspended($credentials['email']);
-            }
 
             // Attempt authentication
             if (!$token = JWTAuth::attempt($credentials)) {
@@ -279,7 +275,7 @@ class UserController extends Controller
                 $e->getMessage(),
                 $e->getErrorCode(),
                 $e->getErrorDetails(),
-                $e->getCode()
+                $e->getStatusCode()
             );
         } catch (JWTException $e) {
             return ApiResponseHelper::serverError(
@@ -370,9 +366,9 @@ class UserController extends Controller
             }
 
             // Check if user account is active
-            if ($user->status !== 'approved') {
-                throw AuthException::accountSuspended($request->email);
-            }
+            // if ($user->status !== 'approved') {
+            //     throw AuthException::accountSuspended($request->email);
+            // }
 
             // Delete existing password reset tokens
             DB::table('password_resets')->where('email', $request->email)->delete();
@@ -406,7 +402,7 @@ class UserController extends Controller
                 $e->getMessage(),
                 $e->getErrorCode(),
                 $e->getErrorDetails(),
-                $e->getCode()
+                $e->getStatusCode()
             );
         } catch (\Throwable $e) {
             Log::error('Password reset request error', [
@@ -469,9 +465,9 @@ class UserController extends Controller
             }
 
             // Check if user account is active
-            if ($user->status !== 'approved') {
-                throw AuthException::accountSuspended($request->email);
-            }
+            // if ($user->status !== 'approved') {
+            //     throw AuthException::accountSuspended($request->email);
+            // }
 
             $user->update([
                 'password' => Hash::make($request->password)
@@ -498,7 +494,7 @@ class UserController extends Controller
                 $e->getMessage(),
                 $e->getErrorCode(),
                 $e->getErrorDetails(),
-                $e->getCode()
+                $e->getStatusCode()
             );
         } catch (\Throwable $e) {
             Log::error('Password reset error', [

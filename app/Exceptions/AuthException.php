@@ -25,6 +25,7 @@ class AuthException extends Exception
     public const SESSION_EXPIRED = 'SESSION_EXPIRED';
 
     protected $code;
+    protected $statusCode;
     protected $errorDetails;
 
     public function __construct(
@@ -35,12 +36,28 @@ class AuthException extends Exception
     ) {
         parent::__construct($message, $statusCode);
         $this->code         = $code;
+        $this->statusCode   = $statusCode;
         $this->errorDetails = $errorDetails;
     }
 
+    /**
+     * Get the error code (string identifier)
+     *
+     * @return string
+     */
     public function getErrorCode(): string
     {
         return $this->code;
+    }
+
+    /**
+     * Get the HTTP status code
+     *
+     * @return int
+     */
+    public function getStatusCode(): int
+    {
+        return $this->statusCode;
     }
 
     public function getErrorDetails(): ?array
