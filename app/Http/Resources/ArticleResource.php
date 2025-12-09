@@ -18,12 +18,14 @@ class ArticleResource extends JsonResource
     {
         $data = [
             'id' => $this->id,
+            'slug' => $this->slug,
             'news_type_id' => $this->news_type_id,
             'author_id' => $this->author_id,
             'name' => $this->name,
             'title' => $this->title,
             'body' => $this->body,
             'mediaType' => $this->mediaType,
+            'mediaSrc' => $this->mediaSrc,
             'news_date' => $this->news_date,
             'image_url' => $this->featuredImage ? URL::to('storage/' . $this->featuredImage) : null,
             'status' => $this->status,
