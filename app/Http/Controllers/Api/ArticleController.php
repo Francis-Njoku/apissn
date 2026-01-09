@@ -75,7 +75,6 @@ class ArticleController extends Controller
         $file->storeAs('featured_image', $fileName, 'public');
 
         return $fileName;
-
     }
 
     public function newsletterGenerateSlug()
@@ -117,8 +116,6 @@ class ArticleController extends Controller
 
             return new ArticleAllResource($latestRow);
         }
-
-
     }
 
     /**
@@ -213,7 +210,6 @@ class ArticleController extends Controller
             // Wrap the result with the API resource
             return ArticleAllResource::collection($posts);
         }
-
     }
 
     /**
@@ -289,7 +285,6 @@ class ArticleController extends Controller
                 'message' => 'Data processed successfully',
                 'data' => $media
             ], 200);
-
         } else {
             return response()->json([
                 'status' => 'failed',
@@ -364,7 +359,7 @@ class ArticleController extends Controller
 
         // Get unique user emails from the payment table by joining with the users table
         // Dispatch the email job to notify users
-        SendNewPostEmail::dispatch($media->title);
+        SendNewPostEmail::dispatch($media->title, $media->body);
 
 
         return response()->json([
@@ -431,7 +426,7 @@ class ArticleController extends Controller
         $media = Newsletter::create($data);
 
         // Dispatch the email job to notify users
-        SendNewPostEmail::dispatch($media->title);
+        SendNewPostEmail::dispatch($media->title, $media->body);
 
         return response()->json([
             'status' => 'success',
@@ -565,8 +560,7 @@ class ArticleController extends Controller
         ]);
 
         // Find the item by ID
-        $item = Newsletter::where('slug', $slug)->firstOrFail();
-        ;
+        $item = Newsletter::where('slug', $slug)->firstOrFail();;
 
         // Update the specific column
         $item->update(['status' => $request->status]);

@@ -22,16 +22,19 @@ class SendNewPostEmail implements ShouldQueue
     use SerializesModels;
 
     public $title;
+    public $body;
 
     /**
      * Create a new job instance.
      *
      * @param  string  $title
+     * @param  string  $body
      * @return void
      */
-    public function __construct($title)
+    public function __construct($title, $body)
     {
         $this->title = $title;
+        $this->body = $body;
     }
 
     /**
@@ -52,7 +55,7 @@ class SendNewPostEmail implements ShouldQueue
         $userEmails->chunk(100)->each(function ($chunk) {
             foreach ($chunk as $user) {
                 // Send email
-                Mail::to($user->email)->send(new NewPostMail($this->title));
+                Mail::to($user->email)->send(new NewPostMail($this->title, $this->body));
             }
         });
     }

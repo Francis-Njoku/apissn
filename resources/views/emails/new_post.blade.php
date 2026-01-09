@@ -8,6 +8,21 @@
 </head>
 <body>
     <h1>New Post: {{ $title }}</h1>
-    <p>A new post has been published on our platform. Check it out at <a href="https://ftm.ng">ftm.ng</a>!</p>
+    @if($body)
+        @php
+            // Extract paragraphs from HTML
+            preg_match_all('/<p>(.*?)<\/p>/s', $body, $matches);
+            $allParagraphs = $matches[1];
+            
+            // Get first 2 paragraphs
+            $firstTwoParagraphs = array_slice($allParagraphs, 0, 2);
+        @endphp
+        @foreach($firstTwoParagraphs as $paragraph)
+            <p>{!! trim($paragraph) !!}</p>
+        @endforeach
+    @else
+        <p>A new post has been published on our platform. Check it out at <a href="https://ftm.ng">ftm.ng</a>!</p>
+    @endif
+    <p>Read the full article at <a href="https://ftm.ng">ftm.ng</a>.</p>
 </body>
 </html>
