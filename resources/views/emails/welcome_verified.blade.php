@@ -51,37 +51,10 @@
         .signature {
             font-style: italic;
         }
-        .environment-badge {
-            display: inline-block;
-            padding: 4px 8px;
-            border-radius: 4px;
-            font-size: 12px;
-            font-weight: bold;
-            text-transform: uppercase;
-            margin-bottom: 10px;
-        }
-        .environment-production {
-            background-color: #28a745;
-            color: white;
-        }
-        .environment-staging {
-            background-color: #ffc107;
-            color: #333;
-        }
-        .environment-development {
-            background-color: #dc3545;
-            color: white;
-        }
     </style>
 </head>
 <body>
     <div class="header">
-        @if(config('app.env') !== 'production')
-            <span class="environment-badge environment-{{ config('app.env') }}">
-                {{ config('app.env') }} Environment
-            </span>
-        @endif
-        
         <h1>Welcome to Follow The Money (FTM)</h1>
         <p>Good to have you here.</p>
     </div>
@@ -112,7 +85,7 @@
 
         <h3>To get started:</h3>
         <ul>
-            <li>Bookmark <a href="{{ $appUrl }}">{{ $appUrl }}</a> so you never miss a post</li>
+            <li>Bookmark <a href="https://FTM.ng">FTM.ng</a> so you never miss a post</li>
             <li>Add this email address to your safe list to keep our updates out of spam</li>
             <li>Join the Telegram community using the link above</li>
         </ul>
@@ -125,13 +98,6 @@
     <div class="footer signature">
         <p>Warm regards,<br>
         Ugodre</p>
-        
-        @if(config('app.env') !== 'production')
-            <p style="font-size: 11px; color: #999; margin-top: 20px;">
-                This email was sent from the {{ config('app.env') }} environment.<br>
-                Recipient: {{ $userEmail }}
-            </p>
-        @endif
     </div>
 </body>
 </html>

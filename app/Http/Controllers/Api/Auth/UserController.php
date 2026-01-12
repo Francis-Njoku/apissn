@@ -20,7 +20,6 @@ use Carbon\Carbon;
 use App\Models\UserGroup;
 use App\Models\User;
 use App\Mail\WelcomeMail;
-use App\Mail\WelcomeEmail;
 use App\Mail\ResetPassword;
 use App\Http\Resources\UserResource;
 
@@ -156,6 +155,25 @@ class UserController extends Controller
 
             // Send email to new user
             event(new Registered($user));
+            
+            // Send welcome email with error handling
+            try {
+                Mail::to($user->email)->send(new WelcomeMail($user->name, $user->email));
+                
+                Log::info('Welcome email sent successfully', [
+                    'user_id' => $user->id,
+                    'email' => $user->email,
+                    'ip' => $request->ip(),
+                ]);
+            } catch (\Exception $e) {
+                // Log email sending error but don't fail user creation
+                Log::error('Failed to send welcome email', [
+                    'user_id' => $user->id,
+                    'email' => $user->email,
+                    'error' => $e->getMessage(),
+                    'trace' => $e->getTraceAsString(),
+                ]);
+            }
 
             Log::info('User created successfully', [
                 'user_id' => $user->id,
@@ -656,6 +674,24 @@ class UserController extends Controller
 
             // Send email to new user
             event(new Registered($user));
+            
+            // Send welcome email with error handling
+            try {
+                Mail::to($user->email)->send(new WelcomeMail($user->name, $user->email));
+                
+                Log::info('Welcome email sent successfully for admin-created user', [
+                    'user_id' => $user->id,
+                    'email' => $user->email,
+                ]);
+            } catch (\Exception $e) {
+                // Log email sending error but don't fail user creation
+                Log::error('Failed to send welcome email for admin-created user', [
+                    'user_id' => $user->id,
+                    'email' => $user->email,
+                    'error' => $e->getMessage(),
+                    'trace' => $e->getTraceAsString(),
+                ]);
+            }
 
             //$accessToken = $user->createToken('access_token', [UserATokenAbility::ACCESS_API->value], Carbon::now()->addMinutes(config('sanctum.ac_expiration')));
             //$refreshToken = $user->createToken('refresh_token', [TokenAbility::ISSUE_ACCESS_TOKEN->value], Carbon::now()->addMinutes(config('sanctum.rt_expiration')));
