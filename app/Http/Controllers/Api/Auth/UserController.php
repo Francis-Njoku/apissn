@@ -579,8 +579,15 @@ class UserController extends Controller
         //     'normalized_subscriber_status' => $status ?? null
         // ]);
 
-        // Handle per_page parameter with validation (min: 1, max: 100, default: 10)
+        // Handle per_page parameter
         $perPage = $request->query('per_page', 10);
+        
+        // Check for per_page=all option to return all users without pagination
+        if ($perPage === 'all') {
+            return UserResource::collection($query->get());
+        }
+        
+        // Validate per_page parameter (min: 1, max: 100, default: 10)
         $perPage = max(1, min(100, (int) $perPage));
 
         return UserResource::collection($query->paginate($perPage));
