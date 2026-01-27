@@ -24,3 +24,14 @@ deploy.sh
 memory-bank/
 .clinerules/
 .roo/
+.kilcode/.agents/
+AGENTS.md
+claude.md
+QWEN.md
+CRUSH.md
+.crush.json
+opencode.json
+.kilocode/
+.cache/
+*.log
+plans/
