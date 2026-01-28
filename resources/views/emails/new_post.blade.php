@@ -23,6 +23,23 @@
     @else
         <p>A new post has been published on our platform. Check it out at <a href="https://ftm.ng">ftm.ng</a>!</p>
     @endif
-    <p>Read the full article at <a href="https://ftm.ng">ftm.ng</a>.</p>
+
+    @php
+        // Map mediaType to URL path
+        $pathPrefixMap = [
+            'audio' => '/podcasts',
+            'video' => '/videos',
+            'bytes' => '/bytes',
+            'text' => '/articles'
+        ];
+
+        // Get the path prefix, default to '/articles' if not found
+        $pathPrefix = $pathPrefixMap[$mediaType] ?? '/articles';
+
+        // Construct the full article URL
+        $articleUrl = 'https://ftm.ng' . $pathPrefix . '/' . $slug;
+    @endphp
+
+    <p>Read the full article at <a href="{{ $articleUrl }}">{{ $articleUrl }}</a>.</p>
 </body>
 </html>

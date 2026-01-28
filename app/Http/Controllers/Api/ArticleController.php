@@ -359,7 +359,7 @@ class ArticleController extends Controller
 
         // Get unique user emails from the payment table by joining with the users table
         // Dispatch the email job to notify users
-        SendNewPostEmail::dispatch($media->title, $media->body);
+        SendNewPostEmail::dispatch($media->title, $media->body, $media->slug, $media->mediaType);
 
 
         return response()->json([
@@ -426,7 +426,7 @@ class ArticleController extends Controller
         $media = Newsletter::create($data);
 
         // Dispatch the email job to notify users
-        SendNewPostEmail::dispatch($media->title, $media->body);
+        SendNewPostEmail::dispatch($media->title, $media->body, $media->slug, $media->mediaType);
 
         return response()->json([
             'status' => 'success',

@@ -23,18 +23,24 @@ class SendNewPostEmail implements ShouldQueue
 
     public $title;
     public $body;
+    public $slug;
+    public $mediaType;
 
     /**
      * Create a new job instance.
      *
      * @param  string  $title
      * @param  string  $body
+     * @param  string  $slug
+     * @param  string  $mediaType
      * @return void
      */
-    public function __construct($title, $body)
+    public function __construct($title, $body, $slug, $mediaType)
     {
         $this->title = $title;
         $this->body = $body;
+        $this->slug = $slug;
+        $this->mediaType = $mediaType;
     }
 
     /**
@@ -55,7 +61,12 @@ class SendNewPostEmail implements ShouldQueue
         $userEmails->chunk(100)->each(function ($chunk) {
             foreach ($chunk as $user) {
                 // Send email
-                Mail::to($user->email)->send(new NewPostMail($this->title, $this->body));
+                Mail::to($user->email)->send(new NewPostMail(
+                    $this->title,
+                    $this->body,
+                    $this->slug,
+                    $this->mediaType
+                ));
             }
         });
     }
