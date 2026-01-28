@@ -158,7 +158,7 @@ class UserController extends Controller
             
             // Send welcome email with error handling
             try {
-                Mail::to($user->email)->send(new WelcomeMail($user->name, $user->email));
+                Mail::to($user->email)->send(new WelcomeMail($user->first_name, $user->email));
                 
                 Log::info('Welcome email sent successfully', [
                     'user_id' => $user->id,
@@ -677,7 +677,7 @@ class UserController extends Controller
             
             // Send welcome email with error handling
             try {
-                Mail::to($user->email)->send(new WelcomeMail($user->name, $user->email));
+                Mail::to($user->email)->send(new WelcomeMail($user->first_name, $user->email));
                 
                 Log::info('Welcome email sent successfully for admin-created user', [
                     'user_id' => $user->id,
