@@ -33,7 +33,7 @@ class UserResource extends JsonResource
             'created_at' => (new \DateTime($this->created_at))->format('Y-m-d H:i:s'),
             'updated_at' => (new \DateTime($this->updated_at))->format('Y-m-d H:i:s'),
             'subscriber_status' => $this->subscriber_status,
-            'role' => $this->role->name,
+            'role' => $this->role_id === 1 ? 'admin' : ($this->role_id === 3 ? 'moderator' : 'user'),
             'last_payment_date' => $this->last_payment_date ? (new \DateTime($this->last_payment_date))->format('Y-m-d H:i:s') : null,
         ];
     }

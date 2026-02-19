@@ -546,18 +546,19 @@ class UserController extends Controller
     public function listUsers(Request $request)
     {
         $role  = $request->query('role');
-        $query = User::select([
-            'id',
-            'name',
-            'first_name',
-            'last_name',
-            'email',
-            'phone',
-            'role_id',
-            'status',
-            'created_at',
-            'updated_at'
-        ]);
+        $query = User::with('role')
+            ->select([
+                'id',
+                'name',
+                'first_name',
+                'last_name',
+                'email',
+                'phone',
+                'role_id',
+                'status',
+                'created_at',
+                'updated_at'
+            ]);
 
         // Handle role parameter case-insensitively with trimming and decoding
         $normalizedRole = strtolower(trim(urldecode($role)));
@@ -607,36 +608,19 @@ class UserController extends Controller
                       ->orderBy('first_name', $sortDirection);
                 break;
             case 'last_payment_date':
-                // Join with payments to sort by last payment date
-                $query->leftJoin('payments', function ($join) {
-                    $join->on('users.id', '=', 'payments.user_id')
-                        ->where('payments.status', '=', 'active');
-                })
-                ->select([
+                // Use left join with subquery for better performance and compatibility with eager loading
+                $query->leftJoinSub(
+                    'SELECT user_id, MAX(created_at) as last_payment_date 
+                     FROM payment 
+                     WHERE status = "active" 
+                     GROUP BY user_id',
+                    'last_payment',
                     'users.id',
-                    'users.name',
-                    'users.first_name',
-                    'users.last_name',
-                    'users.email',
-                    'users.phone',
-                    'users.role_id',
-                    'users.status',
-                    'users.created_at',
-                    'users.updated_at'
-                ])
-                ->orderByRaw('MAX(payments.created_at) ' . $sortDirection)
-                ->groupBy([
-                    'users.id',
-                    'users.name',
-                    'users.first_name',
-                    'users.last_name',
-                    'users.email',
-                    'users.phone',
-                    'users.role_id',
-                    'users.status',
-                    'users.created_at',
-                    'users.updated_at'
-                ]);
+                    '=',
+                    'last_payment.user_id'
+                )
+                ->orderByRaw('last_payment.last_payment_date IS NULL ASC')  // NULLs last
+                ->orderBy('last_payment.last_payment_date', $sortDirection);
                 break;
             case 'created_at':
                 $query->orderBy('created_at', $sortDirection);
