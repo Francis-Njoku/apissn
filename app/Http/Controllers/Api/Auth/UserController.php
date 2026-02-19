@@ -589,13 +589,62 @@ class UserController extends Controller
             }
         }
 
-        // Log query parameters for debugging
-        // dump('User list query parameters', [
-        //     'role' => $role,
-        //     'normalized_role' => $normalizedRole,
-        //     'subscriber_status' => $request->input('subscriber_status'),
-        //     'normalized_subscriber_status' => $status ?? null
-        // ]);
+        // Handle sorting
+        $sortField = $request->query('sort_field', 'created_at');
+        $sortDirection = strtolower($request->query('sort_direction', 'desc'));
+
+        // Validate sort direction
+        $validDirections = ['asc', 'desc'];
+        if (!in_array($sortDirection, $validDirections)) {
+            $sortDirection = 'desc';
+        }
+
+        // Apply sorting based on field
+        switch ($sortField) {
+            case 'name':
+                // Sort by last_name, then first_name
+                $query->orderBy('last_name', $sortDirection)
+                      ->orderBy('first_name', $sortDirection);
+                break;
+            case 'last_payment_date':
+                // Join with payments to sort by last payment date
+                $query->leftJoin('payments', function ($join) {
+                    $join->on('users.id', '=', 'payments.user_id')
+                        ->where('payments.status', '=', 'active');
+                })
+                ->select([
+                    'users.id',
+                    'users.name',
+                    'users.first_name',
+                    'users.last_name',
+                    'users.email',
+                    'users.phone',
+                    'users.role_id',
+                    'users.status',
+                    'users.created_at',
+                    'users.updated_at'
+                ])
+                ->orderByRaw('MAX(payments.created_at) ' . $sortDirection)
+                ->groupBy([
+                    'users.id',
+                    'users.name',
+                    'users.first_name',
+                    'users.last_name',
+                    'users.email',
+                    'users.phone',
+                    'users.role_id',
+                    'users.status',
+                    'users.created_at',
+                    'users.updated_at'
+                ]);
+                break;
+            case 'created_at':
+                $query->orderBy('created_at', $sortDirection);
+                break;
+            default:
+                // Default sort by created_at desc
+                $query->orderBy('created_at', 'desc');
+        }
 
         // Handle per_page parameter
         $perPage = $request->query('per_page', 10);
