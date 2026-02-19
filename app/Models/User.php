@@ -131,6 +131,9 @@ class User extends Authenticatable implements JWTSubject
     {
         return $query->whereHas('payments', function ($q) {
             $q->where('due_date', '<', now());
+        })->whereDoesntHave('payments', function ($q) {
+            $q->where('status', 'active')
+              ->where('due_date', '>', now());
         });
     }
 
