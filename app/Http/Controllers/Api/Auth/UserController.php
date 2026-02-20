@@ -106,7 +106,6 @@ class UserController extends Controller
         //here you can test it
         echo $nndate . '<br/>';
         echo $nntime;
-
     }
     /***
      * Create User
@@ -155,11 +154,11 @@ class UserController extends Controller
 
             // Send email to new user
             event(new Registered($user));
-            
+
             // Send welcome email with error handling
             try {
                 Mail::to($user->email)->send(new WelcomeMail($user->first_name, $user->email));
-                
+
                 Log::info('Welcome email sent successfully', [
                     'user_id' => $user->id,
                     'email' => $user->email,
@@ -197,7 +196,6 @@ class UserController extends Controller
                 // 'verification_required' => true,
                 // 'verification_message' => 'Please check your email for verification instructions.'
             ], 201);
-
         } catch (AuthException $e) {
             return ApiResponseHelper::error(
                 $e->getMessage(),
@@ -287,7 +285,6 @@ class UserController extends Controller
                     'last_name' => Auth::user()->last_name,
                 ]
             ], 200);
-
         } catch (AuthException $e) {
             return ApiResponseHelper::error(
                 $e->getMessage(),
@@ -414,7 +411,6 @@ class UserController extends Controller
                 'expires_in' => 3600, // Token expires in 1 hour
                 'instructions' => 'Enter the 6-digit pin in the password reset form.'
             ], 200);
-
         } catch (AuthException $e) {
             return ApiResponseHelper::error(
                 $e->getMessage(),
@@ -506,7 +502,6 @@ class UserController extends Controller
                 ],
                 200
             );
-
         } catch (AuthException $e) {
             return ApiResponseHelper::error(
                 $e->getMessage(),
@@ -605,7 +600,7 @@ class UserController extends Controller
             case 'name':
                 // Sort by last_name, then first_name
                 $query->orderBy('last_name', $sortDirection)
-                      ->orderBy('first_name', $sortDirection);
+                    ->orderBy('first_name', $sortDirection);
                 break;
             case 'last_payment_date':
                 // Use left join with subquery for better performance and compatibility with eager loading
@@ -619,8 +614,8 @@ class UserController extends Controller
                     '=',
                     'last_payment.user_id'
                 )
-                ->orderByRaw('last_payment.last_payment_date IS NULL ASC')  // NULLs last
-                ->orderBy('last_payment.last_payment_date', $sortDirection);
+                    ->orderByRaw('last_payment.last_payment_date IS NULL ASC')  // NULLs last
+                    ->orderBy('last_payment.last_payment_date', $sortDirection);
                 break;
             case 'created_at':
                 $query->orderBy('created_at', $sortDirection);
@@ -632,12 +627,12 @@ class UserController extends Controller
 
         // Handle per_page parameter
         $perPage = $request->query('per_page', 10);
-        
+
         // Check for per_page=all option to return all users without pagination
         if ($perPage === 'all') {
             return UserResource::collection($query->get());
         }
-        
+
         // Validate per_page parameter (min: 1, max: 100, default: 10)
         $perPage = max(1, min(100, (int) $perPage));
 
@@ -707,11 +702,11 @@ class UserController extends Controller
 
             // Send email to new user
             event(new Registered($user));
-            
+
             // Send welcome email with error handling
             try {
                 Mail::to($user->email)->send(new WelcomeMail($user->first_name, $user->email));
-                
+
                 Log::info('Welcome email sent successfully for admin-created user', [
                     'user_id' => $user->id,
                     'email' => $user->email,
@@ -769,7 +764,8 @@ class UserController extends Controller
                 'last_name' => 'string|max:255',
                 'phone' => 'nullable|string|max:20',
                 'email' => 'email|unique:users,email,' . ($id ?? Auth::id()),
-                'role_id' => 'integer|exists:roles,id',
+                'role' => 'nullable|string|in:admin,user',
+                'role_id' => 'nullable|integer|exists:roles,id',
                 'status' => 'string|in:approved,pending,blocked',
                 'password' => 'string|min:6|confirmed',
                 'current_password' => 'string|required_with:password',
@@ -824,11 +820,22 @@ class UserController extends Controller
                 'last_name',
                 'phone',
                 'email',
-                'role_id',
                 'status'
             ]), function ($value) {
                 return $value !== null && $value !== '';
             });
+
+            // Handle role conversion from string to role_id
+            if ($request->filled('role')) {
+                $role = strtolower(trim($request->role));
+                if ($role === 'admin') {
+                    $updateData['role_id'] = 1;
+                } elseif ($role === 'user') {
+                    $updateData['role_id'] = 2;
+                }
+            } elseif ($request->filled('role_id')) {
+                $updateData['role_id'] = $request->role_id;
+            }
 
             // If password is being updated, add it to update data
             if ($request->filled('password')) {
@@ -852,5 +859,4 @@ class UserController extends Controller
             ], 500);
         }
     }
-
 }
