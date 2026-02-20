@@ -767,7 +767,7 @@ class UserController extends Controller
             $validateUser = Validator::make($request->all(), [
                 'first_name' => 'string|max:255',
                 'last_name' => 'string|max:255',
-                'phone' => 'string|max:20',
+                'phone' => 'nullable|string|max:20',
                 'email' => 'email|unique:users,email,' . ($id ?? Auth::id()),
                 'role_id' => 'integer|exists:roles,id',
                 'status' => 'string|in:approved,pending,blocked',

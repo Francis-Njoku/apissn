@@ -172,23 +172,28 @@ class CommentModerationController extends Controller
 
     public function moderate(Request $request, Comment $comment): JsonResponse
     {
-        $request->validate([
+        $validator = Validator::make($request->all(), [
             'status' => ['required', Rule::in(['approved', 'rejected', 'spam'])],
             'reason' => 'sometimes|string|max:500'
         ]);
+
+        if ($validator->fails()) {
+            return ApiResponseHelper::validationError($validator->errors()->toArray());
+        }
 
         $comment->update([
             'status' => $request->status,
             'moderated_at' => now(),
             'moderated_by' => Auth::id(),
             'metadata' => array_merge($comment->metadata ?? [], [
-                'moderation_reason' => $request->reason
+                'moderation_reason' => $request->reason ?? null
             ])
         ]);
 
         $comment->load(['user', 'moderatedBy']);
 
         return response()->json([
+            'success' => true,
             'message' => 'Comment moderated successfully',
             'data' => new CommentResource($comment)
         ]);
@@ -196,24 +201,44 @@ class CommentModerationController extends Controller
 
     public function bulkModerate(Request $request): JsonResponse
     {
-        $request->validate([
+        // Debug: Log the request content type and body
+        \Log::info('Bulk moderate request', [
+            'content_type' => $request->header('Content-Type'),
+            'method' => $request->method(),
+            'all_input' => $request->all(),
+            'json' => $request->json()->all(),
+            'getContent' => $request->getContent(),
+        ]);
+
+        $validator = Validator::make($request->all(), [
             'comment_ids' => 'required|array',
             'comment_ids.*' => 'exists:comments,id',
             'status' => ['required', Rule::in(['approved', 'rejected', 'spam'])],
             'reason' => 'sometimes|string|max:500'
         ]);
 
-        $updated = Comment::whereIn('id', $request->comment_ids)
-            ->update([
+        if ($validator->fails()) {
+            return ApiResponseHelper::validationError($validator->errors()->toArray());
+        }
+
+        $comments = Comment::whereIn('id', $request->comment_ids)->get();
+        $updated = 0;
+
+        foreach ($comments as $comment) {
+            $comment->update([
                 'status' => $request->status,
                 'moderated_at' => now(),
                 'moderated_by' => Auth::id(),
-                'metadata' => [
-                    'moderation_reason' => $request->reason ?? 'Bulk moderation'
-                ]
+                'metadata' => array_merge($comment->metadata ?? [], [
+                    'bulk_moderation_reason' => $request->reason ?? 'Bulk moderation',
+                    'bulk_moderated_at' => now()->toISOString()
+                ])
             ]);
+            $updated++;
+        }
 
         return response()->json([
+            'success' => true,
             'message' => "Successfully moderated {$updated} comments",
             'updated_count' => $updated
         ]);

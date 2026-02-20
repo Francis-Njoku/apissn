@@ -1271,6 +1271,7 @@ Response:
 
 ```json path=null start=null
 {
+    "success": true,
     "message": "Comment moderated successfully",
     "data": {
         "id": 1,
@@ -1291,6 +1292,10 @@ Response:
 }
 ```
 
+**Validation Rules:**
+- `status`: Required, must be one of: `approved`, `rejected`, `spam`
+- `reason`: Optional, string, max 500 characters
+
 ### PATCH /api/admin/comments/bulk-moderate
 
 Bulk moderate multiple comments.
@@ -1309,10 +1314,35 @@ Response:
 
 ```json path=null start=null
 {
+    "success": true,
     "message": "Successfully moderated 3 comments",
     "updated_count": 3
 }
 ```
+
+**Error Response (Validation Error):**
+
+```json path=null start=null
+{
+    "success": false,
+    "code": "VALIDATION_ERROR",
+    "message": "Validation failed. Please check your input and try again.",
+    "errors": {
+        "status": [
+            "The status field is required."
+        ],
+        "comment_ids": [
+            "The comment ids field is required."
+        ]
+    },
+    "data": null
+}
+```
+
+**Validation Rules:**
+- `comment_ids`: Required, must be an array of valid comment IDs
+- `status`: Required, must be one of: `approved`, `rejected`, `spam`
+- `reason`: Optional, string, max 500 characters
 
 ### GET /api/admin/comments/stats
 

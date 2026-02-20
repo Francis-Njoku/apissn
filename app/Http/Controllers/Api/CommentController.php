@@ -11,6 +11,7 @@ use App\Models\Comment;
 use App\Http\Resources\CommentResource;
 use App\Http\Controllers\Controller;
 use App\Helpers\ApiResponseHelper;
+use App\Jobs\SendCommentNotificationEmail;
 
 class CommentController extends Controller
 {
@@ -35,10 +36,10 @@ class CommentController extends Controller
         if (!Auth::user() || !Auth::user()->hasAnyRole(['admin', 'moderator'])) {
             $query->where(function ($q) {
                 $q->approved()
-                  ->orWhere(function ($q2) {
-                      $q2->pending()
-                         ->where('user_id', Auth::id());
-                  });
+                    ->orWhere(function ($q2) {
+                        $q2->pending()
+                            ->where('user_id', Auth::id());
+                    });
             });
         } elseif ($request->has('status')) {
             $query->where('status', $request->status);
@@ -50,16 +51,16 @@ class CommentController extends Controller
         // Get all comments and build the tree
         $allComments = $query->with(['replies' => function ($query) {
             $query->with('user')
-                  ->when(
-                      !Auth::user() || !Auth::user()->hasAnyRole(['admin', 'moderator']),
-                      fn ($q) => $q->where(function ($q2) {
-                          $q2->approved()
-                             ->orWhere(function ($q3) {
-                                 $q3->pending()
+                ->when(
+                    !Auth::user() || !Auth::user()->hasAnyRole(['admin', 'moderator']),
+                    fn($q) => $q->where(function ($q2) {
+                        $q2->approved()
+                            ->orWhere(function ($q3) {
+                                $q3->pending()
                                     ->where('user_id', Auth::id());
-                             });
-                      })
-                  );
+                            });
+                    })
+                );
         }])->get();
 
         $topLevelComments = $allComments->whereNull('parent_id');
@@ -100,6 +101,9 @@ class CommentController extends Controller
         $comment = Comment::create($data);
         $comment->load(['user', 'replies']);
 
+        // Dispatch email notification to admins
+        SendCommentNotificationEmail::dispatch($comment);
+
         return response()->json([
             'message' => 'Comment created successfully',
             'data' => new CommentResource($comment)
@@ -111,9 +115,11 @@ class CommentController extends Controller
         $comment->load(['user', 'replies.user']);
 
         // Check if user can view this comment
-        if (!$comment->isApproved() &&
+        if (
+            !$comment->isApproved() &&
             !$this->canModerate() &&
-            !(Auth::check() && $comment->user_id === Auth::id())) {
+            !(Auth::check() && $comment->user_id === Auth::id())
+        ) {
             return response()->json(['message' => 'Comment not found'], 404);
         }
 
@@ -202,6 +208,5 @@ class CommentController extends Controller
         }
 
         return $user->id === $comment->user_id || $user->hasAnyRole(['admin', 'moderator']);
-
     }
 }
