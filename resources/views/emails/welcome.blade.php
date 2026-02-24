@@ -112,7 +112,7 @@
 
         <h3>To get started:</h3>
         <ul>
-            <li>Bookmark <a href="{{ $appUrl }}">{{ $appUrl }}</a> so you never miss a post</li>
+            <li>Bookmark <a href="{{ $clientUrl }}">{{ $clientUrl }}</a> so you never miss a post</li>
             <li>Add this email address to your safe list to keep our updates out of spam</li>
             <li>Join the Telegram community using the link above</li>
         </ul>

@@ -13,7 +13,7 @@ class WelcomeMail extends Mailable implements ShouldQueue
 
     public $userName;
     public $userEmail;
-    public $appUrl;
+    public $clientUrl;
 
     /**
      * Create a new message instance.
@@ -26,8 +26,8 @@ class WelcomeMail extends Mailable implements ShouldQueue
     {
         $this->userName = $userName;
         $this->userEmail = $userEmail;
-        $this->appUrl = config('app.url', 'https://FTM.ng');
-        
+        $this->clientUrl = config('app.client', 'https://FTM.ng');
+
         // Set queue connection and queue name for better management
         $this->onQueue('emails');
         $this->onConnection(config('queue.default', 'database'));
@@ -41,6 +41,6 @@ class WelcomeMail extends Mailable implements ShouldQueue
     public function build()
     {
         return $this->subject('Welcome to Follow The Money (FTM) - Account Created!')
-                    ->view('emails.welcome');
+            ->view('emails.welcome');
     }
 }

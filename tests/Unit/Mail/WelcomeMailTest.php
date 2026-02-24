@@ -61,27 +61,27 @@ class WelcomeMailTest extends TestCase
     {
         $userName = 'John Doe';
         $userEmail = 'john@example.com';
- 
+
         $mail = new WelcomeMail($userName, $userEmail);
-        
+
         // Access public properties directly since they're passed to the view
         $this->assertEquals($userName, $mail->userName);
         $this->assertEquals($userEmail, $mail->userEmail);
-        $this->assertNotNull($mail->appUrl);
+        $this->assertNotNull($mail->clientUrl);
     }
 
     /**
-     * Test that WelcomeMail uses appUrl from config.
+     * Test that WelcomeMail uses clientUrl from config.
      *
      * @return void
      */
     public function test_welcome_mail_uses_app_url_from_config()
     {
         Config::set('app.url', 'https://test.example.com');
- 
+
         $mail = new WelcomeMail('John Doe', 'john@example.com');
-        
-        $this->assertEquals('https://test.example.com', $mail->appUrl);
+
+        $this->assertEquals('https://test.example.com', $mail->clientUrl);
     }
 
     /**
@@ -94,10 +94,10 @@ class WelcomeMailTest extends TestCase
         // Note: Laravel's config() returns null when key is set to null, not the default value
         // This test verifies the default value is used in the constructor
         $mail = new WelcomeMail('John Doe', 'john@example.com');
-        
-        // Verify appUrl is set (either from config or default)
-        $this->assertNotNull($mail->appUrl);
-        $this->assertIsString($mail->appUrl);
+
+        // Verify clientUrl is set (either from config or default)
+        $this->assertNotNull($mail->clientUrl);
+        $this->assertIsString($mail->clientUrl);
     }
 
     /**
@@ -108,12 +108,12 @@ class WelcomeMailTest extends TestCase
     public function test_welcome_mail_can_be_queued()
     {
         Mail::fake();
- 
+
         $userName = 'John Doe';
         $userEmail = 'john@example.com';
- 
+
         Mail::to($userEmail)->send(new WelcomeMail($userName, $userEmail));
- 
+
         Mail::assertQueued(WelcomeMail::class, function ($mail) use ($userName, $userEmail) {
             return $mail->userName === $userName && $mail->userEmail === $userEmail;
         });
@@ -139,7 +139,7 @@ class WelcomeMailTest extends TestCase
     public function test_welcome_mail_uses_correct_queue_configuration()
     {
         $mail = new WelcomeMail('John Doe', 'john@example.com');
-        
+
         // Check that the mail is queued on the 'emails' queue
         $this->assertEquals('emails', $mail->queue);
     }

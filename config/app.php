@@ -57,6 +57,8 @@ return [
 
     'url' => env('APP_URL', 'http://localhost'),
 
+    'client' => env('CLIENT_URL', 'https://ftm.ng'),
+
     'asset_url' => env('ASSET_URL'),
 
     /*
