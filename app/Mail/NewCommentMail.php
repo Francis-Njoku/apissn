@@ -26,7 +26,7 @@ class NewCommentMail extends Mailable
     public function __construct(Comment $comment)
     {
         $this->comment = $comment;
-        $this->siteUrl = config('app.url', 'https://ftm.ng');
+        $this->siteUrl = config('app.client') ?? config('app.url', 'https://ftm.ng');
         $this->adminDashboardUrl = $this->siteUrl . '/admin/comments';
 
         // Load relationships

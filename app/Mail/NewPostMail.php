@@ -37,7 +37,7 @@ class NewPostMail extends Mailable
      */
     public function __construct($title, $body, $slug, $mediaType)
     {
-        $this->siteUrl = config('app.url', 'https://ftm.ng');
+        $this->siteUrl = config('app.client') ?? config('app.url', 'https://ftm.ng');
         $this->title = $title;
         $this->excerpt = $this->extractExcerpt($body);
         $this->articleUrl = $this->buildArticleUrl($slug, $mediaType);
